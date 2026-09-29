@@ -6,12 +6,19 @@ import {
   ApiError,
   fetchRandomBrief,
   fetchArtifact,
+  fetchAuditEvents,
   getCurrentRun,
   listComplexityOptions,
   previewUrl as buildPreviewUrl,
   startRun,
 } from './api.js';
-import { buildClientBrief, runStateToDashboard, slugProjectName } from './phaseMap.js';
+import {
+  buildClientBrief,
+  deliveryStageCopy,
+  runStateToDashboard,
+  slugProjectName,
+} from './phaseMap.js';
+import { buildProjectJourney } from './journeyMap.js';
 import { connectRun } from './runSync.js';
 
 function Brand() {
@@ -69,7 +76,9 @@ function Intake({ onStart }) {
   useEffect(() => {
     getCurrentRun()
       .then((state) => {
-        if (state?.status === 'running' && state?.is_live) setLiveRun(state);
+        if (!state?.run_id) return;
+        if (state.status === 'running' && state.is_live) setLiveRun(state);
+        if (state.status === 'completed') setLiveRun({ ...state, completed: true });
       })
       .catch(() => {});
   }, []);
@@ -167,10 +176,11 @@ function Intake({ onStart }) {
       {liveRun && (
         <div className="live-run-banner" role="status">
           <span>
-            Run in progress: <b>{liveRun.project_name}</b> ({liveRun.run_id})
+            {liveRun.completed ? 'Run complete' : 'Run in progress'}:{' '}
+            <b>{liveRun.project_name}</b> ({liveRun.run_id})
           </span>
           <button type="button" className="primary" onClick={viewLiveRun}>
-            View live run
+            {liveRun.completed ? 'View delivery' : 'View live run'}
           </button>
         </div>
       )}
@@ -353,16 +363,35 @@ function Dashboard({ project, onReset }) {
   const [modal, setModal] = useState(null);
   const [prdContent, setPrdContent] = useState('');
   const [prdLoading, setPrdLoading] = useState(false);
+  const [auditEvents, setAuditEvents] = useState([]);
+  const [journeyLoading, setJourneyLoading] = useState(false);
   const navRef = useRef();
 
-  const run = runState ? runStateToDashboard(runState) : { active: 0, progress: 0, complete: false, failed: false, overall: 0, browserReady: false, projectName: project.projectName, approval: 'pending' };
+  const run = runState
+    ? runStateToDashboard(runState)
+    : {
+        active: 0,
+        progress: 0,
+        complete: false,
+        failed: false,
+        overall: 0,
+        browserReady: false,
+        projectName: project.projectName,
+        approval: 'pending',
+        checks: {},
+        releaseNumber: 1,
+      };
   const stageIndex = view ?? run.active;
   const stage = stages[stageIndex];
   const viewing = view !== null && view !== run.active;
   const progress = viewing ? (stageIndex < run.active ? 100 : 0) : run.progress;
   const done = run.complete && stageIndex === 8;
   const preview = run.browserReady && project.runId ? buildPreviewUrl(project.runId) : null;
+  const showPreview = Boolean(preview && (run.browserReady || run.complete));
   const displayName = runState?.project_name || project.projectName || 'Project';
+  const deliveryCopy =
+    stageIndex === 8 ? deliveryStageCopy(runState, displayName) : null;
+  const journey = buildProjectJourney(auditEvents, runState);
 
   useEffect(() => {
     stages.forEach((s) => {
@@ -372,9 +401,27 @@ function Dashboard({ project, onReset }) {
   }, []);
 
   useEffect(() => {
-    const disconnect = connectRun(project.runId, setRunState);
+    const disconnect = connectRun(project.runId, setRunState, (event) => {
+      setAuditEvents((prev) => {
+        if (prev.some((e) => e.timestamp === event.timestamp && e.event === event.event)) {
+          return prev;
+        }
+        return [...prev, event].sort((a, b) =>
+          (a.timestamp || '').localeCompare(b.timestamp || ''),
+        );
+      });
+    });
     return disconnect;
   }, [project.runId]);
+
+  useEffect(() => {
+    if (modal !== 'journey' || !project.runId) return;
+    setJourneyLoading(true);
+    fetchAuditEvents(project.runId)
+      .then(setAuditEvents)
+      .catch(() => setAuditEvents([]))
+      .finally(() => setJourneyLoading(false));
+  }, [modal, project.runId]);
 
   useEffect(() => {
     navRef.current?.querySelector('[aria-current="step"]')?.scrollIntoView({
@@ -387,11 +434,13 @@ function Dashboard({ project, onReset }) {
   useEffect(() => {
     if (modal !== 'brief' || !project.runId) return;
     setPrdLoading(true);
-    fetchArtifact('requirements/prd.md', project.runId)
+    const artifactPath =
+      stageIndex === 8 ? 'releases/release_1_notes.md' : 'requirements/prd.md';
+    fetchArtifact(artifactPath, project.runId)
       .then((res) => setPrdContent(res.content || ''))
       .catch(() => setPrdContent(''))
       .finally(() => setPrdLoading(false));
-  }, [modal, project.runId]);
+  }, [modal, project.runId, stageIndex]);
 
   const status = run.failed
     ? 'Failed'
@@ -531,8 +580,8 @@ function Dashboard({ project, onReset }) {
             <span className={`status ${done ? 'success' : run.failed ? 'error' : ''}`}>● {status}</span>
           </div>
           <div className="device-area">
-            <MobileFrame previewUrl={preview && (done || run.browserReady) ? preview : null}>
-              {preview && (done || run.browserReady) ? null : done ? (
+            <MobileFrame previewUrl={showPreview ? preview : null}>
+              {showPreview ? null : done ? (
                 <ReadyApp />
               ) : (
                 <StageSkeleton stage={stageIndex} progress={progress} />
@@ -544,6 +593,14 @@ function Dashboard({ project, onReset }) {
                   Release approval: {run.approval || 'pending'}
                 </span>
                 <small>Approval is handled by the simulated client in the pipeline.</small>
+              </div>
+            )}
+            {stageIndex === 8 && showPreview && !done && (
+              <div className="stage-actions">
+                <button className="primary" onClick={() => setModal('app')}>
+                  View application
+                </button>
+                <small>Live preview ready · finalizing handover package</small>
               </div>
             )}
             {done && (
@@ -572,33 +629,48 @@ function Dashboard({ project, onReset }) {
           </div>
           <div className="info-cards">
             <article>
-              <h3>{stage.card1[0]}</h3>
+              <h3>{deliveryCopy?.card1Title || stage.card1[0]}</h3>
               <button className="document-card" onClick={() => setModal('brief')}>
                 <img src="/assets/11e0d.svg" alt="" />
                 <span>
-                  <b>{stageIndex === 0 && project.files.length ? project.files[0].name : stage.card1[1]}</b>
-                  <small>{stage.card1[2]}</small>
+                  <b>
+                    {stageIndex === 0 && project.files.length
+                      ? project.files[0].name
+                      : deliveryCopy?.card1Name || stage.card1[1]}
+                  </b>
+                  <small>{deliveryCopy?.card1Sub || stage.card1[2]}</small>
                 </span>
               </button>
               <p>
-                {done
-                  ? 'Handover package ready'
-                  : stageIndex === 8
-                    ? 'Packaging source, build and documentation'
-                    : stage.card1[3]}
+                {deliveryCopy?.card1Foot ||
+                  (done
+                    ? 'Handover package ready'
+                    : stageIndex === 8
+                      ? 'Packaging source, build and documentation'
+                      : stage.card1[3])}
               </p>
             </article>
             <article>
               <h3>{stage.card2[0]}</h3>
-              {stage.card2.slice(1).map((x, i) => (
+              {(deliveryCopy?.deployLines || stage.card2.slice(1)).map((x, i) => (
                 <p className="feature" key={x}>
-                  <span>{progress >= (i + 1) * 30 ? '✓' : ''}</span>
-                  {stageIndex === 8 && !done
+                  <span>
+                    {deliveryCopy
+                      ? run.complete || (i === 0 && run.browserReady) || (i === 1 && run.checks?.qa_passed) || (i === 2 && run.complete)
+                        ? '✓'
+                        : ''
+                      : progress >= (i + 1) * 30
+                        ? '✓'
+                        : ''}
+                  </span>
+                  {deliveryCopy
                     ? x
-                        .replace('Complete', 'Preparing')
-                        .replace('Passed', 'Checking')
-                        .replace('Ready', 'Preparing')
-                    : x}
+                    : stageIndex === 8 && !done
+                      ? x
+                          .replace('Complete', 'Preparing')
+                          .replace('Passed', 'Checking')
+                          .replace('Ready', 'Preparing')
+                      : x}
                 </p>
               ))}
             </article>
@@ -633,9 +705,12 @@ function Dashboard({ project, onReset }) {
           : `Current stage: ${stages[run.active].key}`}
       </div>
       {modal === 'brief' && (
-        <Modal title="Project brief" onClose={() => setModal(null)}>
+        <Modal
+          title={stageIndex === 8 ? 'Release notes' : 'Project brief'}
+          onClose={() => setModal(null)}
+        >
           {prdLoading ? (
-            <p>Loading PRD…</p>
+            <p>{stageIndex === 8 ? 'Loading release notes…' : 'Loading PRD…'}</p>
           ) : prdContent ? (
             <pre className="brief-text artifact-content">{prdContent}</pre>
           ) : (
@@ -656,7 +731,7 @@ function Dashboard({ project, onReset }) {
       {modal === 'app' && (
         <Modal title={`${displayName} · Preview`} onClose={() => setModal(null)}>
           <div className="app-modal">
-            <MobileFrame previewUrl={preview}>
+            <MobileFrame previewUrl={preview} wide>
               {!preview && <ReadyApp />}
             </MobileFrame>
           </div>
@@ -664,16 +739,44 @@ function Dashboard({ project, onReset }) {
       )}
       {modal === 'journey' && (
         <Modal title="Project journey" onClose={() => setModal(null)}>
-          <ol className="journey">
-            {stages.map((s, i) => (
-              <li key={s.key}>
-                <b>
-                  {i <= run.active || run.complete ? '✓' : '○'} {s.key}
-                </b>
-                <span>{s.output}</span>
-              </li>
-            ))}
-          </ol>
+          <p className="journey-note">{journey.pipelineNote}</p>
+          {journeyLoading ? (
+            <p>Loading activity log…</p>
+          ) : (
+            <>
+              <ol className="journey-stages">
+                {stages.map((s, i) => (
+                  <li key={s.key}>
+                    <b>
+                      {i <= run.active || run.complete ? '✓' : '○'} {s.key}
+                    </b>
+                    <span>{s.output}</span>
+                  </li>
+                ))}
+              </ol>
+              <h3 className="journey-activity-heading">Activity log</h3>
+              <ol className="journey-activity">
+                {journey.activities.length ? (
+                  journey.activities.map((item) => (
+                    <li key={item.id} className={item.passed ? 'pass' : 'warn'}>
+                      <div className="journey-activity-head">
+                        <b>{item.title}</b>
+                        <span>{item.timeLabel}</span>
+                      </div>
+                      <small>
+                        {item.stage} · {item.role} · {item.decision}
+                      </small>
+                      <p>{item.detail}</p>
+                    </li>
+                  ))
+                ) : (
+                  <li>
+                    <p>No audit entries yet for this run.</p>
+                  </li>
+                )}
+              </ol>
+            </>
+          )}
           <button className="primary" onClick={download}>
             Download handover
           </button>

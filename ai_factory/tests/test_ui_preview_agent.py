@@ -35,6 +35,13 @@ def test_validate_preview_html_rejects_short_fragment():
     assert validate_preview_html("<html><body>login sign up</body></html>") is False
 
 
+def test_repair_common_script_errors_fixes_create_text_node_paren():
+    broken = "lines.forEach(function(l){root.appendChild(document.createTextNode(l);});"
+    fixed = repair_common_script_errors(broken)
+    assert "createTextNode(l));" in fixed
+    assert javascript_syntax_ok(f"function x(){{var root={{appendChild:function(){{}}}};{fixed}}}") is True
+
+
 def test_repair_common_script_errors_removes_stray_brace():
     broken = "function cardHTML(p){\n  return `<span>ok</span>`}\n}\nfunction next(){}\n"
     fixed = repair_common_script_errors(broken)
@@ -57,7 +64,7 @@ function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.re
 </script>
 </body></html>"""
     out = finalize_preview_html(html)
-    assert "ai-factory-preview-bootstrap" in out
+    assert "ai-factory-preview-bootstrap" in out.html
     assert javascript_syntax_ok(
-        out.split("<script>")[1].split("</script>")[0]
-    ) or "ai-factory-preview-bootstrap" in out
+        out.html.split("<script>")[1].split("</script>")[0]
+    ) or "ai-factory-preview-bootstrap" in out.html

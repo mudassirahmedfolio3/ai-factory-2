@@ -24,6 +24,7 @@ class BrowserRunResult:
     preview_dir: Path | None = None
     url: str | None = None
     log: str = ""
+    preview_qa: dict | None = None
 
 
 def _free_port() -> int:
@@ -249,13 +250,19 @@ def run_browser_preview(
     from ai_factory.ui_preview_agent import finalize_preview_html, validate_preview_html
 
     if ui_html and validate_preview_html(ui_html):
-        html = finalize_preview_html(ui_html)
+        finalized = finalize_preview_html(ui_html)
     else:
-        html = finalize_preview_html(
+        finalized = finalize_preview_html(
             build_preview_html(project_name, client_brief, code_artifacts, requirements_doc)
         )
     index = preview_dir / "index.html"
-    index.write_text(html, encoding="utf-8")
+    index.write_text(finalized.html, encoding="utf-8")
+    preview_qa = {
+        "js_valid_before": finalized.js_valid_before,
+        "js_valid_after": finalized.js_valid_after,
+        "repairs": finalized.repairs,
+        "bootstrap_injected": finalized.bootstrap_injected,
+    }
 
     port = _free_port()
     try:
@@ -278,4 +285,5 @@ def run_browser_preview(
         preview_dir=preview_dir,
         url=url,
         log=f"Serving {index.as_posix()} at {url}",
+        preview_qa=preview_qa,
     )

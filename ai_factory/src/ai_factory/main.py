@@ -185,6 +185,17 @@ class AIFactoryFlow(Flow[AIFactoryState]):
         save_artifact("sprints/release_1_plan.md", self.state.current_sprint)
         save_artifact("build/release_1_code.md", combined)
         sync_graph_from_state(self.state)
+        log_audit(
+            "build",
+            "completed",
+            "software_engineer",
+            {
+                "artifact": "build/release_1_code.md",
+                "summary": "Architecture sketch + sample Dart for Flutter MVP (not the browser HTML preview).",
+                "lines": len(combined.splitlines()),
+            },
+            state=self.state,
+        )
         return "basic_build_done"
 
     @listen(run_basic_build)
@@ -200,10 +211,26 @@ class AIFactoryFlow(Flow[AIFactoryState]):
         self.state.phase = "security"
         publish_run_state(self.state)
 
-        self.state.test_report = "# QA\n\nPASS\n\nSmoke tests assumed for basic MVP.\n"
+        self.state.test_report = (
+            "# QA — Backend / API smoke tests\n\n"
+            "PASS (stub at Basic complexity)\n\n"
+            "Smoke tests assumed for MVP backend and Flutter sketch.\n"
+            "Note: interactive browser HTML preview is validated separately at the Delivery step.\n"
+        )
         self.state.qa_passed = True
         self.state.phase = "qa"
         publish_run_state(self.state)
+        log_audit(
+            "qa",
+            "stub_pass",
+            "qa_engineer",
+            {
+                "scope": "backend_smoke",
+                "note": "Basic track auto-pass — does not execute the mobile HTML preview.",
+                "artifact": "qa/release_1_report.md",
+            },
+            state=self.state,
+        )
 
         self.state.release_notes = (
             f"# Release 1 — {self.state.project_name}\n\n"
@@ -228,7 +255,7 @@ class AIFactoryFlow(Flow[AIFactoryState]):
         )
         log_audit("release_review", "approved", "auto_basic", state=self.state)
         self.state.remaining_backlog = False
-        return "project_complete"
+        return self.finalize_project()
 
     @listen("basic_plus_path")
     def run_plus_discovery(self, _previous=None):
@@ -376,7 +403,7 @@ Approve if MVP scope is clear; otherwise request specific changes.
         )
         log_audit("release_review", "approved", "auto_basic_plus", state=self.state)
         self.state.remaining_backlog = False
-        return "project_complete"
+        return self.finalize_project()
 
     @staticmethod
     def _parse_client_approval(raw: str) -> ClientApproval:
@@ -443,6 +470,52 @@ Approve if MVP scope is clear; otherwise request specific changes.
             {"url": result.url, "preview_dir": str(result.preview_dir or "")},
             state=self.state,
         )
+        if result.preview_qa:
+            qa = result.preview_qa
+            preview_passed = bool(qa.get("js_valid_after"))
+            log_audit(
+                "preview_qa",
+                "pass" if preview_passed else "fail",
+                "qa_engineer",
+                {
+                    "scope": "browser_html",
+                    "js_valid_before": qa.get("js_valid_before"),
+                    "js_valid_after": qa.get("js_valid_after"),
+                    "repairs": qa.get("repairs") or [],
+                    "checks": [
+                        "JavaScript syntax (Node parse)",
+                        "Auth screens present",
+                        "Navigation shell present",
+                    ],
+                },
+                state=self.state,
+            )
+            if qa.get("repairs"):
+                log_audit(
+                    "developer_fix",
+                    "applied",
+                    "ui_designer",
+                    {
+                        "summary": "Auto-repaired generated preview before release.",
+                        "fixes": qa.get("repairs") or [],
+                        "artifact": f"apps/{self.state.run_id}/index.html",
+                    },
+                    state=self.state,
+                )
+            qa_note = (
+                f"\n\n## Browser preview QA\n\n"
+                f"- JavaScript valid before repair: **{qa.get('js_valid_before')}**\n"
+                f"- JavaScript valid after repair: **{qa.get('js_valid_after')}**\n"
+            )
+            if qa.get("repairs"):
+                qa_note += "- Repairs applied:\n" + "\n".join(
+                    f"  - {item}" for item in qa["repairs"]
+                )
+            self.state.test_report = (self.state.test_report or "") + qa_note
+            save_artifact(f"qa/release_{rel}_report.md", self.state.test_report)
+        if result.success:
+            self.state.phase = "release_review"
+        publish_run_state(self.state)
 
     @listen("standard_path")
     def run_discovery(self, _previous=None):

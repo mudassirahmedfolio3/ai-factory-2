@@ -88,6 +88,44 @@ export function overallProgressFromState(runState) {
   return Math.min(99, Math.floor(sum / UI_STAGE_COUNT));
 }
 
+/** True when the built app preview can be loaded in the phone iframe. */
+export function previewReadyFromState(runState) {
+  if (!runState) return false;
+  if (runState.status === 'completed') return true;
+  const checks = runState.checks || {};
+  if (checks.post_deploy_passed) return true;
+  const statusMap = stepStatusMap(runState?.pipeline_steps);
+  return (statusMap.get('browser') || 'pending') === 'completed';
+}
+
+/** Copy for Delivery stage cards driven by live pipeline checks. */
+export function deliveryStageCopy(runState, displayName) {
+  const checks = runState?.checks || {};
+  const release = runState?.release_number || 1;
+  const complete = runState?.status === 'completed';
+  const previewReady = previewReadyFromState(runState);
+
+  return {
+    card1Title: 'Release Artifacts',
+    card1Name: `${displayName} · Release v${release}.0.0`,
+    card1Sub: 'Source · Build · Browser preview',
+    card1Foot: complete
+      ? 'Tests, security and UAT passed'
+      : previewReady
+        ? 'Browser preview ready · Finalizing handover'
+        : 'Packaging source, build and documentation',
+    deployLines: [
+      previewReady || complete
+        ? 'Production deployment · Complete'
+        : 'Production deployment · Preparing',
+      checks.qa_passed || complete
+        ? 'Health checks · Passed'
+        : 'Health checks · Checking',
+      complete ? 'Handover package · Ready' : 'Handover package · Preparing',
+    ],
+  };
+}
+
 /** Derive dashboard run object from backend RunState. */
 export function runStateToDashboard(runState) {
   const statusMap = stepStatusMap(runState?.pipeline_steps);
@@ -96,8 +134,6 @@ export function runStateToDashboard(runState) {
   const complete = runState?.status === 'completed';
   const failed = runState?.status === 'failed';
 
-  const browserDone = (statusMap.get('browser') || 'pending') === 'completed';
-
   return {
     active,
     progress,
@@ -105,11 +141,13 @@ export function runStateToDashboard(runState) {
     failed,
     error: runState?.error || null,
     approval: runState?.approvals?.release || runState?.approvals?.prd || 'pending',
-    browserReady: browserDone,
+    browserReady: previewReadyFromState(runState),
     projectName: runState?.project_name || 'Project',
     runId: runState?.run_id || null,
     phase: runState?.phase || '',
     overall: overallProgressFromState(runState),
+    checks: runState?.checks || {},
+    releaseNumber: runState?.release_number || 1,
   };
 }
 

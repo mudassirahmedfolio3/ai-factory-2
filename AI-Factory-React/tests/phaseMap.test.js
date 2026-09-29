@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   activeUiStage,
+  deliveryStageCopy,
   overallProgressFromState,
+  previewReadyFromState,
   runStateToDashboard,
   stageProgress,
   slugProjectName,
@@ -70,4 +72,33 @@ test('slugProjectName creates kebab-case slug', () => {
 test('buildClientBrief appends attachment names', () => {
   const brief = buildClientBrief('Hello', [{ name: 'req.pdf' }]);
   assert.match(brief, /req\.pdf/);
+});
+
+test('previewReadyFromState is true when post_deploy_passed', () => {
+  assert.equal(
+    previewReadyFromState({
+      status: 'running',
+      checks: { post_deploy_passed: true },
+      pipeline_steps: [{ id: 'browser', status: 'active' }],
+    }),
+    true,
+  );
+});
+
+test('runStateToDashboard exposes browserReady from post_deploy checks', () => {
+  const dash = runStateToDashboard({
+    status: 'running',
+    checks: { post_deploy_passed: true, qa_passed: true },
+    pipeline_steps: discoveryActive.pipeline_steps,
+  });
+  assert.equal(dash.browserReady, true);
+});
+
+test('deliveryStageCopy uses project name and release number', () => {
+  const copy = deliveryStageCopy(
+    { status: 'running', release_number: 1, checks: { post_deploy_passed: true } },
+    'womens-jewellery',
+  );
+  assert.match(copy.card1Name, /womens-jewellery/);
+  assert.match(copy.deployLines[0], /Complete/);
 });

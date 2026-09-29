@@ -88,10 +88,13 @@ def runs() -> list[dict[str, Any]]:
 
 @app.get("/runs/current")
 def current_run() -> dict[str, Any]:
+    from run_manager import is_running, reconcile_run_state
+
+    reconcile_run_state()
     state = get_current_run_state()
     if not state:
         raise HTTPException(status_code=404, detail="No active or recent run state")
-    return {**state, "is_live": state.get("status") == "running"}
+    return {**state, "is_live": state.get("status") == "running" and is_running()}
 
 
 @app.get("/runs/{run_id}")
@@ -146,6 +149,13 @@ def run_preview(run_id: str, path: str):
     return FileResponse(file_path)
 
 
+@app.get("/runs/{run_id}/audit")
+def run_audit(run_id: str) -> list[dict[str, Any]]:
+    """Governance audit trail for project journey (developer, QA, fixes)."""
+    events = read_audit_events(run_id=run_id)
+    return events
+
+
 @app.get("/runs/{run_id}/artifacts/{path:path}")
 def artifact(run_id: str, path: str) -> dict[str, str]:
     content = read_artifact(path, run_id=run_id)
@@ -172,9 +182,12 @@ def status() -> dict[str, Any]:
 
 
 async def _event_stream(run_id: str | None = None):
+    from run_manager import reconcile_run_state
+
     last_state_ts = ""
     event_count = 0
     while True:
+        reconcile_run_state()
         state = get_current_run_state()
         if run_id and state and state.get("run_id") != run_id:
             archived = get_run(run_id)

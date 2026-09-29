@@ -48,18 +48,52 @@ def is_running() -> bool:
     return bool(state and state.get("status") == "running" and _active_thread and _active_thread.is_alive())
 
 
+def _recover_orphaned_complete_run() -> bool:
+    """Promote finished runs that never reached finalize_project to completed."""
+    state = _read_run_state()
+    if not state or state.get("status") != "running":
+        return False
+    if _active_thread and _active_thread.is_alive():
+        return False
+    checks = state.get("checks") or {}
+    approvals = state.get("approvals") or {}
+    if not (
+        checks.get("post_deploy_passed")
+        and approvals.get("release") == "approved"
+    ):
+        return False
+    state["status"] = "completed"
+    state["phase"] = "complete"
+    for step in state.get("pipeline_steps", []):
+        step["status"] = "completed"
+    state["updated_at"] = datetime.now(timezone.utc).isoformat()
+    state.pop("error", None)
+    RUN_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RUN_STATE_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    return True
+
+
 def _reconcile_stale_run() -> None:
-    """If run_state says running but no worker thread, mark stale so new runs can start."""
+    """If run_state says running but no worker thread, recover or mark stale."""
     state = _read_run_state()
     if not state or state.get("status") != "running":
         return
     if _active_thread and _active_thread.is_alive():
         return
+    if _recover_orphaned_complete_run():
+        return
+    state = _read_run_state() or state
     state["status"] = "stale"
     state["updated_at"] = datetime.now(timezone.utc).isoformat()
     state["error"] = state.get("error") or "Run interrupted (API restarted or worker stopped)."
     RUN_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     RUN_STATE_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
+
+
+def reconcile_run_state() -> None:
+    """Recover completed or stale runs before serving API state."""
+    _recover_orphaned_complete_run()
+    _reconcile_stale_run()
 
 
 def current_live_run_id() -> str | None:

@@ -71,6 +71,10 @@ export function fetchArtifact(path, runId) {
   return fetchJson(url);
 }
 
+export function fetchAuditEvents(runId) {
+  return fetchJson(`/runs/${runId}/audit`);
+}
+
 export function previewUrl(runId) {
   return `${BASE}/runs/${runId}/preview/index.html`;
 }
