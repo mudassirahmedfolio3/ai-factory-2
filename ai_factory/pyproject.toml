@@ -1,0 +1,30 @@
+[project]
+name = "ai_factory"
+version = "0.1.0"
+description = "ai_factory using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[anthropic,tools]>=1.15.22,<2.0.0",
+    "litellm>=1.60.0",
+]
+
+[project.scripts]
+kickoff = "ai_factory.main:kickoff"
+run_crew = "ai_factory.main:kickoff"
+plot = "ai_factory.main:plot"
+run_with_trigger = "ai_factory.main:run_with_trigger"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_factory"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/ai_factory/**/*"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "flow"
+project_id = "17444b53-b2b7-4722-9f7b-b0ad8eef9b77"

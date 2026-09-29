@@ -1,0 +1,37 @@
+select_sprint_scope:
+  description: >
+    Plan release #{release_number} for {project_name}.
+
+    Requirements and backlog:
+    {requirements_doc}
+
+    Prior sprint context:
+    {current_sprint}
+
+    Select user stories for this release increment. Mark remaining backlog items
+    clearly. Focus on demoable e-commerce mobile features.
+  expected_output: >
+    Sprint scope document listing selected stories, deferred items, and release
+    goals for the client demo.
+  agent: product_manager
+
+break_into_tasks:
+  description: >
+    Break the selected sprint stories into implementable Flutter development tasks.
+
+    Architecture reference:
+    {architecture_doc}
+
+    Sprint scope from prior task.
+
+    For each story provide:
+    - Task title
+    - Files to create or modify (under lib/)
+    - Acceptance criteria mapping
+    - Suggested test cases
+  expected_output: >
+    Development task breakdown in markdown with file paths and implementation
+    order for the Flutter engineer.
+  agent: flutter_engineer
+  context:
+    - select_sprint_scope

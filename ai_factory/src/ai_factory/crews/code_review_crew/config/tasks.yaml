@@ -1,0 +1,25 @@
+review_code:
+  description: >
+    Perform autonomous code review for release #{release_number} of {project_name}.
+
+    Delivery context (knowledge graph):
+    {knowledge_graph_context}
+
+    Architecture:
+    {architecture_doc}
+
+    Code artifacts to review:
+    {code_artifacts}
+
+    Review for:
+    - Code quality and Flutter/Dart conventions
+    - Security anti-patterns (hardcoded secrets, insecure storage)
+    - Missing tests for cart/checkout flows
+    - Architecture alignment
+
+    End with explicit verdict: REVIEW_PASS or REVIEW_FAIL
+    List blocking issues separately from suggestions.
+  expected_output: >
+    Structured code review report with severity-rated findings, blocking issues
+    list, and REVIEW_PASS or REVIEW_FAIL verdict.
+  agent: code_reviewer

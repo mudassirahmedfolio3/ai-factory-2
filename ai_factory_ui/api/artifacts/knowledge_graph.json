@@ -1,0 +1,40 @@
+{
+  "entities": [
+    {
+      "id": "project:ecommerce-flutter-app",
+      "type": "project",
+      "attributes": {
+        "name": "ecommerce-flutter-app",
+        "phase": "discovery"
+      }
+    },
+    {
+      "id": "service:ecommerce-flutter-app",
+      "type": "service",
+      "attributes": {
+        "stack": "flutter",
+        "domain": "ecommerce"
+      }
+    },
+    {
+      "id": "release:ecommerce-flutter-app:r1",
+      "type": "release",
+      "attributes": {
+        "number": 1,
+        "environment": "staging"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "source_id": "project:ecommerce-flutter-app",
+      "relationship": "owns",
+      "target_id": "service:ecommerce-flutter-app"
+    },
+    {
+      "source_id": "service:ecommerce-flutter-app",
+      "relationship": "release",
+      "target_id": "release:ecommerce-flutter-app:r1"
+    }
+  ]
+}

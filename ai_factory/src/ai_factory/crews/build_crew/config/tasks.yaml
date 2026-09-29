@@ -1,0 +1,41 @@
+implement_features:
+  description: >
+    Implement release #{release_number} features for {project_name}.
+
+    Sprint tasks:
+    {current_sprint}
+
+    Architecture:
+    {architecture_doc}
+
+    Prior code (if any):
+    {code_artifacts}
+
+    QA feedback from last attempt (if any):
+    {test_report}
+
+    Produce Flutter/Dart source files with paths and full file contents.
+    Use artifacts/ as the logical output root (e.g. artifacts/lib/...).
+    Never include API keys or secrets — use placeholder env vars.
+  expected_output: >
+    Code artifacts document listing each file path and complete source code
+    in fenced code blocks, ready to write to disk.
+  agent: flutter_engineer
+
+architecture_review:
+  description: >
+    Review the implemented code against the architecture document.
+
+    Architecture:
+    {architecture_doc}
+
+    Code from prior task.
+
+    Flag violations, missing tests, or structural issues. If critical issues
+    exist, list them clearly; otherwise approve for QA.
+  expected_output: >
+    Architecture review report with APPROVED or REVISION_NEEDED status,
+    issue list, and corrected code snippets if needed.
+  agent: technical_architect
+  context:
+    - implement_features

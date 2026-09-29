@@ -1,0 +1,34 @@
+test_plan:
+  description: >
+    Create a test plan for release #{release_number} of {project_name}.
+
+    Sprint scope:
+    {current_sprint}
+
+    Code artifacts:
+    {code_artifacts}
+
+    Include manual test cases and automated test recommendations mapped to
+    acceptance criteria. Cover cart, checkout, and navigation edge cases.
+  expected_output: >
+    Test plan in markdown with test case IDs, steps, expected results, and
+    priority (P0/P1/P2).
+  agent: qa_engineer
+
+release_readiness:
+  description: >
+    Execute the test plan against the code artifacts and determine release readiness.
+
+    Test plan from prior task.
+    Code artifacts: {code_artifacts}
+
+    End with explicit verdict:
+    - PASS — no blocking issues, ready for release
+    - FAIL — list blocking issues that must be fixed before release
+
+    Be strict on checkout, payment flow, and data validation issues.
+  expected_output: >
+    QA report with PASS or FAIL verdict, blocking issues list, and test summary.
+  agent: qa_engineer
+  context:
+    - test_plan

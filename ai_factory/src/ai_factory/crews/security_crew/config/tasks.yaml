@@ -1,0 +1,34 @@
+security_scan:
+  description: >
+    Security scan for release #{release_number} of {project_name}.
+
+    Knowledge graph context:
+    {knowledge_graph_context}
+
+    Code under review:
+    {code_artifacts}
+
+    Code review findings (if any):
+    {code_review_report}
+
+    Perform:
+    1. Dependency / SCA analysis (pubspec, known CVE patterns)
+    2. Secrets detection (API keys, tokens in source)
+    3. SAST — injection, insecure storage, weak crypto
+    4. Mobile OWASP checks for e-commerce (payment, PII)
+
+    Output findings with severity. End with SECURITY_PASS or SECURITY_FAIL.
+  expected_output: >
+    Security scan report with findings table, critical/high issues, remediation
+    steps, and SECURITY_PASS or SECURITY_FAIL verdict.
+  agent: security_engineer
+
+remediate_findings:
+  description: >
+    For non-blocking medium/low findings, document remediation plan and
+    acceptable risk notes. Confirm whether any critical/high remain open.
+  expected_output: >
+    Remediation plan with prioritized fixes and final go/no-go recommendation.
+  agent: security_engineer
+  context:
+    - security_scan

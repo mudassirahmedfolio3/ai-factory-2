@@ -1,0 +1,59 @@
+recommend_backend_scope:
+  description: >
+    Analyze requirements for {project_name} and recommend backend scope.
+
+    Requirements:
+    {requirements_doc}
+
+    Options to evaluate:
+    1. Mobile-only with mock/API stubs
+    2. Flutter app + lightweight BFF
+    3. Full stack (mobile + backend + admin)
+
+    Provide recommendation with rationale, risks, and timeline impact.
+  expected_output: >
+    Backend scope recommendation document with chosen option, rationale,
+    API surface overview, and integration approach.
+  agent: technical_architect
+
+mobile_architecture:
+  description: >
+    Design the Flutter mobile architecture for {project_name} based on
+    requirements and backend recommendation.
+
+    Requirements:
+    {requirements_doc}
+
+    Include:
+    - Module/feature folder structure
+    - Navigation approach (go_router routes)
+    - State management choice and rationale
+    - API client and repository layer design
+    - Key data models
+    - Security considerations (token storage, env config)
+  expected_output: >
+    Architecture document in markdown with diagrams described in text,
+    module layout, and API contracts.
+  agent: technical_architect
+  context:
+    - recommend_backend_scope
+
+sprint_zero_setup:
+  description: >
+    Create a sprint-zero scaffold plan for the Flutter project.
+
+    Architecture:
+    Use the mobile architecture from the prior task.
+
+    Include:
+    - pubspec.yaml dependencies list
+    - Folder structure to create under lib/
+    - .env.example variables (no real secrets)
+    - Initial routes and placeholder screens
+    - First integration test outline
+  expected_output: >
+    Sprint-zero setup plan with file tree, dependency list, and step-by-step
+    scaffold instructions a developer can follow.
+  agent: flutter_engineer
+  context:
+    - mobile_architecture

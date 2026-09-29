@@ -1,0 +1,53 @@
+generate_pipeline:
+  description: >
+    Generate CI/CD pipeline for release #{release_number} deploying to
+    {deploy_environment}.
+
+    Knowledge graph:
+    {knowledge_graph_context}
+
+    Architecture: {architecture_doc}
+    Code artifacts summary: {code_artifacts}
+    QA report: {test_report}
+    Security report: {security_report}
+
+    Produce:
+    - Pipeline YAML (GitHub Actions or generic CI shape)
+    - Stage order: lint → test → build → security gate → deploy
+    - Version/tag strategy
+    - Rollback procedure
+    - Audit log fields to capture
+  expected_output: >
+    Complete CI/CD pipeline definition with deploy steps, environment config,
+    and rollback plan in markdown with YAML blocks.
+  agent: devops_engineer
+
+execute_deploy_plan:
+  description: >
+    Create executable deploy runbook for {deploy_environment} (simulated —
+    document commands, do not run real infra).
+
+    Include pre-deploy checklist, deploy commands, post-deploy verification
+    hooks, and evidence to collect for audit trail.
+  expected_output: >
+    Deploy runbook with step-by-step commands, expected outputs, and
+    DEPLOY_READY or DEPLOY_BLOCKED status.
+  agent: devops_engineer
+  context:
+    - generate_pipeline
+
+post_deploy_verification:
+  description: >
+    Define SRE post-deploy verification for release #{release_number}.
+
+    Deploy runbook from prior tasks.
+    Knowledge graph context for service dependencies.
+
+    Include smoke tests, crash/error monitoring checks, and rollback criteria.
+    End with POST_DEPLOY_PASS or POST_DEPLOY_FAIL.
+  expected_output: >
+    Post-deploy verification report with smoke test results (simulated analysis),
+    SLO check, and POST_DEPLOY_PASS or POST_DEPLOY_FAIL verdict.
+  agent: sre_engineer
+  context:
+    - execute_deploy_plan

@@ -1,0 +1,31 @@
+prepare_release:
+  description: >
+    Prepare release #{release_number} for {project_name}.
+
+    Sprint scope: {current_sprint}
+    Code artifacts: {code_artifacts}
+    QA report: {test_report}
+
+    Include:
+    - pubspec.yaml version bump recommendation
+    - CHANGELOG entry
+    - Build commands (flutter analyze, test, build)
+    - Pre-release checklist status
+  expected_output: >
+    Release preparation document with version, changelog, build steps, and
+    checklist completion status.
+  agent: release_engineer
+
+release_notes:
+  description: >
+    Write client-facing release notes for release #{release_number}.
+
+    Use the release preparation document and sprint scope.
+
+    Focus on user-visible features and improvements. Avoid internal jargon.
+  expected_output: >
+    Client-friendly release notes in markdown suitable for stakeholder email or
+    demo presentation.
+  agent: product_manager
+  context:
+    - prepare_release

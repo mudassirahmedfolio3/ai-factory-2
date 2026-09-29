@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {initialRun,runReducer,overallProgress,validateFiles} from '../src/engine.js';
+test('automatic demo visits every stage and ends at 100 percent',()=>{let s={...initialRun};const visited=new Set();for(let i=0;i<1000&&!s.complete;i++){visited.add(s.active);s=runReducer(s,{type:'tick',amount:4});}assert.deepEqual([...visited],[0,1,2,3,4,5,6,7,8]);assert.equal(s.complete,true);assert.equal(overallProgress(s),100);assert.equal(s.approval,'auto-approved');assert.deepEqual(runReducer(s,{type:'tick',amount:10}),s)});
+test('pause prevents progress; resume continues',()=>{const paused=runReducer(initialRun,{type:'pause'});assert.deepEqual(runReducer(paused,{type:'tick',amount:50}),paused);assert.equal(runReducer(runReducer(paused,{type:'pause'}),{type:'tick',amount:50}).progress,50)});
+test('UAT approval starts delivery and revision reruns development',()=>{const uat={...initialRun,active:7,progress:35};assert.equal(runReducer(uat,{type:'approve'}).active,8);const revision=runReducer(uat,{type:'revise'});assert.equal(revision.active,5);assert.equal(revision.revision,1);assert.equal(revision.progress,0);assert.equal(revision.paused,false);assert.deepEqual(runReducer(initialRun,{type:'approve'}),initialRun)});
+test('uploads reject invalid, empty and oversized files',()=>{const r=validateFiles([{name:'brief.pdf',size:100},{name:'photo.png',size:500},{name:'script.exe',size:5},{name:'empty.txt',size:0},{name:'huge.pdf',size:21*1024*1024}]);assert.equal(r.accepted.length,2);assert.equal(r.errors.length,3)});
+test('reset clears completed or revised runs',()=>{assert.deepEqual(runReducer({...initialRun,active:8,complete:true,revision:2},{type:'reset'}),initialRun)});

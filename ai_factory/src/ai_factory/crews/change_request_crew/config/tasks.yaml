@@ -1,0 +1,45 @@
+analyze_change_impact:
+  description: >
+    Analyze change requests for {project_name}.
+
+    Client feedback:
+    {client_feedback}
+
+    Change requests:
+    {change_requests}
+
+    Current requirements:
+    {requirements_doc}
+
+    Classify severity as minor or major. List affected user stories and timeline
+    impact.
+  expected_output: >
+    Change impact analysis with severity (minor/major), affected stories,
+    timeline impact, and recommended response.
+  agent: product_manager
+
+update_backlog:
+  description: >
+    Update the requirements and backlog based on the change impact analysis.
+
+    Incorporate e-commerce domain validation. Produce revised user stories and
+    mark deferred items.
+  expected_output: >
+    Updated requirements document and backlog in markdown reflecting approved
+    changes.
+  agent: ecommerce_advisor
+  context:
+    - analyze_change_impact
+
+client_confirm_change:
+  description: >
+    As the simulated client, review the proposed change scope and updated backlog.
+
+    Confirm whether the changes are acceptable from a business perspective.
+    Respond with APPROVED or NEEDS_REVISION and list any remaining concerns.
+  expected_output: >
+    Client change confirmation with APPROVED or NEEDS_REVISION, business feedback,
+    and sign-off on updated scope.
+  agent: simulated_client
+  context:
+    - update_backlog

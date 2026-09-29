@@ -1,0 +1,52 @@
+intake_client_brief:
+  description: >
+    Parse the client brief for project {project_name}.
+
+    Client brief:
+    {client_brief}
+
+    List assumptions, open questions, and constraints. Identify MVP vs
+    post-MVP scope for an e-commerce Flutter mobile app.
+  expected_output: >
+    Structured intake summary with assumptions, open questions, MVP scope,
+    and post-MVP backlog items in markdown.
+  agent: product_manager
+
+write_prd:
+  description: >
+    Using the intake summary and client brief, write a Product Requirements
+    Document (PRD) for {project_name}.
+
+    Include:
+    - Executive summary
+    - User personas
+    - User stories with acceptance criteria (Given/When/Then)
+    - MVP feature list prioritized for e-commerce mobile
+    - Non-functional requirements (performance, security, offline)
+    - Out of scope items
+
+    Client brief: {client_brief}
+  expected_output: >
+    Complete PRD in markdown with numbered user stories and acceptance criteria.
+  agent: product_manager
+  context:
+    - intake_client_brief
+
+domain_review:
+  description: >
+    Review the PRD against e-commerce mobile best practices.
+
+    Validate:
+    - Catalog browse and search flows
+    - Cart behavior (guest vs authenticated)
+    - Checkout and payment UX
+    - Order confirmation and tracking
+    - Account and address management
+
+    Incorporate any critical gaps into the final requirements document.
+  expected_output: >
+    Final requirements document merging PRD content with e-commerce domain
+    review notes and any required story additions or corrections.
+  agent: ecommerce_advisor
+  context:
+    - write_prd
