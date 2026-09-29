@@ -246,12 +246,14 @@ def run_browser_preview(
     preview_dir = PREVIEWS_DIR / run_id
     preview_dir.mkdir(parents=True, exist_ok=True)
 
-    from ai_factory.ui_preview_agent import validate_preview_html
+    from ai_factory.ui_preview_agent import finalize_preview_html, validate_preview_html
 
     if ui_html and validate_preview_html(ui_html):
-        html = ui_html
+        html = finalize_preview_html(ui_html)
     else:
-        html = build_preview_html(project_name, client_brief, code_artifacts, requirements_doc)
+        html = finalize_preview_html(
+            build_preview_html(project_name, client_brief, code_artifacts, requirements_doc)
+        )
     index = preview_dir / "index.html"
     index.write_text(html, encoding="utf-8")
 

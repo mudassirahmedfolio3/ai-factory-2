@@ -1,6 +1,6 @@
 import React,{useState} from 'react';
 export function MobileFrame({children,previewUrl}) {
-  return <div className="phone"><div className="phone-screen"><div className="device-status"><b>9:41</b><span className="notch"/><span>••• ▰</span></div><div className="app-viewport" data-testid="app-viewport">{previewUrl ? <iframe title="Built application" src={previewUrl} sandbox="allow-scripts allow-forms"/> : children}</div><div className="home-indicator"/></div></div>;
+  return <div className="phone"><div className="phone-screen"><div className="device-status"><b>9:41</b><span className="notch"/><span>••• ▰</span></div><div className="app-viewport" data-testid="app-viewport">{previewUrl ? <iframe title="Built application" src={previewUrl} sandbox="allow-scripts allow-forms allow-same-origin"/> : children}</div><div className="home-indicator"/></div></div>;
 }
 const Bar=({width='100%',height=8})=><span className="skeleton" style={{width,height}}/>;
 const Box=({children,className=''})=><div className={`skeleton-box ${className}`}>{children}</div>;

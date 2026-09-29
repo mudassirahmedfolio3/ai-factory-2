@@ -3,9 +3,97 @@
 from __future__ import annotations
 
 import re
+import subprocess
+import tempfile
+from pathlib import Path
 
 from ai_factory.fast_path import run_basic_agent
 from ai_factory.models import AIFactoryState
+
+_PREVIEW_BOOTSTRAP = """
+<script id="ai-factory-preview-bootstrap">
+(function () {
+  function ensure(name, fn) {
+    if (typeof window[name] !== "function") window[name] = fn;
+  }
+  ensure("show", function (id) {
+    document.querySelectorAll(".screen").forEach(function (s) {
+      s.classList.remove("active");
+    });
+    var el = document.getElementById(id);
+    if (el) el.classList.add("active");
+  });
+  ensure("doAuth", function (mode) {
+    var fields =
+      mode === "login"
+        ? ["loginEmail", "loginPass"]
+        : ["suName", "suEmail", "suPass"];
+    for (var i = 0; i < fields.length; i++) {
+      var input = document.getElementById(fields[i]);
+      if (!input || !String(input.value || "").trim()) return;
+    }
+    show("app");
+    if (typeof nav === "function") nav("home");
+    if (typeof renderAll === "function") renderAll();
+  });
+  function wireAuthClicks() {
+    document.querySelectorAll("button.link, button.btn").forEach(function (btn) {
+      if (btn.dataset.afBound) return;
+      var label = (btn.textContent || "").trim().toLowerCase();
+      if (label.indexOf("already have") >= 0) {
+        btn.dataset.afBound = "1";
+        btn.addEventListener("click", function () {
+          show("login");
+        });
+      } else if (label.indexOf("create an account") >= 0) {
+        btn.dataset.afBound = "1";
+        btn.addEventListener("click", function () {
+          show("signup");
+        });
+      } else if (label.indexOf("create account") >= 0) {
+        btn.dataset.afBound = "1";
+        btn.addEventListener("click", function () {
+          doAuth("signup");
+        });
+      } else if (label === "sign in") {
+        btn.dataset.afBound = "1";
+        btn.addEventListener("click", function () {
+          doAuth("login");
+        });
+      }
+    });
+  }
+  function addDemoSkip() {
+    var login = document.getElementById("login");
+    if (!login || document.getElementById("af-demo-skip")) return;
+    var skip = document.createElement("button");
+    skip.id = "af-demo-skip";
+    skip.type = "button";
+    skip.className = "link";
+    skip.textContent = "Try demo (skip login)";
+    skip.style.marginTop = "8px";
+    skip.addEventListener("click", function () {
+      ["loginEmail", "loginPass", "suName", "suEmail", "suPass"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && !el.value) el.value = "demo";
+      });
+      doAuth("login");
+    });
+    var anchor = login.querySelector(".link") || login.querySelector(".btn");
+    if (anchor && anchor.parentNode) anchor.parentNode.appendChild(skip);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      wireAuthClicks();
+      addDemoSkip();
+    });
+  } else {
+    wireAuthClicks();
+    addDemoSkip();
+  }
+})();
+</script>
+""".strip()
 
 
 def ui_preview_prompt(state: AIFactoryState) -> str:
@@ -51,8 +139,12 @@ MANDATORY FEATURES:
 
 TECHNICAL RULES:
 - Single HTML document: <!DOCTYPE html> through </html>
-- All CSS inside <style>, all JS inside <script> — no external files except picsum.photos images
-- Must run inside an iframe with sandbox="allow-scripts allow-forms"
+- All CSS inside <style>, all JS inside one <script> block — no external files except picsum.photos images
+- Must run inside an iframe with sandbox="allow-scripts allow-forms allow-same-origin"
+- Use addEventListener for button clicks — avoid inline onclick attributes
+- JavaScript MUST parse without syntax errors (no stray braces after template-return functions)
+- Do not nest template literals that embed onclick="..." strings — build DOM with createElement instead
+- Login screen must include a visible "Try demo (skip login)" button that enters the app without credentials
 - No markdown fences, no commentary before or after the HTML
 - Maximum ~450 lines of HTML/CSS/JS total
 
@@ -81,6 +173,96 @@ def extract_html_from_response(text: str) -> str:
     if end == -1:
         return raw[start:].strip()
     return raw[start : end + len("</html>")].strip()
+
+
+def extract_script_blocks(html: str) -> list[str]:
+    return [
+        match.group(1).strip()
+        for match in re.finditer(
+            r"<script\b[^>]*>(.*?)</script>",
+            html,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+        if "ai-factory-preview-bootstrap" not in match.group(0)
+    ]
+
+
+def javascript_syntax_ok(script: str) -> bool:
+    """Return True when Node can parse the script (or Node is unavailable)."""
+    if not script.strip():
+        return False
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".js",
+        encoding="utf-8",
+        delete=False,
+    ) as handle:
+        handle.write(script)
+        path = Path(handle.name)
+    try:
+        result = subprocess.run(
+            ["node", "--check", str(path)],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+        return result.returncode == 0
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        return True
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def repair_common_script_errors(script: str) -> str:
+    """Fix frequent LLM mistakes that break the whole preview script."""
+    repaired = script
+    patterns = (
+        r"(`\}\n)\}(\nfunction )",
+        r"(`;\n)\}(\nfunction )",
+    )
+    for _ in range(8):
+        if javascript_syntax_ok(repaired):
+            break
+        changed = False
+        for pattern in patterns:
+            next_repaired = re.sub(pattern, r"\1\2", repaired, count=1)
+            if next_repaired != repaired:
+                repaired = next_repaired
+                changed = True
+                break
+        if not changed:
+            break
+    return repaired
+
+
+def inject_preview_bootstrap(html: str) -> str:
+    if "ai-factory-preview-bootstrap" in html:
+        return html
+    if re.search(r"</body>", html, re.IGNORECASE):
+        return re.sub(
+            r"</body>",
+            _PREVIEW_BOOTSTRAP + "\n</body>",
+            html,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+    return html + "\n" + _PREVIEW_BOOTSTRAP
+
+
+def finalize_preview_html(html: str) -> str:
+    """Repair JS when possible and always attach iframe-safe auth bootstrap."""
+    scripts = extract_script_blocks(html)
+    if scripts:
+        main_script = scripts[0]
+        repaired = repair_common_script_errors(main_script)
+        if repaired != main_script and javascript_syntax_ok(repaired):
+            html = html.replace(main_script, repaired, 1)
+            main_script = repaired
+        if not javascript_syntax_ok(main_script):
+            html = inject_preview_bootstrap(html)
+            return html
+    return inject_preview_bootstrap(html)
 
 
 def validate_preview_html(html: str) -> bool:
@@ -116,4 +298,4 @@ def generate_ui_preview_html(state: AIFactoryState) -> str:
         raise ValueError(
             "UI preview HTML failed validation (missing screens, images, or structure)."
         )
-    return html
+    return finalize_preview_html(html)

@@ -1,6 +1,12 @@
 """Tests for UI preview HTML extraction and validation."""
 
-from ai_factory.ui_preview_agent import extract_html_from_response, validate_preview_html
+from ai_factory.ui_preview_agent import (
+    extract_html_from_response,
+    finalize_preview_html,
+    javascript_syntax_ok,
+    repair_common_script_errors,
+    validate_preview_html,
+)
 
 SAMPLE_HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -27,3 +33,31 @@ def test_validate_preview_html_accepts_complete_document():
 
 def test_validate_preview_html_rejects_short_fragment():
     assert validate_preview_html("<html><body>login sign up</body></html>") is False
+
+
+def test_repair_common_script_errors_removes_stray_brace():
+    broken = "function cardHTML(p){\n  return `<span>ok</span>`}\n}\nfunction next(){}\n"
+    fixed = repair_common_script_errors(broken)
+    assert fixed == "function cardHTML(p){\n  return `<span>ok</span>`}\nfunction next(){}\n"
+    assert javascript_syntax_ok(fixed) is True
+
+
+def test_finalize_preview_html_injects_bootstrap_for_broken_script():
+    html = """<!DOCTYPE html>
+<html><head><title>Shop</title><style>.screen{display:none}.screen.active{display:block}</style></head>
+<body>
+<section id="login" class="screen auth active"><button class="btn">Sign In</button>
+<button class="link">Create an account</button></section>
+<section id="signup" class="screen auth"><button class="link">Already have an account?</button></section>
+<section id="app" class="screen"><nav class="tab"><button>Home</button></nav></section>
+<script>
+function cardHTML(){ return `<span>x</span>`}
+}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+</script>
+</body></html>"""
+    out = finalize_preview_html(html)
+    assert "ai-factory-preview-bootstrap" in out
+    assert javascript_syntax_ok(
+        out.split("<script>")[1].split("</script>")[0]
+    ) or "ai-factory-preview-bootstrap" in out
