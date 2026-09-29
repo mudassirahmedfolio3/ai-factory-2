@@ -3,8 +3,10 @@ import { stages, examples } from './data';
 import { validateFiles } from './engine';
 import { MobileFrame, StageSkeleton, ReadyApp } from './Phone';
 import {
+  ApiError,
   fetchRandomBrief,
   fetchArtifact,
+  getCurrentRun,
   listComplexityOptions,
   previewUrl as buildPreviewUrl,
   startRun,
@@ -39,6 +41,17 @@ function Progress({ value, label }) {
   );
 }
 
+function projectFromRunState(state, fallbackText = '') {
+  return {
+    runId: state.run_id,
+    text: fallbackText,
+    files: [],
+    complexity: state.complexity || 'basic_plus',
+    estimatedMinutes: state.estimated_minutes,
+    projectName: state.project_name || 'Project',
+  };
+}
+
 function Intake({ onStart }) {
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
@@ -49,8 +62,17 @@ function Intake({ onStart }) {
   const [complexityOptions, setComplexityOptions] = useState([]);
   const [starting, setStarting] = useState(false);
   const [loadingBrief, setLoadingBrief] = useState(false);
+  const [liveRun, setLiveRun] = useState(null);
   const input = useRef();
   const menuRef = useRef();
+
+  useEffect(() => {
+    getCurrentRun()
+      .then((state) => {
+        if (state?.status === 'running' && state?.is_live) setLiveRun(state);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     listComplexityOptions()
@@ -111,9 +133,9 @@ function Intake({ onStart }) {
     if (!text.trim() && !files.length) return;
     setStarting(true);
     setError('');
+    const project_name = slugProjectName(text);
     try {
       const client_brief = buildClientBrief(text, files);
-      const project_name = slugProjectName(text);
       const result = await startRun({ project_name, client_brief, complexity });
       onStart({
         runId: result.run_id,
@@ -124,14 +146,34 @@ function Intake({ onStart }) {
         projectName: project_name,
       });
     } catch (err) {
+      if (err instanceof ApiError && err.code === 'RUN_IN_PROGRESS' && err.runId) {
+        setLiveRun({ run_id: err.runId, project_name: project_name, status: 'running', is_live: true });
+        setError('A factory run is already in progress. View it below or wait for it to finish.');
+        return;
+      }
       setError(err.message || 'Failed to start factory run.');
     } finally {
       setStarting(false);
     }
   }
 
+  function viewLiveRun() {
+    if (!liveRun) return;
+    onStart(projectFromRunState(liveRun, text.trim()));
+  }
+
   return (
     <>
+      {liveRun && (
+        <div className="live-run-banner" role="status">
+          <span>
+            Run in progress: <b>{liveRun.project_name}</b> ({liveRun.run_id})
+          </span>
+          <button type="button" className="primary" onClick={viewLiveRun}>
+            View live run
+          </button>
+        </div>
+      )}
       <header className="header intake-header">
         <Brand />
         <span className="eyebrow">NEW PROJECT</span>

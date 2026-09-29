@@ -48,6 +48,27 @@ def is_running() -> bool:
     return bool(state and state.get("status") == "running" and _active_thread and _active_thread.is_alive())
 
 
+def _reconcile_stale_run() -> None:
+    """If run_state says running but no worker thread, mark stale so new runs can start."""
+    state = _read_run_state()
+    if not state or state.get("status") != "running":
+        return
+    if _active_thread and _active_thread.is_alive():
+        return
+    state["status"] = "stale"
+    state["updated_at"] = datetime.now(timezone.utc).isoformat()
+    state["error"] = state.get("error") or "Run interrupted (API restarted or worker stopped)."
+    RUN_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    RUN_STATE_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
+
+
+def current_live_run_id() -> str | None:
+    state = _read_run_state()
+    if state and state.get("status") == "running" and is_running():
+        return state.get("run_id")
+    return None
+
+
 def _read_run_state() -> dict[str, Any] | None:
     if not RUN_STATE_PATH.exists():
         return None
@@ -99,8 +120,10 @@ def start_run(
     global _active_thread
 
     with _lock:
+        _reconcile_stale_run()
         if is_running():
-            raise RuntimeError("A factory run is already in progress")
+            run_id = (_read_run_state() or {}).get("run_id", "")
+            raise RuntimeError(f"RUN_IN_PROGRESS:{run_id}")
 
         _ensure_factory_env()
 

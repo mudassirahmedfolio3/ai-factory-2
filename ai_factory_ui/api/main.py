@@ -114,7 +114,17 @@ def create_run(body: StartRunRequest) -> dict[str, Any]:
             deploy_environment=body.deploy_environment,
         )
     except RuntimeError as exc:
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
+        message = str(exc)
+        if message.startswith("RUN_IN_PROGRESS:"):
+            run_id = message.split(":", 1)[1] or None
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "message": "A factory run is already in progress",
+                    "run_id": run_id,
+                },
+            ) from exc
+        raise HTTPException(status_code=409, detail=message) from exc
 
 
 PREVIEWS_ROOT = AI_FACTORY_ROOT / "apps"

@@ -1,10 +1,37 @@
 const BASE = '/api';
 
+export class ApiError extends Error {
+  constructor(message, { status, runId, code } = {}) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.runId = runId;
+    this.code = code;
+  }
+}
+
 async function fetchJson(path, init) {
   const res = await fetch(`${BASE}${path}`, init);
   if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(detail || res.statusText);
+    const raw = await res.text();
+    let message = raw || res.statusText;
+    let runId;
+    try {
+      const parsed = JSON.parse(raw);
+      const detail = parsed.detail;
+      if (typeof detail === 'object' && detail !== null) {
+        message = detail.message || message;
+        runId = detail.run_id;
+      } else if (typeof detail === 'string') {
+        message = detail;
+      }
+    } catch {
+      /* plain text error body */
+    }
+    if (res.status === 409 && runId) {
+      throw new ApiError(message, { status: 409, runId, code: 'RUN_IN_PROGRESS' });
+    }
+    throw new ApiError(message, { status: res.status });
   }
   return res.json();
 }
