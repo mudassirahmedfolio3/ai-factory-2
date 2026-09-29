@@ -1,36 +1,62 @@
-# AI Factory
+# AI Factory (React Frontend)
 
-React implementation of the AI Factory Figma intake screen and nine-stage dashboard. React, React DOM and Vite only; native CSS handles transitions and skeleton animations. Inter is loaded from Google Fonts.
+Figma-designed intake and nine-stage dashboard, wired to the live AI Factory backend on `release-1.0.0`.
 
-## Run
+## Run (live mode)
 
-Requires Node 22.12+ (Node 24 recommended) and pnpm.
+Requires Node 18+, pnpm (or npm), and the FastAPI backend running on port 8000.
+
+**All-in-one (recommended)**
+
+```powershell
+cd ai_factory_ui
+.\scripts\start-console.ps1
+```
+
+**Or manually**
+
+Terminal 1 — API:
+
+```powershell
+cd ai_factory_ui\api
+..\..\ai_factory\.venv\Scripts\python.exe -m uvicorn main:app --reload --port 8000
+```
+
+Terminal 2 — this frontend:
 
 ```sh
+cd AI-Factory-React
 pnpm install
 pnpm dev
 ```
 
+Open **http://127.0.0.1:5173**. Vite proxies `/api` → `http://127.0.0.1:8000`.
+
 Production: `pnpm build`, then `pnpm preview`. Tests: `pnpm test`.
 
-## Demo workflow
+## Live workflow
 
-Enter requirements, use an example prompt or attach files. Start begins Requirement → Business Analyst → UX → UI → Architect → Developer → QA → UAT → Delivery. A normal run takes about two minutes. Speed controls offer 2× and 4×, plus pause/resume. Stage navigation reviews a stage without skipping or corrupting the running process; “Return to live stage” resumes following it.
+1. Enter requirements or use **Random brief**
+2. Pick run complexity (Basic / Basic+ / Standard / Full)
+3. **Start AI Factory** — triggers a real CrewAI run via `POST /api/runs`
+4. Dashboard updates live via SSE (`/api/runs/{run_id}/events`)
+5. Nine UI stages map to backend pipeline steps (discovery → browser)
+6. **Project brief** modal loads real PRD from artifacts when available
+7. **Delivery** shows the built browser preview in the phone frame when ready
 
-UAT automatically approves in the demo so an unattended run finishes. During UAT, Approve release proceeds immediately. Request changes pauses the demo and collects feedback; submitting reruns Developer, QA and UAT. Closing that dialog leaves the run paused so the reviewer can decide when to resume.
+## Key files
 
-Delivery reveals a working NOVA sample: create an item, save/unsave items and navigate tabs. View application opens a larger review dialog. Project journey lists all outputs. Download handover exports a JSON demo report, not generated application source.
+| File | Role |
+|------|------|
+| `src/api.js` | REST + SSE client for FastAPI backend |
+| `src/phaseMap.js` | Maps 9 UI stages ↔ backend `pipeline_steps` |
+| `src/runSync.js` | SSE connection helper |
+| `src/App.jsx` | Intake + dashboard |
+| `src/Phone.jsx` | Mobile frame with optional `previewUrl` iframe |
+| `src/engine.js` | File validation only |
 
-## Integration points
+## Notes
 
-- `src/styles.css`: shared Figma color, spacing, radius and animation variables.
-- `src/data.js`, `src/stages.json`: stage content and original local artwork.
-- `src/engine.js`: deterministic workflow state machine, independent of the UI.
-- `src/Phone.jsx`: `MobileFrame` exposes a `children` slot and optional `previewUrl` iframe. Its content viewport stays contained inside the phone. The iframe intentionally allows scripts/forms but isolates the embedded origin; extend only for a trusted integration.
-- `src/App.jsx`: intake, dashboard, review dialogs and handover.
-
-This is a frontend simulation. Files remain in memory in the current browser tab; no AI backend receives or parses them. Refresh resets the session. The NOVA sample is dummy data, not generated from the brief. A backend can later replace timer events and provide a built app through the mobile slot.
-
-Accepted files: PDF, DOC/DOCX, TXT, MD, PNG, JPG, WebP. Maximum 20 MB each, 8 files. Empty/unsupported files are rejected. Drag-and-drop, remove attachment and Ctrl/Cmd+Enter submit are supported.
-
-Responsive layout stacks the factory floor and studio below 900px; the nine-stage navigation scrolls horizontally. Keyboard focus, dialog Escape handling, semantic progress indicators and reduced-motion support are included.
+- File attachments are listed in the brief text; binary upload is not yet supported by the API.
+- UAT approval is read-only — the pipeline handles simulated client gates.
+- Ensure `CURSOR_API_KEY` (or other LLM provider) is set in `ai_factory/.env`.

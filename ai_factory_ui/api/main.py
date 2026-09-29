@@ -13,6 +13,7 @@ from artifact_reader import (
 )
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from config import AI_FACTORY_ROOT
 from dotenv import load_dotenv
@@ -114,6 +115,25 @@ def create_run(body: StartRunRequest) -> dict[str, Any]:
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+PREVIEWS_ROOT = AI_FACTORY_ROOT / "apps"
+
+
+@app.get("/runs/{run_id}/preview/{path:path}")
+def run_preview(run_id: str, path: str):
+    """Serve built browser preview HTML from ai_factory/apps/{run_id}/."""
+    preview_dir = (PREVIEWS_ROOT / run_id).resolve()
+    if not preview_dir.is_dir():
+        raise HTTPException(status_code=404, detail=f"Preview for run {run_id} not found")
+    file_path = (preview_dir / path).resolve()
+    try:
+        file_path.relative_to(preview_dir)
+    except ValueError as exc:
+        raise HTTPException(status_code=403, detail="Invalid preview path") from exc
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail=f"Preview file {path} not found")
+    return FileResponse(file_path)
 
 
 @app.get("/runs/{run_id}/artifacts/{path:path}")
