@@ -1,0 +1,154 @@
+# App-type profile: Flutter mobile e-commerce app with a NestJS + PostgreSQL backend.
+# To support a new app type, copy this folder and change it. The core stays the same.
+
+name: flutter_nestjs_ecommerce
+description: Flutter e-commerce mobile app with a NestJS + Prisma + PostgreSQL REST API.
+
+stack:
+  mobile: Flutter 3.x (Dart), Riverpod, go_router, dio, freezed/json_serializable, API client generated from OpenAPI (dart-dio)
+  backend: NestJS (TypeScript), Prisma ORM, PostgreSQL 16, JWT auth, @nestjs/swagger
+  payments: Stripe (test mode)
+  testing: flutter_test + integration_test; Jest + Supertest
+  delivery: Docker, docker-compose (staging), GitHub Actions; Android first
+
+domain_entities: [User, Address, Category, Product, ProductVariant, Cart, CartItem, Order, OrderItem, Payment]
+
+# Extra context appended to an agent's backstory (paths relative to this folder).
+agent_context:
+  spec_writer: [knowledge/ecommerce_domain.md]
+  project_manager: [knowledge/ecommerce_domain.md]
+  architect:
+    - knowledge/ecommerce_domain.md
+    - knowledge/nest_conventions.md
+    - knowledge/flutter_conventions.md
+  ui_ux_designer: [knowledge/flutter_conventions.md]
+  backend_developer: [knowledge/nest_conventions.md]
+  frontend_developer: [knowledge/flutter_conventions.md]
+  qa_engineer: [knowledge/nest_conventions.md, knowledge/flutter_conventions.md]
+
+# Field overrides on top of config/agents.yaml, e.g.:
+# agent_overrides:
+#   architect:
+#     goal: ...
+agent_overrides: {}
+
+# What gets built, by which agent, where, and how it is verified.
+# checks run after every work item; an item is only done when they pass.
+components:
+  backend:
+    agent: backend_developer
+    workdir: server
+    runtime: node
+    checks: [npm run build, npm test]
+    scaffold:
+      # Keep the @nestjs/* majors in step with the CLI major.
+      - run: npx -y @nestjs/cli@12 new server --package-manager npm --skip-git --strict
+        creates: server/package.json
+      # Pin majors: an unpinned install follows npm "latest", which can be a pre-release.
+      # Prisma 6 matches the schema style the Architect writes (prisma-client-js, url in datasource).
+      - workdir: server
+        run: npm install @nestjs/config@^12 @nestjs/swagger@^12 @prisma/client@^6 class-validator class-transformer
+      - workdir: server
+        run: npm install --save-dev prisma@^6
+      - copy_from: docs/schema.prisma
+        copy_to: server/prisma/schema.prisma
+      - copy_from: docs/openapi.yaml
+        copy_to: server/openapi.yaml
+      - workdir: server
+        run: npx prisma generate
+  frontend:
+    agent: frontend_developer
+    workdir: app
+    runtime: flutter
+    checks: [flutter analyze, flutter test]
+    scaffold:
+      - run: flutter create --org com.shopease --project-name shopease_app --platforms android,ios app
+        creates: app/pubspec.yaml
+      - copy_from: docs/openapi.yaml
+        copy_to: app/openapi.yaml
+      - runtime: openapi
+        run: generate -i docs/openapi.yaml -g dart-dio -o app/packages/api_client --additional-properties=pubName=api_client
+        creates: app/packages/api_client/pubspec.yaml
+      - workdir: app
+        run: flutter pub get
+  infra:
+    agent: deployment_engineer
+    workdir: .
+    runtime: null
+    checks: []
+  shared:
+    agent: backend_developer
+    workdir: .
+    runtime: null
+    checks: []
+
+# Release phase: how staging runs and is checked.
+release:
+  api_component: backend
+  api_prefix: /api/v1
+  health_path: /api/v1/health
+  openapi_json_path: /api/docs-json      # @nestjs/swagger JSON (the Deployment engineer ensures it is served)
+  compose_file: infra/docker-compose.staging.yml
+  env_file: infra/staging.env
+  local_prepare: [npm run build, npx prisma migrate deploy]
+  local_start: node dist/main.js
+  smoke_command: npm run test:smoke
+  package_commands: [npm ci, npm run build]
+
+# Running the app on an Android emulator (release phase device tests, and `uv run showcase`).
+device:
+  app_component: frontend
+  app_id: com.shopease.shopease_app          # from flutter create --org com.shopease --project-name shopease_app
+  system_image: system-images;android-35;google_apis;x86_64
+  avd_name: sdlc_phone
+  device_profile: pixel_7
+  build_command: flutter build apk --debug --dart-define=API_BASE_URL={api_base}
+  apk_path: build/app/outputs/flutter-apk/app-debug.apk
+  test_command: flutter test integration_test -d {serial} --dart-define=API_BASE_URL={api_base}
+  asset_env:
+    PUBLIC_ASSET_BASE_URL: http://{host}:{port}/assets
+
+# Toolchains. docker mode uses `image`; local mode needs `local_binary` on PATH.
+sandbox:
+  runtimes:
+    node:
+      # Node 24 ships npm 11; npm 10 (Node 22) crashes resolving the NestJS 12 dependency tree.
+      image: node:24-bookworm
+      local_binary: npm
+    flutter:
+      image: ghcr.io/cirruslabs/flutter:stable
+      local_binary: flutter
+      run_as_root: true            # the SDK writes to its root-owned cache
+      env:
+        PUB_CACHE: /workspace/.pub-cache   # keep downloaded packages between commands
+        GRADLE_USER_HOME: /workspace/.gradle   # keep the Android build cache between commands
+        ANDROID_USER_HOME: /workspace/.android # one debug signing key per run (reinstalls keep working)
+    openapi:
+      image: openapitools/openapi-generator-cli:v7.10.0
+      local_binary: java
+      local_prefix: npx -y @openapitools/openapi-generator-cli
+  # Non-secret environment for every command (Prisma needs a URL even to generate/validate).
+  env:
+    CI: "true"   # non-interactive test runners
+    DATABASE_URL: postgresql://shopease:shopease@localhost:5432/shopease?schema=public
+  # Commands agents may run (prefix match, one command at a time, no shell operators).
+  allowed_commands:
+    flutter:
+      - flutter pub get
+      - flutter pub add
+      - flutter analyze
+      - flutter test
+      - dart run build_runner build
+      - dart format
+    node:
+      - npm install
+      - npm ci
+      - npm run build
+      - npm run lint
+      - npm test
+      - npm run test
+      - npx prisma generate
+      - npx prisma validate
+      - npx prisma format
+      - npx prisma migrate diff
+      - npx tsc --noEmit
