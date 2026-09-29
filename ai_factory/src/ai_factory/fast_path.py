@@ -19,6 +19,7 @@ Rules:
 - Bullet points only, maximum 12 bullets total
 - Tailor every feature and product example to the specific niche in the client brief — NOT a generic store
 - Name 4-6 example products that fit this niche (realistic titles and price ranges)
+- Require login/signup, bottom navigation, product images, and cart in MVP scope
 - Include 3 user stories with one acceptance criterion each
 - Under 400 words total
 - Do NOT ask questions — output the PRD only

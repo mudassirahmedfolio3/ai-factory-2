@@ -20,6 +20,7 @@ from ai_factory.crews.sprint_planning_crew.sprint_planning_crew import SprintPla
 from ai_factory.complexity import get_profile
 from ai_factory.brief_generator import fetch_random_ecommerce_brief
 from ai_factory.browser_runner import run_browser_preview
+from ai_factory.ui_preview_agent import generate_ui_preview_html
 from ai_factory.fast_path import (
     auto_approval,
     basic_build_prompt,
@@ -392,6 +393,21 @@ Approve if MVP scope is clear; otherwise request specific changes.
         """Open a mobile-style web preview in the browser (replaces deploy/emulator)."""
         self.state.phase = "browser"
         publish_run_state(self.state)
+        rel = self.state.release_number
+        ui_source = "ui_designer_agent"
+        print("UI Designer: generating unique mobile preview...")
+        try:
+            self.state.ui_preview_html = generate_ui_preview_html(self.state)
+            save_artifact(
+                f"browser/release_{rel}_ui_preview.html",
+                self.state.ui_preview_html,
+            )
+            print("UI preview generated successfully.")
+        except Exception as exc:
+            ui_source = f"fallback_template ({exc})"
+            self.state.ui_preview_html = ""
+            print(f"UI Designer failed, using fallback template: {exc}")
+
         print("Opening browser preview...")
         result = run_browser_preview(
             run_id=self.state.run_id,
@@ -399,11 +415,13 @@ Approve if MVP scope is clear; otherwise request specific changes.
             client_brief=self.state.client_brief,
             code_artifacts=self.state.code_artifacts,
             requirements_doc=self.state.requirements_doc,
+            ui_html=self.state.ui_preview_html or None,
         )
         status = "BROWSER_PASS" if result.success else "BROWSER_SKIPPED"
         report = (
             f"# Browser Preview — {self.state.project_name}\n\n"
             f"**Status:** {status}\n"
+            f"**UI source:** {ui_source}\n"
             f"**Message:** {result.message}\n"
         )
         if result.url:
@@ -416,7 +434,6 @@ Approve if MVP scope is clear; otherwise request specific changes.
         self.state.deployment_report = report
         self.state.post_deploy_report = report
         self.state.post_deploy_passed = result.success
-        rel = self.state.release_number
         save_artifact(f"browser/release_{rel}_preview.md", report)
         sync_graph_from_state(self.state)
         log_audit(

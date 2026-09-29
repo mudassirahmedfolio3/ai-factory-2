@@ -38,6 +38,7 @@ class AIFactoryState(BaseModel):
     sprint_backlog: str = ""
     current_sprint: str = ""
     code_artifacts: str = ""
+    ui_preview_html: str = ""
     code_review_report: str = ""
     security_report: str = ""
     deployment_report: str = ""
