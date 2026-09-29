@@ -1,0 +1,354 @@
+# Task prompts per phase. {placeholders} are filled by the flow before the task runs.
+# Each task's structured output model is set in code (src/agentic_sdlc/crews/).
+
+customer_brief:
+  agent: customer
+  description: |
+    Here is the initial product brief:
+
+    ---
+    {brief}
+    ---
+
+    Expand it into a structured product brief from your point of view as the
+    business owner. Fill gaps with realistic business decisions and list the
+    questions you have not decided yet.
+  expected_output: A structured product brief.
+
+spec_questions:
+  agent: spec_writer
+  description: |
+    You are preparing to write the PRD for this product.
+
+    Product brief:
+    {product_brief}
+
+    Questions already asked and answered:
+    {qa_history}
+
+    This is clarification round {round} of at most {max_rounds}.
+    List only the questions whose answers would change the requirements
+    (scope, user flows, business rules, payments, delivery, returns, roles).
+    Do not repeat answered questions. If you have enough to write a complete
+    PRD, return an empty question list and set ready to true.
+  expected_output: A list of open questions (can be empty) and whether you are ready.
+
+customer_answers:
+  agent: customer
+  description: |
+    Your product brief:
+    {product_brief}
+
+    The spec writer asks:
+    {questions}
+
+    Answer every question directly, as the business owner. Keep answers
+    consistent with the brief and with a realistic first release.
+  expected_output: One answer per question.
+
+write_prd:
+  agent: spec_writer
+  description: |
+    Write the product requirements document.
+
+    Product brief:
+    {product_brief}
+
+    Clarifications (questions and customer answers):
+    {qa_history}
+
+    Target stack (for context only; do not design the architecture):
+    {stack}
+
+    Reviewer feedback on the previous draft (address all of it, empty if first draft):
+    {revision_notes}
+
+    Scope for this run:
+    {scope_rules}
+
+    Rules:
+    - Story ids are US-001, US-002, ... Every story has at least two
+      acceptance criteria in Given/When/Then form.
+    - Mark priority as must, should or could. Keep the first release focused:
+      must-haves only cover what is needed to sell and fulfil an order.
+    - Include non-functional requirements (performance, security, privacy,
+      accessibility, supported platforms) and an explicit out-of-scope list.
+  expected_output: A complete PRD.
+
+plan_backlog:
+  agent: project_manager
+  description: |
+    Plan delivery for this approved PRD:
+    {prd}
+
+    Target stack: {stack}
+
+    Scope for this run:
+    {scope_rules}
+
+    Rules:
+    - Epic ids E-01, E-02...; work item ids WI-001, WI-002...; milestone ids M1, M2...
+    - Each work item belongs to exactly one component: backend, frontend, infra or shared.
+    - A work item is small (1 to 5 points) and names the user stories it serves.
+    - depends_on only lists work item ids. No cycles.
+    - Order milestones so each ends in a testable slice (e.g. auth end to end,
+      then catalog, then cart, then checkout, then orders). Backend items come
+      before the frontend items that call them.
+    - Every must-have story is covered by at least one work item.
+  expected_output: Epics, work items and ordered milestones.
+
+design_architecture:
+  agent: architect
+  description: |
+    Design the system for this approved PRD and delivery plan.
+
+    PRD:
+    {prd}
+
+    Backlog:
+    {backlog}
+
+    Target stack: {stack}
+    Core domain entities to consider: {domain_entities}
+
+    Reviewer feedback on the previous draft (address all of it, empty if first draft):
+    {revision_notes}
+
+    Scope for this run (also limits the API: only endpoints the stories need):
+    {scope_rules}
+
+    Deliver:
+    1. Components and their responsibilities.
+    2. Backend modules: each with its entities and the endpoints it owns.
+    3. Mobile app features: screens and state management per feature.
+    4. A complete OpenAPI 3.1 document in YAML (openapi_yaml) covering every
+       endpoint the must-have stories need, with request/response schemas,
+       bearer auth, pagination and a shared error schema. Every operation has
+       an operationId (used to generate the mobile API client).
+    5. A complete Prisma schema (prisma_schema) for PostgreSQL.
+    6. Security design and at least three ADRs for the key decisions.
+  expected_output: The architecture document, OpenAPI YAML and Prisma schema.
+
+design_ui:
+  agent: ui_ux_designer
+  description: |
+    Create the design system and screen specifications for the mobile app.
+
+    PRD:
+    {prd}
+
+    App features and screens from the architecture:
+    {app_features}
+
+    Scope for this run:
+    {scope_rules}
+
+    Rules:
+    - Colors as hex values; include light and dark theme colors.
+    - Every screen has an id (SCR-01...), a go_router path, the components it
+      uses, its loading/empty/error states, and the user stories it serves.
+    - Every must-have user story is served by at least one screen.
+    - Minimum touch target 48dp; text contrast at least WCAG AA.
+  expected_output: A design system with screen specs and navigation.
+
+# ---------- build phase (M3). {tooling} is filled in by the worker (Claude Code or CrewAI tools). ----------
+
+implement_work_item:
+  agent: backend_developer   # overridden per component (see profile components)
+  description: |
+    Implement work item {item_id} ({component}): {item_title}
+
+    What it covers:
+    {item_description}
+
+    Milestone: {milestone}
+
+    User stories and acceptance criteria this item serves:
+    {stories}
+
+    Already built (do not redo; build on it):
+    {done_items}
+
+    How to work:
+    {tooling}
+
+    Source of truth, in {docs_dir} (read what you need, do not edit):
+    - openapi.yaml: the API contract. Endpoints, request/response shapes and status codes must match it exactly.
+    - architecture.md: modules, data model notes, security design and ADRs.
+    - prd.md: full requirements. design_system.md: screens and design tokens (mobile work).
+    - The project conventions in your instructions.
+
+    Rules:
+    - Implement only this work item, completely. No placeholders or TODOs for the core behaviour.
+    - Add focused tests for the behaviour you add.
+    - These checks must pass when you finish: {checks}. Run them if you can; fix what fails.
+    - Never put secrets in code; read configuration from environment variables.
+    - If the item cannot be done (e.g. it needs an external account or a decision), set blocked
+      to true and explain in blocked_reason instead of faking it.
+
+    Problems to fix from a previous attempt:
+    {problems}
+  expected_output: A report of what you changed and whether the checks pass.
+
+fix_work_item:
+  agent: backend_developer
+  description: |
+    Fix work item {item_id} ({component}): {item_title}
+
+    Problems to fix:
+    {problems}
+
+    Context: {item_description}
+    Milestone: {milestone}
+
+    User stories and acceptance criteria:
+    {stories}
+
+    How to work:
+    {tooling}
+
+    The API contract and design documents are in {docs_dir} (read-only).
+    Fix the root cause with the smallest correct change, keep existing tests passing, and make
+    sure these checks pass: {checks}.
+  expected_output: A report of what you changed and whether the checks pass.
+
+qa_milestone:
+  agent: qa_engineer
+  description: |
+    Verify milestone {milestone}
+
+    Built work items:
+    {items}
+
+    Not built (blocked or failed; do not report bugs for these):
+    {not_built}
+
+    Acceptance criteria to verify:
+    {stories}
+
+    How to work:
+    {tooling}
+
+    Documents in {docs_dir}: openapi.yaml (API contract), architecture.md, prd.md, design_system.md.
+
+    Do this:
+    1. For each acceptance criterion above that the built items cover, find the code and the tests
+       that prove it. Add missing tests where you can, and run the test suites if you can.
+    2. Check that implemented endpoints match openapi.yaml (paths, methods, status codes, shapes).
+    3. Look for security problems: auth checks, input validation, secrets in code.
+    Report each real defect as a bug with the work item it belongs to. Severity: blocker (breaks
+    the milestone goal or security), major (an acceptance criterion is not met), minor (other).
+    Set milestone_id to {milestone_id}. passed is true only when there are no blocker or major bugs.
+  expected_output: A QA report.
+
+# ---------- release phase (M4) ----------
+
+deploy_staging:
+  agent: deployment_engineer
+  description: |
+    Prepare this system to run on a staging environment.
+
+    Built so far:
+    {built}
+
+    Not built (ignore these):
+    {not_built}
+
+    How to work:
+    {tooling}
+
+    Documents (read-only) are in {docs_dir}; the API code is in '{api_dir}'.
+
+    Create or update:
+    1. {api_dir}/Dockerfile: a small multi-stage production image for the API. It must run database
+       migrations on start (before the server) and listen on the PORT environment variable.
+       Use the same runtime major version as the build toolchain ({toolchain_image}), e.g. its
+       -slim variant: the lockfile was produced with that toolchain.
+    2. {compose_file}: the API plus PostgreSQL 16 for staging. Publish the API on host port
+       $STAGING_PORT (default {port}); build the API from {api_dir}; read settings from {env_file}.
+    3. {env_file}: every environment variable the API needs, with SAFE TEST VALUES ONLY (no real
+       keys: use placeholders such as sk_test_placeholder). DATABASE_URL must point at the compose
+       database. Add a comment at the top saying these are test values.
+    4. .github/workflows/ci.yml: install, lint, build and test the API on every push and pull request.
+    5. infra/README.md: how to run staging, and which variables production needs.
+    Also make sure the API serves GET {health_path} (200 when up) and its OpenAPI document as JSON
+    at {openapi_json_path} (for example with @nestjs/swagger); add them if missing, with tests.
+    Never write real secrets anywhere.
+  expected_output: A report of the files you created and anything a human must provide.
+
+write_smoke_tests:
+  agent: smoke_tester
+  description: |
+    Write a smoke test suite that checks the critical user journeys against a RUNNING API.
+
+    Built so far (test only these):
+    {built}
+
+    How to work:
+    {tooling}
+
+    The suite runs with `{smoke_command}` from the '{api_dir}' directory, with the environment
+    variable SMOKE_BASE_URL set to the API's full base URL, INCLUDING the API prefix (for example
+    {api_base_example}). Build request URLs as SMOKE_BASE_URL + the contract path (e.g. + "/products").
+    - Add the script to package.json if it does not exist; keep smoke tests separate from unit
+      tests (their own folder and config) so `npm test` does not run them.
+    - Use plain HTTP requests against SMOKE_BASE_URL; do not import application code.
+    - Cover only journeys the built items support, end to end (e.g. health, sign up, sign in,
+      browse, add to cart), with unique test data per run (e.g. a timestamped email).
+    - The API contract is {docs_dir}/openapi.yaml; request/response shapes must follow it.
+    - Keep it short and reliable: a handful of journeys, clear failure messages.
+  expected_output: A report of the smoke suite you wrote.
+
+integration_review:
+  agent: integration_pass
+  description: |
+    The system is running on staging at {base_url}. Check that the parts work together.
+
+    Built so far:
+    {built}
+
+    Contract check (API served vs {docs_dir}/openapi.yaml, built scope only):
+    {contract_issues}
+
+    Recent staging logs:
+    {staging_logs}
+
+    How to work:
+    {tooling}
+
+    Check: configuration and environment variables ({env_file}, config validation), the API prefix,
+    database migrations, CORS/security headers, error format, and that implemented endpoints match
+    the contract (see the contract check). Fix small glue problems yourself (configuration, wiring,
+    missing registration of a module) and say so in criteria_checked. Report anything else as a
+    bug with the work item it belongs to (use RELEASE if unclear). Severity: blocker if the system
+    cannot serve its built journeys, major for contract mismatches, minor otherwise.
+    Set milestone_id to "integration". passed is true only with no blocker or major bugs.
+  expected_output: An integration report.
+
+write_device_tests:
+  agent: smoke_tester
+  description: |
+    Write on-device journey tests for the mobile app, to run on an Android emulator against the
+    running staging API.
+
+    Built so far (test only these):
+    {built}
+
+    How to work:
+    {tooling}
+
+    The app is in '{app_dir}'. Put the tests in '{app_dir}/{test_dir}/' using Flutter's
+    integration_test package (add it as a dev dependency from the Flutter SDK if missing).
+    They run with: {test_command}
+    so the app talks to the real API at {device_api_base} (the emulator reaches this machine at
+    {host_alias}). Do not mock the network.
+    - Drive the real app from its entry point, like a user: open the product list, open a product,
+      add it to the cart, open the cart, change a quantity and check the total, for the journeys
+      the built items support.
+    - Wait for network data with pumpAndSettle or explicit waits with timeouts; keep each test
+      independent of the others and of existing cart state.
+    - A handful of reliable journeys beats many fragile ones. Clear failure messages.
+    - Do not change application behaviour. If the app cannot reach {device_api_base} from the
+      device (e.g. cleartext HTTP blocked), leave the test as is: that failure goes to the
+      frontend developer.
+  expected_output: A report of the on-device tests you wrote.

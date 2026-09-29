@@ -1,0 +1,50 @@
+# Pipeline settings: which phases run, where humans approve, loop limits.
+
+phases:
+  discovery: true     # Customer + Spec writer -> PRD
+  planning: true      # Project manager + Architect -> backlog, architecture, OpenAPI, Prisma
+  design: true        # UI/UX designer -> design system, screen specs
+  build: true         # Backend + Frontend + QA loop (see build: below)
+  release: false      # Deployment engineer, staging, Integration pass, Smoke tester, Gate 3, production
+
+build:
+  # Which backlog milestones to build, e.g. [M1, M2]. Empty list = all of them.
+  # Override per run: uv run resume <run_id> --milestones M1,M2  (or SDLC_BUILD_MILESTONES=M1,M2)
+  milestones: [M1, M2]
+  # docker (recommended) or local (runs build/test commands on this machine).
+  # Override with the SDLC_SANDBOX environment variable.
+  sandbox: docker
+  check_fix_attempts: 2      # extra tries when build/tests fail after a work item
+  agent_timeout_s: 3600      # per coding-agent job
+
+release:
+  staging_port: 3100
+  startup_timeout_s: 90      # wait this long for the health endpoint
+  fix_rounds: 2              # developer fix rounds when staging verification fails
+  # Your production deploy command, run from the run folder after Gate 3 approval
+  # (e.g. "bash infra/deploy.sh"). Empty: package only (build, release notes, git tag).
+  # Run the mobile app on an Android emulator against staging (needs `uv run setup-android` once).
+  device:
+    enabled: true
+    headless: true           # pipeline runs; `uv run showcase` opens a window
+    boot_timeout_s: 420
+  production_command: ""
+  production_timeout_s: 1800
+
+gates:
+  prd: true
+  architecture: true
+  release: true
+
+# console: ask on the terminal. auto: approve without asking (tests, demos).
+# Override with the SDLC_GATE_MODE environment variable.
+gate_mode: console
+
+limits:
+  clarification_rounds: 3   # Spec writer <-> Customer question rounds
+  gate_rejections: 3        # revisions allowed per gate before the run stops
+  qa_fix_rounds: 3          # QA -> dev fix loops per milestone (M3)
+
+budget:
+  # The run stops before the next phase once total tokens pass this number.
+  max_total_tokens: 3000000
