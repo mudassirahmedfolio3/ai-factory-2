@@ -190,6 +190,14 @@ class Builder:
                 out += [f"  - Given {c.given} when {c.when} then {c.then}" for c in s.acceptance_criteria]
         return "\n".join(out) or "(no user stories: technical item)"
 
+    @staticmethod
+    def links_text(item: WorkItem) -> str:
+        """What the plan says this item builds, so the developer knows exactly what it owns."""
+        parts = [(label, values) for label, values in (
+            ("API operations", item.api_operations), ("data models", item.data_models),
+            ("screens", item.screens), ("modules", item.modules)) if values]
+        return ("\nPlanned scope: " + "; ".join(f"{label}: {', '.join(v)}" for label, v in parts)) if parts else ""
+
     def done_summary(self) -> str:
         lines = [f"- {wid} {self.items[wid].title}: {p.summary[:200]}" for wid, p in self.s.build.items.items()
                  if p.status == "done" and wid in self.items]
@@ -199,7 +207,7 @@ class Builder:
         return {
             "item_id": item.id,
             "item_title": item.title,
-            "item_description": item.description,
+            "item_description": item.description + self.links_text(item),
             "component": item.component,
             "milestone": f"{m.id} {m.name}: {m.goal}",
             "stories": self.stories_text(item.story_ids),

@@ -9,13 +9,15 @@ from agentic_sdlc.scope import Scope
 PHASE = "design"
 
 
-def design_ui(runner: TaskRunner, prd: PRD, architecture: ArchitectureDoc, scope: Scope | None = None) -> TaskResult[DesignSystem]:
+def design_ui(runner: TaskRunner, prd: PRD, architecture: ArchitectureDoc, scope: Scope | None = None,
+              revision_notes: str = "") -> TaskResult[DesignSystem]:
     scope = scope or Scope()
     must_haves = prd.must_have_ids()
     return runner.run(
         PHASE,
         "design_ui",
-        {"prd": prd.to_markdown(), "app_features": architecture.app_features_summary(), "scope_rules": scope.rules_text()},
+        {"prd": prd.to_markdown(), "app_features": architecture.app_features_summary(), "scope_rules": scope.rules_text(),
+         "revision_notes": revision_notes or "(none)"},
         DesignSystem,
         guardrail=artifact_guardrail(
             DesignSystem,

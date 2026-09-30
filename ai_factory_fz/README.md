@@ -9,7 +9,7 @@ The first target app type is a Flutter e-commerce app with a NestJS + PostgreSQL
 |---|---|---|
 | M0 Foundation | model/agent/profile registries, run workspace, file + sandbox tools, checkpoints | done |
 | M1 Discovery | Customer ⇄ Spec writer clarification loop, PRD, **Gate 1** | done |
-| M2 Planning & design | Backlog, architecture + OpenAPI + Prisma, **Gate 2**, design system | done |
+| M2 Solution & plan | Architect (architecture, OpenAPI, Prisma) → UI/UX (design system) → Project manager (work breakdown + estimates, checked for coverage) → **Gate 2** | done |
 | M3 Build loop | Scaffold, Backend/Frontend devs per work item with build+test checks, QA fix loop per milestone | done |
 | M4 Release | Staging deploy, contract check, Integration pass, Smoke tester, **Gate 3**, production packaging/deploy | done |
 
@@ -24,6 +24,36 @@ uv run kickoff --brief briefs/demo_mini.md --pipeline pipeline.demo
 `config/pipeline.demo.yaml` caps the scope (4 stories, 6 work items, 2 milestones, 6 API operations,
 3 screens) and runs every phase with every gate: it stops for your approval of the PRD, the
 architecture and the release. Any pipeline file can set the same `scope:` limits.
+
+## Lifecycle order
+
+```
+Customer ⇄ Spec writer ─► Gate 1 (PRD)
+  ─► Architect ─► UI/UX designer ─► Project manager (WBS + estimates) ─► Gate 2 (solution + plan)
+  ─► Build: developers per work item (checks) ─► QA per milestone
+  ─► Release: staging, contract check, integration pass, smoke + device tests ─► Gate 3 ─► production
+```
+
+The Project manager plans the *solution*: each work item links to the API operations, data models
+and screens it builds, with points, risk, confidence and a rationale. The plan is rejected (and
+redone) unless every operation, model and screen is covered and app items depend on the backend
+items they call. `docs/backlog.md` shows the plan with totals and the critical path. Rejecting
+Gate 2 rewrites architecture, design and plan together with your feedback.
+
+## Machine setup (once)
+
+```bash
+uv sync
+cp .env.example .env          # set CLAUDE_CODE_ENABLE=true and CLAUDE_CODE_OAUTH_TOKEN (claude setup-token)
+uv run setup                  # Docker, docker group, toolchain images, Android emulator
+uv run preflight --pipeline pipeline.demo   # optional: check without starting a run
+```
+
+`uv run setup` does everything itself except what needs you: your sudo password (installing Docker,
+adding you to the `docker` group) and accepting the Android SDK licence. No logout is needed after
+joining the `docker` group: the pipeline notices the old session and runs Docker through `sg docker`.
+Every run also starts with the same preflight check and stops before any agent runs (no tokens spent)
+if something is missing, with the fix to apply.
 
 ## Setup
 

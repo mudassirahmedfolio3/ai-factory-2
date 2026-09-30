@@ -14,6 +14,7 @@ from pydantic import PrivateAttr
 
 from agentic_sdlc.build.coders import Worker, make_worker
 from agentic_sdlc.build.loop import BuildConfig, Builder
+from agentic_sdlc import preflight
 from agentic_sdlc.crews import design, discovery, planning
 from agentic_sdlc.crews.base import TaskResult, TaskRunner
 from agentic_sdlc.gates.human import InputFn, gate_mode, request_approval
@@ -43,6 +44,7 @@ class Deps:
     worker_for: Callable[[str], Worker] | None = None
     staging: Staging | None = None
     emulator: Emulator | None = None
+    preflight: Callable[[], list[str]] | None = None   # machine checks; problems stop the run early
     extra: dict[str, Any] = field(default_factory=dict)
 
 
@@ -53,7 +55,6 @@ def default_deps(state: ProjectState) -> Deps:
     build_cfg = pipeline.get("build", {}) or {}
     sandbox = SandboxRunner(workspace, profile.sandbox, sandbox_mode(build_cfg.get("sandbox", "docker")))
     agents = AgentRegistry.from_config(profile, build_tool_resolver(workspace, sandbox), pipeline.get("models"))
-    agents.models.check_credentials()
     runner = TaskRunner(agents)
     timeout = build_cfg.get("agent_timeout_s", 3600)
     release_cfg = pipeline.get("release", {}) or {}
@@ -68,6 +69,7 @@ def default_deps(state: ProjectState) -> Deps:
         workspace=workspace, profile=profile, runner=runner, pipeline=pipeline, sandbox=sandbox, staging=staging,
         emulator=emulator,
         worker_for=lambda agent_key: make_worker(agent_key, agents, runner.tasks, workspace, sandbox, timeout),
+        preflight=lambda: preflight.check(pipeline, profile, sandbox, agents.models),
     )
 
 
@@ -173,6 +175,11 @@ class SDLCFlow(Flow[ProjectState]):
             raise ValueError("run_id is required")
         self._deps = (self._deps_factory or default_deps)(self.state)
         self._checkpoint("Run started")
+        if self.deps.preflight:
+            problems = self.deps.preflight()
+            print(preflight.report(problems), flush=True)
+            if problems:
+                self._stop(preflight.report(problems) + f"\nThen run: uv run resume {self.state.run_id}")
 
     @listen(init_run)
     def discovery_phase(self) -> None:
@@ -224,63 +231,65 @@ class SDLCFlow(Flow[ProjectState]):
         self._write_prd()
 
     @listen("prd_approved")
-    def planning_phase(self) -> None:
-        if not self._can_continue() or not self._phase_enabled("planning"):
-            return
-        if self.state.backlog is None:
-            self.state.backlog = self._record(
-                planning.plan_backlog(self.deps.runner, self.state.prd, self.deps.profile.stack_summary(), self._scope)
-            )
-            self.deps.workspace.save_artifact("backlog", self.state.backlog)
-            self._checkpoint("Planning: backlog")
-        self._write_architecture()
+    def solution_phase(self) -> None:
+        """Architect designs the solution, UI/UX designs the screens, then the Project manager
+        breaks the solution down into estimated, linked work items."""
+        self._write_solution()
 
-    def _write_architecture(self) -> None:
-        if self.state.architecture is not None or not self._can_continue():
-            return
-        arch = self._record(
-            planning.design_architecture(
-                self.deps.runner,
-                self.state.prd,
-                self.state.backlog,
-                self.deps.profile.stack_summary(),
-                self.deps.profile.domain_entities,
-                self.state.revision_notes("architecture"),
-                self._scope,
-            )
-        )
-        self.state.architecture = arch
-        ws = self.deps.workspace
-        ws.save_artifact("architecture", arch)
-        ws.write_text("docs/openapi.yaml", arch.openapi_yaml)
-        ws.write_text("docs/schema.prisma", arch.prisma_schema)
-        self._checkpoint("Planning: architecture, OpenAPI contract, Prisma schema")
+    def _write_solution(self) -> None:
+        ws, notes = self.deps.workspace, self.state.revision_notes("architecture")
+        if self._phase_enabled("planning") and self.state.architecture is None and self._can_continue():
+            arch = self._record(planning.design_architecture(
+                self.deps.runner, self.state.prd, self.deps.profile.stack_summary(),
+                self.deps.profile.domain_entities, notes, self._scope,
+            ))
+            self.state.architecture = arch
+            ws.save_artifact("architecture", arch)
+            ws.write_text("docs/openapi.yaml", arch.openapi_yaml)
+            ws.write_text("docs/schema.prisma", arch.prisma_schema)
+            self._checkpoint("Planning: architecture, OpenAPI contract, Prisma schema")
+        if (self._phase_enabled("design") and self.state.design is None and self.state.architecture is not None
+                and self._can_continue()):
+            self.state.design = self._record(design.design_ui(
+                self.deps.runner, self.state.prd, self.state.architecture, self._scope, notes))
+            ws.save_artifact("design_system", self.state.design)
+            self._checkpoint("Design: design system and screen specs")
+        if (self._phase_enabled("planning") and self.state.backlog is None and self.state.architecture is not None
+                and self._can_continue()):
+            self.state.backlog = self._record(planning.plan_work(
+                self.deps.runner, self.state.prd, self.state.architecture, self.state.design,
+                self.deps.profile.stack_summary(), notes, self._scope,
+            ))
+            ws.save_artifact("backlog", self.state.backlog)
+            self._checkpoint("Planning: work breakdown and estimates")
 
-    @router(or_(planning_phase, "revise_architecture"))
+    @router(or_(solution_phase, "revise_solution"))
     def architecture_gate(self) -> Literal["architecture_approved", "architecture_rejected", "stopped"]:
-        if self.state.architecture is None:
+        if self.state.architecture is None or self.state.backlog is None:
             if self.state.status == "running":
-                self._stop("No architecture was produced (is the planning phase disabled?)")
+                self._stop("No architecture or plan was produced (is the planning phase disabled?)")
             return "stopped"
-        a = self.state.architecture
+        a, b = self.state.architecture, self.state.backlog
+        screens = f", {len(self.state.design.screens)} screens" if self.state.design else ""
         summary = (
-            f"Architecture: {len(a.backend_modules)} backend modules, {len(a.app_features)} app features, "
-            f"{len(a.adrs)} ADRs; backlog has {len(self.state.backlog.work_items)} work items "
-            f"in {len(self.state.backlog.milestones)} milestones."
+            f"Solution: {len(a.backend_modules)} backend modules, {len(a.operations())} API operations, "
+            f"{len(a.data_models())} data models{screens}, {len(a.adrs)} ADRs. Plan: {len(b.work_items)} work items, "
+            f"{b.total_points()} points in {len(b.milestones)} milestones; critical path {' → '.join(b.critical_path())}."
         )
-        docs = ["docs/architecture.md", "docs/openapi.yaml", "docs/schema.prisma", "docs/backlog.md"]
-        return self._gate("architecture", summary, docs, lambda: setattr(self.state, "architecture", None))
+        docs = ["docs/architecture.md", "docs/openapi.yaml", "docs/schema.prisma", "docs/design_system.md", "docs/backlog.md"]
+
+        def discard() -> None:
+            # A change to the design changes the plan: rewrite all three with the feedback.
+            self.state.architecture = self.state.design = self.state.backlog = None
+
+        return self._gate("architecture", summary, docs, discard)
 
     @listen("architecture_rejected")
-    def revise_architecture(self) -> None:
-        self._write_architecture()
+    def revise_solution(self) -> None:
+        self._write_solution()
 
     @router("architecture_approved")
-    def design_phase(self) -> Literal["build_requested", "release_requested", "run_finished", "stopped"]:
-        if self._can_continue() and self._phase_enabled("design") and self.state.design is None:
-            self.state.design = self._record(design.design_ui(self.deps.runner, self.state.prd, self.state.architecture, self._scope))
-            self.deps.workspace.save_artifact("design_system", self.state.design)
-            self._checkpoint("Design: design system and screen specs")
+    def after_solution(self) -> Literal["build_requested", "release_requested", "run_finished", "stopped"]:
         if self.state.status != "running":
             return "stopped"
         if self._phase_enabled("build"):

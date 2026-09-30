@@ -2,8 +2,8 @@
 
 phases:
   discovery: true     # Customer + Spec writer -> PRD
-  planning: true      # Project manager + Architect -> backlog, architecture, OpenAPI, Prisma
-  design: true        # UI/UX designer -> design system, screen specs
+  planning: true      # Architect -> architecture, OpenAPI, Prisma; then Project manager -> WBS + estimates
+  design: true        # UI/UX designer -> design system, screen specs (between Architect and Project manager)
   build: true         # Backend + Frontend + QA loop (see build: below)
   release: false      # Deployment engineer, staging, Integration pass, Smoke tester, Gate 3, production
 

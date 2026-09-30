@@ -16,6 +16,7 @@ import urllib.request
 from pathlib import Path
 
 from agentic_sdlc.registry.profiles import Profile
+from agentic_sdlc.tools import docker_access
 from agentic_sdlc.tools.sandbox_exec import SandboxMode, SandboxRunner
 from agentic_sdlc.workspace import Workspace
 
@@ -109,7 +110,7 @@ class Staging:
             files += ["-f", str(override)]
         cmd = ["docker", "compose", "--progress", "plain", *files, "--env-file", self.rel.env_file, *args]
         env = {**os.environ, "STAGING_PORT": str(self.port)}
-        return subprocess.run(cmd, cwd=self.ws.root, capture_output=True, text=True, timeout=1800, env=env)
+        return docker_access.run(cmd, cwd=self.ws.root, capture_output=True, text=True, timeout=1800, env=env)
 
     def _start_compose(self) -> None:
         for f in (self.rel.compose_file, self.rel.env_file):

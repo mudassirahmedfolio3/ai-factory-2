@@ -77,8 +77,9 @@ def test_claude_code_worker_local_mode(tmp_path, monkeypatch):
     assert (u.prompt_tokens, u.cached_prompt_tokens, u.completion_tokens, u.uncached_tokens) == (9500, 9000, 50, 550)
 
 
-def test_claude_code_worker_docker_mode_gets_no_bash(tmp_path):
+def test_claude_code_worker_gets_no_bash_when_the_toolchain_is_unavailable(tmp_path, monkeypatch):
     profile, ws, sandbox, agents = setup(tmp_path, SandboxMode.DOCKER)
+    monkeypatch.setattr(sandbox, "unavailable_reason", lambda rt: "Docker is not usable")
     cli, log = fake_cli(tmp_path, REPLY)
     ClaudeCodeWorker(agents, load_config("tasks"), ws, sandbox, cli_path=cli).run(job())
     rec = json.loads(log.read_text())

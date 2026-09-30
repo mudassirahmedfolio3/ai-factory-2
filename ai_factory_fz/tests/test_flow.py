@@ -63,7 +63,7 @@ def test_happy_path_runs_all_built_phases(tmp_path, canned):
     assert s.status == "completed", s.stop_reason
     assert runner.keys() == [
         "customer_brief", "spec_questions", "customer_answers", "spec_questions",
-        "customer_answers", "write_prd", "plan_backlog", "design_architecture", "design_ui",
+        "customer_answers", "write_prd", "design_architecture", "design_ui", "plan_backlog",
     ]
     assert [(g.gate, g.approved) for g in s.gate_history] == [("prd", True), ("architecture", True)]
     root = tmp_path / "r1"
@@ -85,14 +85,25 @@ def test_rejected_prd_is_rewritten_with_feedback(tmp_path, canned):
     assert prd_calls[1]["revision_notes"] == "Add guest checkout"
 
 
-def test_rejected_architecture_is_rewritten_and_backlog_is_kept(tmp_path, canned):
+def test_rejected_solution_rewrites_architecture_design_and_plan_with_feedback(tmp_path, canned):
     runner = FakeRunner(canned)
     flow = make_flow(tmp_path, runner, ["y", "", "n", "Use Redis for carts", "y", ""])
     flow.kickoff(inputs={"run_id": "r3", "brief": "shop"})
 
     assert flow.state.status == "completed", flow.state.stop_reason
-    assert runner.keys().count("design_architecture") == 2
-    assert runner.keys().count("plan_backlog") == 1
+    for key in ("design_architecture", "design_ui", "plan_backlog"):
+        assert runner.keys().count(key) == 2, key
+        assert [i for k, i in runner.calls if k == key][1]["revision_notes"] == "Use Redis for carts", key
+
+
+def test_pm_plans_from_the_architecture_and_screens(tmp_path, canned):
+    runner = FakeRunner(canned)
+    flow = make_flow(tmp_path, runner, ["y", "", "y", ""])
+    flow.kickoff(inputs={"run_id": "r9", "brief": "shop"})
+    inputs = next(i for k, i in runner.calls if k == "plan_backlog")
+    assert "listProducts: GET /api/v1/products" in inputs["solution"]
+    assert "Data models: Product" in inputs["solution"]
+    assert "SCR-01 Products (/products)" in inputs["screens"]
 
 
 def test_too_many_rejections_stop_the_run(tmp_path, canned):
@@ -230,3 +241,18 @@ def test_scope_rules_reach_the_planning_prompts(tmp_path, canned):
     for key in ("write_prd", "plan_backlog", "design_architecture", "design_ui"):
         inputs = next(i for k, i in runner.calls if k == key)
         assert "Demo only." in inputs["scope_rules"] and "at most 5 work items" in inputs["scope_rules"], key
+
+
+def test_preflight_problems_stop_the_run_before_any_agent(tmp_path, canned):
+    runner = FakeRunner(canned)
+
+    def deps_factory(state):
+        return Deps(workspace=Workspace.create(state.run_id, runs_dir=tmp_path), profile=Profile.load("flutter_nestjs_ecommerce"),
+                    runner=runner, pipeline=PIPELINE, input_fn=lambda _p: "y",
+                    preflight=lambda: ["Docker is not usable: run `uv run setup` once"])
+
+    flow = SDLCFlow(deps_factory=deps_factory)
+    flow.kickoff(inputs={"run_id": "rp", "brief": "shop"})
+    assert flow.state.status == "stopped"
+    assert "uv run setup" in flow.state.stop_reason and "uv run resume rp" in flow.state.stop_reason
+    assert runner.calls == []

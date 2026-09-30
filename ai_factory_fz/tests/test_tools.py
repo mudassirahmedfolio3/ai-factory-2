@@ -161,3 +161,20 @@ def test_timed_out_container_is_killed(runner, monkeypatch):
     assert result.exit_code == 124 and "5s" in result.output
     name = calls[0][calls[0].index("--name") + 1]
     assert calls[1] == ["docker", "kill", name]
+
+
+def test_docker_access_modes(monkeypatch):
+    from agentic_sdlc.tools import docker_access
+    monkeypatch.setattr(docker_access, "access_mode", lambda: "sg")
+    assert docker_access.argv(["docker", "run", "--rm", "img", "npm", "test"]) == ["sg", "docker", "-c", "docker run --rm img npm test"]
+    assert docker_access.argv(["npm", "test"]) == ["npm", "test"]
+    monkeypatch.setattr(docker_access, "access_mode", lambda: "direct")
+    assert docker_access.argv(["docker", "info"]) == ["docker", "info"]
+
+
+def test_docker_problem_explains_the_fix(monkeypatch):
+    from agentic_sdlc.tools import docker_access
+    monkeypatch.setattr(docker_access, "access_mode", lambda: "none")
+    monkeypatch.setattr(docker_access.shutil, "which", lambda b: "/usr/bin/docker")
+    monkeypatch.setattr(docker_access, "in_docker_group", lambda user=None: False)
+    assert "uv run setup" in docker_access.problem()

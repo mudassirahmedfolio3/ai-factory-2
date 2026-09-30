@@ -272,3 +272,12 @@ def test_usage_limit_stops_the_run_with_the_real_reason(tmp_path, prd, profile):
     b.run()
     assert s.status == "stopped" and "resets 8:10pm" in s.stop_reason and "uv run resume" in s.stop_reason
     assert [j.inputs["item_id"] for j in worker.jobs] == ["WI-001"]  # nothing else attempted
+
+
+def test_developer_prompt_includes_what_the_item_builds(tmp_path, prd, profile):
+    it = item("WI-001")
+    it.api_operations, it.data_models = ["listProducts"], ["Product"]
+    b, s, _, worker = make_builder(tmp_path, prd, profile, [it], [Milestone(id="M1", name="m", goal="g", work_item_ids=["WI-001"])])
+    b.run()
+    desc = next(j for j in worker.jobs if j.task_key == "implement_work_item").inputs["item_description"]
+    assert "Planned scope: API operations: listProducts; data models: Product" in desc

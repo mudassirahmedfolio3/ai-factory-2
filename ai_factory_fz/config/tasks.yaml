@@ -78,35 +78,52 @@ write_prd:
 plan_backlog:
   agent: project_manager
   description: |
-    Plan delivery for this approved PRD:
+    Create the work breakdown structure and estimates for the solution the Architect and the
+    UI/UX designer designed. Plan the SOLUTION, not just the requirements.
+
+    Approved PRD:
     {prd}
+
+    The solution to build (from the architecture):
+    {solution}
+
+    App screens (from the design):
+    {screens}
 
     Target stack: {stack}
 
     Scope for this run:
     {scope_rules}
 
+    Reviewer feedback on the previous version (address all of it, empty if first draft):
+    {revision_notes}
+
     Rules:
-    - Epic ids E-01, E-02...; work item ids WI-001, WI-002...; milestone ids M1, M2...
-    - Each work item belongs to exactly one component: backend, frontend, infra or shared.
-    - A work item is small (1 to 5 points) and names the user stories it serves.
-    - depends_on only lists work item ids. No cycles.
-    - Order milestones so each ends in a testable slice (e.g. auth end to end,
-      then catalog, then cart, then checkout, then orders). Backend items come
-      before the frontend items that call them.
+    - Hierarchy: epics (E-01...) -> features (a short name per work item, e.g. "Cart API") -> work
+      items (WI-001...). Milestones M1, M2... in delivery order, each ending in a testable slice.
+    - Link every work item to what it builds: backend module names, the exact operationIds it
+      implements (backend) or calls (app), Prisma model names, screen ids (SCR-..).
+    - Coverage: every API operation must be implemented by the backend item(s) that own it; every
+      data model and every screen must be covered by some item. Only use names that exist above.
+    - Dependencies follow the design: an app item that calls an operation depends on the backend
+      item that implements it; the project setup comes first. No cycles.
+    - Infrastructure (Dockerfile, compose, CI) is an infra work item built with the rest; the
+      release phase only verifies it.
+    - Estimate each item in points (1-8; split anything larger) with complexity, risk and confidence
+      (low/medium/high) and a one-line rationale naming what drives the size (e.g. "atomic upsert +
+      99-cap rule + 4 endpoints"). Be honest about risk: new infrastructure, payments, auth and
+      concurrency are higher risk.
     - Every must-have story is covered by at least one work item.
-  expected_output: Epics, work items and ordered milestones.
+  expected_output: A work breakdown structure with linked, estimated work items and ordered milestones.
 
 design_architecture:
   agent: architect
   description: |
-    Design the system for this approved PRD and delivery plan.
+    Design the system for this approved PRD. (The Project manager plans the work from your design
+    afterwards, so make modules, operations and data models explicit.)
 
     PRD:
     {prd}
-
-    Backlog:
-    {backlog}
 
     Target stack: {stack}
     Core domain entities to consider: {domain_entities}
@@ -139,6 +156,9 @@ design_ui:
 
     App features and screens from the architecture:
     {app_features}
+
+    Reviewer feedback on the previous design (address all of it, empty if first draft):
+    {revision_notes}
 
     Scope for this run:
     {scope_rules}
@@ -259,7 +279,8 @@ deploy_staging:
 
     Documents (read-only) are in {docs_dir}; the API code is in '{api_dir}'.
 
-    Create or update:
+    The build phase may already have created some of these as an infra work item: check what
+    exists first, keep what works, and only fix or add what is missing or wrong. Make sure of:
     1. {api_dir}/Dockerfile: a small multi-stage production image for the API. It must run database
        migrations on start (before the server) and listen on the PORT environment variable.
        Use the same runtime major version as the build toolchain ({toolchain_image}), e.g. its
