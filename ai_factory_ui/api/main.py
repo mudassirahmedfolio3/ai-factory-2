@@ -17,12 +17,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
-from config import AI_FACTORY_ROOT
+from config import AI_FACTORY_FZ_ROOT, AI_FACTORY_ROOT, FACTORY_ENGINE
 from dotenv import load_dotenv
 from run_manager import is_running, start_run
 from sse_starlette.sse import EventSourceResponse
 
 load_dotenv(AI_FACTORY_ROOT / ".env", override=True)
+if FACTORY_ENGINE == "fz":
+    load_dotenv(AI_FACTORY_FZ_ROOT / ".env", override=False)
 
 app = FastAPI(title="AI Factory Console API", version="0.1.0")
 
@@ -70,6 +72,19 @@ def random_brief() -> dict[str, str]:
 
 @app.get("/complexity-options")
 def complexity_options() -> list[dict[str, object]]:
+    if FACTORY_ENGINE == "fz":
+        from fz_bridge import COMPLEXITY_MINUTES
+
+        return [
+            {
+                "id": key,
+                "label": key.replace("_", " ").title(),
+                "estimated_minutes": minutes,
+                "max_releases": 1,
+            }
+            for key, minutes in COMPLEXITY_MINUTES.items()
+        ]
+
     import sys
 
     sys.path.insert(0, str(AI_FACTORY_ROOT / "src"))
@@ -82,13 +97,21 @@ def complexity_options() -> list[dict[str, object]]:
 def health() -> dict[str, str | bool]:
     import os
 
-    provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
-    return {
+    payload: dict[str, str | bool] = {
         "status": "ok",
-        "llm_provider": provider,
-        "cursor_key_loaded": bool(os.getenv("CURSOR_API_KEY", "").strip()),
-        "groq_key_loaded": bool(os.getenv("GROQ_API_KEY", "").strip()),
+        "factory_engine": FACTORY_ENGINE,
     }
+    if FACTORY_ENGINE == "fz":
+        claude_code = os.getenv("CLAUDE_CODE_ENABLE", "false").strip().lower() == "true"
+        payload["claude_code_enabled"] = claude_code
+        payload["anthropic_key_loaded"] = bool(os.getenv("ANTHROPIC_API_KEY", "").strip())
+        payload["claude_oauth_loaded"] = bool(os.getenv("CLAUDE_CODE_OAUTH_TOKEN", "").strip())
+    else:
+        provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
+        payload["llm_provider"] = provider
+        payload["cursor_key_loaded"] = bool(os.getenv("CURSOR_API_KEY", "").strip())
+        payload["groq_key_loaded"] = bool(os.getenv("GROQ_API_KEY", "").strip())
+    return payload
 
 
 @app.get("/runs")
@@ -145,8 +168,14 @@ PREVIEWS_ROOT = AI_FACTORY_ROOT / "apps"
 
 @app.get("/runs/{run_id}/preview/{path:path}")
 def run_preview(run_id: str, path: str):
-    """Serve built browser preview HTML from ai_factory/apps/{run_id}/."""
+    """Serve browser preview HTML (legacy ai_factory) or fz design docs when available."""
     preview_dir = (PREVIEWS_ROOT / run_id).resolve()
+    if not preview_dir.is_dir() and FACTORY_ENGINE == "fz":
+        from config import FZ_RUNS_DIR
+
+        fz_docs = (FZ_RUNS_DIR / run_id / "docs").resolve()
+        if fz_docs.is_dir():
+            preview_dir = fz_docs
     if not preview_dir.is_dir():
         raise HTTPException(status_code=404, detail=f"Preview for run {run_id} not found")
     file_path = (preview_dir / path).resolve()

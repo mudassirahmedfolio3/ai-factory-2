@@ -1,0 +1,40 @@
+# UI-driven runs from ai_factory_ui (React console). Auto-approves gates; no release/docker emulator.
+# Use: FACTORY_ENGINE=fz via the FastAPI run manager.
+
+phases:
+  discovery: true
+  planning: true
+  design: true
+  build: true
+  release: false
+
+scope:
+  guidance: >
+    Keep scope realistic for a first UI demo: product browse, detail, cart. Skip payments/checkout
+    unless the client brief explicitly requires them.
+  max_user_stories: 6
+  max_work_items: 10
+  max_milestones: 2
+  max_api_operations: 10
+  max_screens: 5
+
+build:
+  milestones: []
+  sandbox: docker
+  check_fix_attempts: 2
+  agent_timeout_s: 3600
+
+gates:
+  prd: true
+  architecture: true
+  release: false
+
+gate_mode: auto
+
+limits:
+  clarification_rounds: 2
+  gate_rejections: 3
+  qa_fix_rounds: 2
+
+budget:
+  max_total_tokens: 2000000

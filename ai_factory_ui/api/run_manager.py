@@ -11,7 +11,7 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from config import AI_FACTORY_ROOT, RUN_STATE_PATH
+from config import AI_FACTORY_ROOT, FACTORY_ENGINE, RUN_STATE_PATH
 
 
 def _ensure_factory_env() -> None:
@@ -59,13 +59,25 @@ def _recover_orphaned_complete_run() -> bool:
         return False
     if _active_thread and _active_thread.is_alive():
         return False
-    checks = state.get("checks") or {}
-    approvals = state.get("approvals") or {}
-    if not (
-        checks.get("post_deploy_passed")
-        and approvals.get("release") == "approved"
-    ):
-        return False
+    if state.get("factory_engine") == "fz":
+        from config import FZ_RUNS_DIR
+
+        run_id = state.get("run_id", "")
+        fz_state_path = FZ_RUNS_DIR / run_id / "state.json"
+        if fz_state_path.is_file():
+            fz = json.loads(fz_state_path.read_text(encoding="utf-8"))
+            if fz.get("status") != "completed":
+                return False
+        else:
+            return False
+    else:
+        checks = state.get("checks") or {}
+        approvals = state.get("approvals") or {}
+        if not (
+            checks.get("post_deploy_passed")
+            and approvals.get("release") == "approved"
+        ):
+            return False
     state["status"] = "completed"
     state["phase"] = "complete"
     for step in state.get("pipeline_steps", []):
@@ -162,6 +174,18 @@ def start_run(
         if is_running():
             run_id = (_read_run_state() or {}).get("run_id", "")
             raise RuntimeError(f"RUN_IN_PROGRESS:{run_id}")
+
+        if FACTORY_ENGINE == "fz":
+            from fz_run_manager import start_fz_run
+
+            return start_fz_run(
+                project_name=project_name,
+                client_brief=client_brief,
+                complexity=complexity,
+                max_releases=max_releases,
+                autonomy_level=autonomy_level,
+                deploy_environment=deploy_environment,
+            )
 
         _ensure_factory_env()
 

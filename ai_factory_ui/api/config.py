@@ -5,6 +5,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 AI_FACTORY_ROOT = Path(os.getenv("AI_FACTORY_ROOT", ROOT / "ai_factory")).resolve()
+AI_FACTORY_FZ_ROOT = Path(os.getenv("AI_FACTORY_FZ_ROOT", ROOT / "ai_factory_fz")).resolve()
+# integrated_ai_factory branch defaults to agentic_sdlc; set FACTORY_ENGINE=legacy for ai_factory.
+FACTORY_ENGINE = os.getenv("FACTORY_ENGINE", "fz").strip().lower()
+FZ_RUNS_DIR = Path(os.getenv("SDLC_RUNS_DIR", AI_FACTORY_FZ_ROOT / "runs")).resolve()
 ARTIFACTS_DIR = AI_FACTORY_ROOT / "artifacts"
 AUDIT_DIR = ARTIFACTS_DIR / "audit"
 RUNS_DIR = ARTIFACTS_DIR / "runs"

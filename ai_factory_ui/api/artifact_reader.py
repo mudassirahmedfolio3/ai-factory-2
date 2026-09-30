@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from config import ARTIFACTS_DIR, AUDIT_DIR, RUNS_DIR, RUN_STATE_PATH
+from config import ARTIFACTS_DIR, AUDIT_DIR, FZ_RUNS_DIR, RUNS_DIR, RUN_STATE_PATH
 
 STALE_RUN_MINUTES = 30
 
@@ -80,25 +80,38 @@ def get_run(run_id: str) -> dict[str, Any] | None:
 
 
 def _list_archived_artifacts(run_id: str) -> list[dict[str, str]]:
-    base = RUNS_DIR / run_id / "artifacts"
-    if not base.exists():
-        return []
     items: list[dict[str, str]] = []
-    for path in sorted(base.rglob("*")):
-        if path.is_file():
-            rel = path.relative_to(base).as_posix()
-            items.append({"path": rel, "category": rel.split("/")[0]})
+    for root_name in ("fz_workspace", "artifacts"):
+        base = RUNS_DIR / run_id / root_name
+        if not base.exists():
+            continue
+        for path in sorted(base.rglob("*")):
+            if path.is_file():
+                rel = path.relative_to(base).as_posix()
+                items.append({"path": rel, "category": rel.split("/")[0]})
     return items
 
 
 def read_artifact(path: str, run_id: str | None = None) -> str | None:
     if run_id:
-        archived = RUNS_DIR / run_id / "artifacts" / path
-        if archived.exists():
-            return archived.read_text(encoding="utf-8")
+        for root_name in ("fz_workspace", "artifacts"):
+            archived = RUNS_DIR / run_id / root_name / path
+            if archived.is_file():
+                return archived.read_text(encoding="utf-8")
+
+    resolved_run_id = run_id
+    if not resolved_run_id:
+        current = get_current_run_state()
+        if current:
+            resolved_run_id = current.get("run_id")
+
+    if resolved_run_id:
+        fz_live = FZ_RUNS_DIR / resolved_run_id / path
+        if fz_live.is_file():
+            return fz_live.read_text(encoding="utf-8")
 
     live = ARTIFACTS_DIR / path
-    if live.exists():
+    if live.is_file():
         return live.read_text(encoding="utf-8")
     return None
 

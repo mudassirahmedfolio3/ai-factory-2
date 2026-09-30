@@ -91,8 +91,11 @@ export function overallProgressFromState(runState) {
 /** True when the built app preview can be loaded in the phone iframe. */
 export function previewReadyFromState(runState) {
   if (!runState) return false;
-  if (runState.status === 'completed') return true;
   const checks = runState.checks || {};
+  if (runState.factory_engine === 'fz') {
+    return Boolean(checks.flutter_artifacts_ready) || runState.status === 'completed';
+  }
+  if (runState.status === 'completed') return true;
   if (checks.post_deploy_passed) return true;
   const statusMap = stepStatusMap(runState?.pipeline_steps);
   return (statusMap.get('browser') || 'pending') === 'completed';
@@ -108,7 +111,10 @@ export function deliveryStageCopy(runState, displayName) {
   return {
     card1Title: 'Release Artifacts',
     card1Name: `${displayName} · Release v${release}.0.0`,
-    card1Sub: 'Flutter project · HTML preview · Docs',
+    card1Sub:
+      runState?.factory_engine === 'fz'
+        ? 'Flutter app · NestJS API · SDLC docs'
+        : 'Flutter project · HTML preview · Docs',
     card1Foot: complete
       ? 'Flutter MVP, preview, and handover ready'
       : previewReady

@@ -505,7 +505,9 @@ function Dashboard({ project, onReset }) {
   const viewing = view !== null && view !== run.active;
   const progress = viewing ? (stageIndex < run.active ? 100 : 0) : run.progress;
   const done = run.complete && stageIndex === 8;
-  const preview = run.browserReady && project.runId ? buildPreviewUrl(project.runId) : null;
+  const isFzEngine = runState?.factory_engine === 'fz';
+  const preview =
+    !isFzEngine && run.browserReady && project.runId ? buildPreviewUrl(project.runId) : null;
   const showPreview = Boolean(preview && (run.browserReady || run.complete));
   const displayName = runState?.project_name || project.projectName || 'Project';
   const flutterDir =
@@ -759,7 +761,7 @@ function Dashboard({ project, onReset }) {
           </div>
           <div className="device-area">
             <MobileFrame previewUrl={showPreview ? preview : null}>
-              {showPreview ? null : done ? (
+              {showPreview ? null : done || (isFzEngine && flutterReady) ? (
                 <ReadyApp />
               ) : (
                 <StageSkeleton stage={stageIndex} progress={progress} />
@@ -784,11 +786,16 @@ function Dashboard({ project, onReset }) {
            
             {done && (
               <div className="stage-actions">
-                <button className="primary" onClick={() => setModal('app')}>
-                  View HTML preview
-                </button>
+                {!isFzEngine && (
+                  <button className="primary" onClick={() => setModal('app')}>
+                    View HTML preview
+                  </button>
+                )}
                 {flutterReady && (
-                  <button className="secondary" onClick={() => setModal('flutter')}>
+                  <button
+                    className={isFzEngine ? 'primary' : 'secondary'}
+                    onClick={() => setModal('flutter')}
+                  >
                     View Flutter source
                   </button>
                 )}
@@ -930,7 +937,7 @@ function Dashboard({ project, onReset }) {
               Project folder: <code>{flutterDir}</code>
             </p>
           )}
-          <pre className="brief-text">{`cd ai_factory/${flutterDir || `apps/${project.runId}/flutter`}
+          <pre className="brief-text">{`cd ${isFzEngine ? flutterDir || `ai_factory_fz/runs/${project.runId}/app` : `ai_factory/${flutterDir || `apps/${project.runId}/flutter`}`}
 flutter pub get
 flutter run`}</pre>
           {flutterLoading ? (
