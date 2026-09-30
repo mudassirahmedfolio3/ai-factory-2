@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import subprocess
 import sys
 import threading
 from datetime import datetime, timezone
@@ -45,11 +46,20 @@ def _ensure_factory_env() -> None:
 
 _lock = threading.Lock()
 _active_thread: threading.Thread | None = None
+_active_process: subprocess.Popen | None = None
+
+
+def _worker_alive() -> bool:
+    if FACTORY_ENGINE == "fz":
+        from fz_run_manager import worker_process_alive
+
+        return worker_process_alive()
+    return bool(_active_thread and _active_thread.is_alive())
 
 
 def is_running() -> bool:
     state = _read_run_state()
-    return bool(state and state.get("status") == "running" and _active_thread and _active_thread.is_alive())
+    return bool(state and state.get("status") == "running" and _worker_alive())
 
 
 def _recover_orphaned_complete_run() -> bool:
@@ -57,7 +67,7 @@ def _recover_orphaned_complete_run() -> bool:
     state = _read_run_state()
     if not state or state.get("status") != "running":
         return False
-    if _active_thread and _active_thread.is_alive():
+    if _worker_alive():
         return False
     if state.get("factory_engine") == "fz":
         from config import FZ_RUNS_DIR
@@ -94,7 +104,7 @@ def _reconcile_stale_run() -> None:
     state = _read_run_state()
     if not state or state.get("status") != "running":
         return
-    if _active_thread and _active_thread.is_alive():
+    if _worker_alive():
         return
     if _recover_orphaned_complete_run():
         return
@@ -176,9 +186,9 @@ def start_run(
             raise RuntimeError(f"RUN_IN_PROGRESS:{run_id}")
 
         if FACTORY_ENGINE == "fz":
-            from fz_run_manager import start_fz_run
+            from fz_run_manager import start_fz_run_unlocked
 
-            return start_fz_run(
+            return start_fz_run_unlocked(
                 project_name=project_name,
                 client_brief=client_brief,
                 complexity=complexity,

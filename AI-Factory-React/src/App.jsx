@@ -10,16 +10,21 @@ import {
   getCurrentRun,
   listComplexityOptions,
   previewUrl as buildPreviewUrl,
+  getEmulatorStatus,
+  startEmulatorRun,
+  stopEmulatorRun,
   startRun,
 } from './api.js';
 import {
   buildClientBrief,
   deliveryStageCopy,
+  flutterRunReadyFromState,
   runStateToDashboard,
   slugProjectName,
 } from './phaseMap.js';
 import { buildProjectJourney } from './journeyMap.js';
 import { connectRun } from './runSync.js';
+import History from './History.jsx';
 
 function Brand() {
   return (
@@ -59,7 +64,7 @@ function projectFromRunState(state, fallbackText = '') {
   };
 }
 
-function Intake({ onStart }) {
+function Intake({ onStart, onOpenHistory }) {
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
   const [menu, setMenu] = useState(false);
@@ -190,7 +195,12 @@ function Intake({ onStart }) {
       )}
       <header className="header intake-header">
         <Brand />
-        <span className="eyebrow">NEW PROJECT</span>
+        <div className="header-actions">
+          <button type="button" className="secondary header-btn" onClick={onOpenHistory}>
+            History
+          </button>
+          <span className="eyebrow">NEW PROJECT</span>
+        </div>
       </header>
       <main className="intake">
         <div className="welcome">
@@ -472,7 +482,7 @@ function UsageBanner({ usage, live = false }) {
   );
 }
 
-function Dashboard({ project, onReset }) {
+function Dashboard({ project, onReset, onOpenHistory }) {
   const [runState, setRunState] = useState(null);
   const [runLoading, setRunLoading] = useState(true);
   const [view, setView] = useState(null);
@@ -481,6 +491,8 @@ function Dashboard({ project, onReset }) {
   const [prdLoading, setPrdLoading] = useState(false);
   const [flutterManifest, setFlutterManifest] = useState('');
   const [flutterLoading, setFlutterLoading] = useState(false);
+  const [emulatorStatus, setEmulatorStatus] = useState(null);
+  const [emulatorBusy, setEmulatorBusy] = useState(false);
   const [auditEvents, setAuditEvents] = useState([]);
   const [journeyLoading, setJourneyLoading] = useState(false);
   const navRef = useRef();
@@ -513,7 +525,7 @@ function Dashboard({ project, onReset }) {
   const flutterDir =
     runState?.flutter_project_dir ||
     (project.runId ? `apps/${project.runId}/flutter` : null);
-  const flutterReady = Boolean(runState?.checks?.flutter_artifacts_ready || run.complete);
+  const flutterReady = flutterRunReadyFromState(runState) || (run.complete && isFzEngine);
   const deliveryCopy =
     stageIndex === 8 ? deliveryStageCopy(runState, displayName) : null;
   const journey = buildProjectJourney(auditEvents, runState);
@@ -576,6 +588,61 @@ function Dashboard({ project, onReset }) {
       .catch(() => setFlutterManifest(''))
       .finally(() => setFlutterLoading(false));
   }, [modal, project.runId]);
+
+  useEffect(() => {
+    if (!isFzEngine || !flutterReady || !project.runId) return;
+    let cancelled = false;
+    const refresh = () => {
+      getEmulatorStatus(project.runId)
+        .then((status) => {
+          if (!cancelled) setEmulatorStatus(status);
+        })
+        .catch(() => {
+          if (!cancelled) setEmulatorStatus(null);
+        });
+    };
+    refresh();
+    const timer = window.setInterval(refresh, 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [isFzEngine, flutterReady, project.runId]);
+
+  const handleStartEmulator = async () => {
+    if (!project.runId || emulatorBusy) return;
+    setEmulatorBusy(true);
+    try {
+      const status = await startEmulatorRun(project.runId);
+      setEmulatorStatus(status);
+    } catch (err) {
+      setEmulatorStatus({
+        status: 'failed',
+        error: err instanceof Error ? err.message : 'Failed to start emulator',
+      });
+    } finally {
+      setEmulatorBusy(false);
+    }
+  };
+
+  const handleStopEmulator = async () => {
+    if (!project.runId || emulatorBusy) return;
+    setEmulatorBusy(true);
+    try {
+      const status = await stopEmulatorRun(project.runId);
+      setEmulatorStatus(status);
+    } catch (err) {
+      setEmulatorStatus({
+        status: 'failed',
+        error: err instanceof Error ? err.message : 'Failed to stop emulator session',
+      });
+    } finally {
+      setEmulatorBusy(false);
+    }
+  };
+
+  const emulatorActive =
+    emulatorStatus?.status === 'starting' || emulatorStatus?.status === 'running';
 
   useEffect(() => {
     if (modal !== 'brief' || !project.runId) return;
@@ -686,12 +753,17 @@ function Dashboard({ project, onReset }) {
             </button>
           ))}
         </nav>
-        <div className="project-progress">
-          <div>
-            <span>Project progress</span>
-            <b>{run.overall}%</b>
+        <div className="header-actions dashboard-header-actions">
+          <button type="button" className="secondary header-btn" onClick={onOpenHistory}>
+            History
+          </button>
+          <div className="project-progress">
+            <div>
+              <span>Project progress</span>
+              <b>{run.overall}%</b>
+            </div>
+            <Progress value={run.overall} label="Overall project progress" />
           </div>
-          <Progress value={run.overall} label="Overall project progress" />
         </div>
       </header>
       <main className="dashboard">
@@ -791,9 +863,18 @@ function Dashboard({ project, onReset }) {
                     View HTML preview
                   </button>
                 )}
+                {flutterReady && isFzEngine && (
+                  <button
+                    className="primary"
+                    onClick={handleStartEmulator}
+                    disabled={emulatorBusy || emulatorActive}
+                  >
+                    {emulatorActive ? 'Launching on emulator…' : 'Run on emulator'}
+                  </button>
+                )}
                 {flutterReady && (
                   <button
-                    className={isFzEngine ? 'primary' : 'secondary'}
+                    className={isFzEngine ? 'secondary' : 'primary'}
                     onClick={() => setModal('flutter')}
                   >
                     View Flutter source
@@ -806,9 +887,32 @@ function Dashboard({ project, onReset }) {
             )}
             {!done && flutterReady && (
               <div className="stage-actions">
+                {isFzEngine && (
+                  <>
+                    <button
+                      className="primary"
+                      onClick={handleStartEmulator}
+                      disabled={emulatorBusy || emulatorActive}
+                    >
+                      {emulatorActive ? 'Launching on emulator…' : 'Run on emulator'}
+                    </button>
+                    {emulatorActive && (
+                      <button className="secondary" onClick={handleStopEmulator} disabled={emulatorBusy}>
+                        Stop emulator
+                      </button>
+                    )}
+                  </>
+                )}
                 <button className="secondary" onClick={() => setModal('flutter')}>
                   View Flutter source
                 </button>
+                {isFzEngine && emulatorStatus?.status && emulatorStatus.status !== 'idle' && (
+                  <small>
+                    Emulator: {emulatorStatus.status}
+                    {emulatorStatus.device_id ? ` · ${emulatorStatus.device_id}` : ''}
+                    {emulatorStatus.error ? ` · ${emulatorStatus.error}` : ''}
+                  </small>
+                )}
               </div>
             )}
           </div>
@@ -930,8 +1034,38 @@ function Dashboard({ project, onReset }) {
         <Modal title={`${displayName} · Flutter source`} onClose={() => setModal(null)}>
           <p className="brief-text">
             There is no live Flutter preview in the browser. The factory writes a Flutter
-            project to disk — run it locally with the Flutter SDK.
+            project to disk — run it locally with the Flutter SDK or launch an emulator from here.
           </p>
+          {isFzEngine && flutterReady && (
+            <div className="stage-actions">
+              <button
+                className="primary"
+                onClick={handleStartEmulator}
+                disabled={emulatorBusy || emulatorActive}
+              >
+                {emulatorActive ? 'Launching on emulator…' : 'Run on emulator'}
+              </button>
+              {emulatorActive && (
+                <button className="secondary" onClick={handleStopEmulator} disabled={emulatorBusy}>
+                  Stop
+                </button>
+              )}
+            </div>
+          )}
+          {emulatorStatus?.status && emulatorStatus.status !== 'idle' && (
+            <p className="brief-text">
+              Emulator: <strong>{emulatorStatus.status}</strong>
+              {emulatorStatus.device_id ? ` · ${emulatorStatus.device_id}` : ''}
+              {emulatorStatus.note ? ` · ${emulatorStatus.note}` : ''}
+              {emulatorStatus.error ? ` · ${emulatorStatus.error}` : ''}
+            </p>
+          )}
+          {emulatorStatus?.log_tail && (
+            <>
+              <h3>Launch log</h3>
+              <pre className="artifact-content">{emulatorStatus.log_tail}</pre>
+            </>
+          )}
           {flutterDir && (
             <p className="brief-text">
               Project folder: <code>{flutterDir}</code>
@@ -1024,10 +1158,41 @@ flutter run`}</pre>
 }
 
 export default function App() {
+  const [view, setView] = useState('intake');
   const [project, setProject] = useState(null);
-  return project ? (
-    <Dashboard project={project} onReset={() => setProject(null)} />
-  ) : (
-    <Intake onStart={setProject} />
-  );
+
+  function openHistory() {
+    setView('history');
+  }
+
+  function openIntake() {
+    setProject(null);
+    setView('intake');
+  }
+
+  function startProject(next) {
+    setProject(next);
+    setView('dashboard');
+  }
+
+  function openRun(run) {
+    setProject(projectFromRunState(run));
+    setView('dashboard');
+  }
+
+  if (view === 'history') {
+    return <History onOpenRun={openRun} onNewProject={openIntake} />;
+  }
+
+  if (view === 'dashboard' && project) {
+    return (
+      <Dashboard
+        project={project}
+        onReset={openIntake}
+        onOpenHistory={openHistory}
+      />
+    );
+  }
+
+  return <Intake onStart={startProject} onOpenHistory={openHistory} />;
 }

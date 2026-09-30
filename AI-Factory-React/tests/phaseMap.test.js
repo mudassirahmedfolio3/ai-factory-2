@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   activeUiStage,
+  buildCompleteFromState,
   deliveryStageCopy,
+  flutterRunReadyFromState,
   overallProgressFromState,
   previewReadyFromState,
   runStateToDashboard,
@@ -82,6 +84,38 @@ test('previewReadyFromState is true when post_deploy_passed', () => {
       pipeline_steps: [{ id: 'browser', status: 'active' }],
     }),
     true,
+  );
+});
+
+test('buildCompleteFromState is true when build step completed', () => {
+  const steps = discoveryActive.pipeline_steps.map((step) =>
+    step.id === 'build' ? { ...step, status: 'completed' } : step,
+  );
+  assert.equal(buildCompleteFromState({ status: 'running', pipeline_steps: steps }), true);
+  assert.equal(buildCompleteFromState(discoveryActive), false);
+});
+
+test('flutterRunReadyFromState waits for build completion on fz runs', () => {
+  const buildDone = discoveryActive.pipeline_steps.map((step) =>
+    step.id === 'build' ? { ...step, status: 'completed' } : step,
+  );
+  assert.equal(
+    flutterRunReadyFromState({
+      factory_engine: 'fz',
+      status: 'running',
+      pipeline_steps: buildDone,
+      checks: { flutter_artifacts_ready: true },
+    }),
+    true,
+  );
+  assert.equal(
+    flutterRunReadyFromState({
+      factory_engine: 'fz',
+      status: 'running',
+      pipeline_steps: discoveryActive.pipeline_steps,
+      checks: { flutter_artifacts_ready: true },
+    }),
+    false,
   );
 });
 

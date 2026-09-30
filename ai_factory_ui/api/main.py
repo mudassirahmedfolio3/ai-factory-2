@@ -22,9 +22,11 @@ from dotenv import load_dotenv
 from run_manager import is_running, start_run
 from sse_starlette.sse import EventSourceResponse
 
-load_dotenv(AI_FACTORY_ROOT / ".env", override=True)
 if FACTORY_ENGINE == "fz":
-    load_dotenv(AI_FACTORY_FZ_ROOT / ".env", override=False)
+    load_dotenv(AI_FACTORY_FZ_ROOT / ".env", override=True)
+    load_dotenv(AI_FACTORY_ROOT / ".env", override=False)
+else:
+    load_dotenv(AI_FACTORY_ROOT / ".env", override=True)
 
 app = FastAPI(title="AI Factory Console API", version="0.1.0")
 
@@ -52,6 +54,10 @@ class StartRunRequest(BaseModel):
     max_releases: int | None = Field(default=None, ge=1, le=10)
     autonomy_level: str = "L2"
     deploy_environment: str = "staging"
+
+
+class EmulatorStartRequest(BaseModel):
+    device_id: str | None = None
 
 
 @app.get("/briefs/random")
@@ -94,18 +100,21 @@ def complexity_options() -> list[dict[str, object]]:
 
 
 @app.get("/health")
-def health() -> dict[str, str | bool]:
+def health() -> dict[str, Any]:
     import os
 
-    payload: dict[str, str | bool] = {
+    payload: dict[str, Any] = {
         "status": "ok",
         "factory_engine": FACTORY_ENGINE,
     }
     if FACTORY_ENGINE == "fz":
+        from fz_docker import docker_status
+
         claude_code = os.getenv("CLAUDE_CODE_ENABLE", "false").strip().lower() == "true"
         payload["claude_code_enabled"] = claude_code
         payload["anthropic_key_loaded"] = bool(os.getenv("ANTHROPIC_API_KEY", "").strip())
         payload["claude_oauth_loaded"] = bool(os.getenv("CLAUDE_CODE_OAUTH_TOKEN", "").strip())
+        payload["docker"] = docker_status()
     else:
         provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
         payload["llm_provider"] = provider
@@ -209,6 +218,41 @@ def live_artifact(path: str) -> dict[str, str]:
     if content is None:
         raise HTTPException(status_code=404, detail=f"Artifact {path} not found")
     return {"path": path, "content": content}
+
+
+@app.get("/runs/{run_id}/emulator/devices")
+def emulator_devices(run_id: str) -> dict[str, Any]:
+    _ = run_id
+    from fz_emulator import list_devices, list_emulators
+
+    return {"devices": list_devices(), "emulators": list_emulators()}
+
+
+@app.get("/runs/{run_id}/emulator/status")
+def emulator_status(run_id: str) -> dict[str, Any]:
+    from fz_emulator import get_status
+
+    return get_status(run_id)
+
+
+@app.post("/runs/{run_id}/emulator/start")
+def emulator_start(run_id: str, body: EmulatorStartRequest | None = None) -> dict[str, Any]:
+    from fz_emulator import start as start_emulator
+
+    run = get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
+    try:
+        return start_emulator(run_id, device_id=body.device_id if body else None, run_state=run)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/runs/{run_id}/emulator/stop")
+def emulator_stop(run_id: str) -> dict[str, Any]:
+    from fz_emulator import stop as stop_emulator
+
+    return stop_emulator(run_id)
 
 
 @app.get("/status")

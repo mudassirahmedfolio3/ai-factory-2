@@ -33,6 +33,7 @@ agents:
     fallbacks: [anthropic/claude-sonnet-5-5]
     effort: high
     timeout: 1800
+    max_tokens: 32000  # ArchitectureDoc includes full OpenAPI + Prisma; 16k truncates often
   ui_ux_designer: balanced
   backend_developer: reasoning
   frontend_developer: reasoning

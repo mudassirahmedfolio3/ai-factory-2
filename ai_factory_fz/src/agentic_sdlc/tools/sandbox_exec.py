@@ -12,6 +12,7 @@ Agent commands must match the profile's allow-list; scaffolding uses run_trusted
 import logging
 import os
 import shlex
+import sys
 import uuid
 import shutil
 import subprocess
@@ -186,6 +187,12 @@ class SandboxRunner:
             cmd = [*cmd[:3], "--name", name, *cmd[3:]]
         env = {**os.environ, **self.config.env, **(extra_env or {})} if self.mode is SandboxMode.LOCAL else None
         limit = timeout_s or self.timeout_s
+        # On Windows, CreateProcess cannot launch .bat/.cmd (flutter.bat, npm.cmd) without a shell.
+        if self.mode is SandboxMode.LOCAL and sys.platform == "win32" and cmd:
+            resolved = shutil.which(cmd[0])
+            if resolved:
+                cmd = [resolved, *cmd[1:]]
+            cmd = ["cmd.exe", "/c", *cmd]
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=limit, cwd=cwd, env=env)
         except subprocess.TimeoutExpired:

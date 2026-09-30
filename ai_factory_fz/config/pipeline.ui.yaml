@@ -20,7 +20,8 @@ scope:
 
 build:
   milestones: []
-  sandbox: docker
+  # local: run npm/flutter on this machine (no Docker). Override: SDLC_SANDBOX=docker
+  sandbox: local
   check_fix_attempts: 2
   agent_timeout_s: 3600
 

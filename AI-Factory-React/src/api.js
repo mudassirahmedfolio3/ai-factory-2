@@ -11,9 +11,10 @@ export class ApiError extends Error {
 }
 
 async function fetchJson(path, init = {}) {
+  const defaultTimeoutMs = init.method === 'POST' && path === '/runs' ? 60000 : 15000;
   const res = await fetch(`${BASE}${path}`, {
     ...init,
-    signal: init.signal ?? AbortSignal.timeout(8000),
+    signal: init.signal ?? AbortSignal.timeout(defaultTimeoutMs),
   });
   if (!res.ok) {
     const raw = await res.text();
@@ -80,6 +81,26 @@ export function fetchAuditEvents(runId) {
 
 export function previewUrl(runId) {
   return `${BASE}/runs/${runId}/preview/index.html`;
+}
+
+export function listEmulatorDevices(runId) {
+  return fetchJson(`/runs/${runId}/emulator/devices`);
+}
+
+export function getEmulatorStatus(runId) {
+  return fetchJson(`/runs/${runId}/emulator/status`);
+}
+
+export function startEmulatorRun(runId, deviceId) {
+  return fetchJson(`/runs/${runId}/emulator/start`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(deviceId ? { device_id: deviceId } : {}),
+  });
+}
+
+export function stopEmulatorRun(runId) {
+  return fetchJson(`/runs/${runId}/emulator/stop`, { method: 'POST' });
 }
 
 export function subscribeEvents(runId, onState, onAudit) {

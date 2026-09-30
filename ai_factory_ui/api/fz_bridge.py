@@ -149,7 +149,15 @@ def publish_fz_run_state(
 
     app_dir = FZ_RUNS_DIR / state.run_id / "app"
     server_dir = FZ_RUNS_DIR / state.run_id / "server"
-    flutter_dir = str(app_dir.resolve()) if app_dir.is_dir() else None
+    pubspec_ready = (app_dir / "pubspec.yaml").is_file()
+    flutter_dir = str(app_dir.resolve()) if pubspec_ready else None
+    build_items_done = bool(state.build.items) and all(
+        p.status == "done" for p in state.build.items.values()
+    )
+    build_step_status = next((s["status"] for s in steps if s["id"] == "build"), "pending")
+    flutter_artifacts_ready = pubspec_ready and (
+        build_items_done or build_step_status == "completed" or ui_status == "completed"
+    )
 
     prd_gate = state.gate_approved("prd")
     arch_gate = state.gate_approved("architecture")
@@ -177,7 +185,7 @@ def publish_fz_run_state(
             "qa_passed": qa_done,
             "post_deploy_passed": bool(state.release.verified),
             "deploy_approved": rel_gate,
-            "flutter_artifacts_ready": app_dir.is_dir(),
+            "flutter_artifacts_ready": flutter_artifacts_ready,
         },
         "approvals": {
             "prd": "approved" if prd_gate else None,

@@ -2,42 +2,23 @@
 
 from __future__ import annotations
 
+import json
 import os
+import subprocess
 import sys
 import threading
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 
-from config import AI_FACTORY_FZ_ROOT, RUN_STATE_PATH
-from fz_bridge import (
-    COMPLEXITY_MINUTES,
-    archive_fz_run,
-    log_fz_audit,
-    publish_fz_run_state,
-)
+from config import AI_FACTORY_FZ_ROOT, ARTIFACTS_DIR, RUN_STATE_PATH
+from fz_bridge import COMPLEXITY_MINUTES, log_fz_audit, publish_fz_run_state
 
-
-def _make_ui_flow(publish_ctx: dict[str, str]):
-    """SDLCFlow subclass that publishes run state after every checkpoint."""
-    from agentic_sdlc.flow import SDLCFlow
-
-    class ConsoleSDLCFlow(SDLCFlow):
-        def __init__(self, **data: Any):
-            super().__init__(**data)
-            self._publish_ctx = publish_ctx
-
-        def _checkpoint(self, message: str) -> None:
-            super()._checkpoint(message)
-            publish_fz_run_state(
-                self.state,
-                project_name=self._publish_ctx["project_name"],
-                complexity=self._publish_ctx["complexity"],
-                checkpoint_msg=message,
-            )
-
-    return ConsoleSDLCFlow
+WORKER_INFO_PATH = ARTIFACTS_DIR / "fz_worker.json"
+FZ_PYTHON = AI_FACTORY_FZ_ROOT / ".venv" / "Scripts" / "python.exe"
+FZ_WORKER_SCRIPT = Path(__file__).resolve().parent / "fz_worker.py"
 
 
 def _ensure_fz_env() -> None:
@@ -75,73 +56,106 @@ def _resolve_milestones(complexity: str) -> str | None:
     return None
 
 
-def _run_fz_flow(
-    *,
-    run_id: str,
-    project_name: str,
-    client_brief: str,
-    complexity: str,
-) -> None:
-    original_cwd = os.getcwd()
-    publish_ctx = {"project_name": project_name, "complexity": complexity}
+def _write_worker_info(run_id: str, pid: int, log_path: Path) -> None:
+    WORKER_INFO_PATH.parent.mkdir(parents=True, exist_ok=True)
+    WORKER_INFO_PATH.write_text(
+        json.dumps({"run_id": run_id, "pid": pid, "log_path": str(log_path)}),
+        encoding="utf-8",
+    )
+
+
+def _clear_worker_info() -> None:
+    if WORKER_INFO_PATH.exists():
+        WORKER_INFO_PATH.unlink()
+
+
+def read_worker_info() -> dict[str, Any] | None:
+    if not WORKER_INFO_PATH.exists():
+        return None
     try:
-        os.chdir(AI_FACTORY_FZ_ROOT)
-        fz_src = AI_FACTORY_FZ_ROOT / "src"
-        if str(fz_src) not in sys.path:
-            sys.path.insert(0, str(fz_src))
+        return json.loads(WORKER_INFO_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
 
-        for mod in list(sys.modules):
-            if mod == "agentic_sdlc" or mod.startswith("agentic_sdlc."):
-                del sys.modules[mod]
 
-        _ensure_fz_env()
+def _pid_alive(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    if sys.platform == "win32":
+        import ctypes
 
-        milestones = _resolve_milestones(complexity)
-        if milestones:
-            os.environ["SDLC_BUILD_MILESTONES"] = milestones
-        else:
-            os.environ.pop("SDLC_BUILD_MILESTONES", None)
+        PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+        handle = ctypes.windll.kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        if handle:
+            ctypes.windll.kernel32.CloseHandle(handle)
+            return True
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
 
-        brief = _resolve_brief(client_brief, project_name)
-        profile = "flutter_nestjs_ecommerce"
-        pipeline = "pipeline.ui"
 
-        from agentic_sdlc.state import ProjectState
+def worker_process_alive() -> bool:
+    import run_manager as rm
 
-        seed = ProjectState(
-            run_id=run_id,
-            profile=profile,
-            pipeline=pipeline,
-            brief=brief,
-            status="running",
-        )
-        publish_fz_run_state(seed, project_name=project_name, complexity=complexity, checkpoint_msg="Queued")
-        log_fz_audit(run_id, "run_started", "started", "console", {"complexity": complexity, "pipeline": pipeline})
+    if rm._active_process is not None and rm._active_process.poll() is None:
+        return True
+    info = read_worker_info()
+    if info and _pid_alive(int(info.get("pid", 0))):
+        return True
+    return False
 
-        FlowClass = _make_ui_flow(publish_ctx)
-        flow = FlowClass()
-        flow.kickoff(inputs={"run_id": run_id, "profile": profile, "brief": brief, "pipeline": pipeline})
 
-        publish_fz_run_state(flow.state, project_name=project_name, complexity=complexity, checkpoint_msg="Finished")
-        archive_fz_run(flow.state, project_name, complexity)
-        log_fz_audit(
-            run_id,
-            "run_finished",
-            flow.state.status,
-            "console",
-            {"stop_reason": flow.state.stop_reason or None},
-        )
-    except Exception as exc:
-        import run_manager as rm
+def _worker_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env["SDLC_HOME"] = str(AI_FACTORY_FZ_ROOT)
+    env.setdefault("SDLC_GATE_MODE", "auto")
+    env.setdefault("SDLC_SANDBOX", "local")
+    env.setdefault("PYTHONUTF8", "1")
+    env.setdefault("GIT_TERMINAL_PROMPT", "0")
+    env.setdefault("GCM_INTERACTIVE", "never")
+    env.setdefault("GIT_OPTIONAL_LOCKS", "0")
+    env["AI_FACTORY_FZ_ROOT"] = str(AI_FACTORY_FZ_ROOT)
+    load_dotenv(AI_FACTORY_FZ_ROOT / ".env", override=True)
+    for key in ("ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_ENABLE", "SDLC_SANDBOX"):
+        val = os.getenv(key)
+        if val is not None:
+            env[key] = val
+    repo_root = AI_FACTORY_FZ_ROOT.parent
+    flutter_bin = repo_root / ".tools" / "flutter" / "bin"
+    if flutter_bin.is_dir():
+        env["PATH"] = str(flutter_bin) + os.pathsep + env.get("PATH", "")
+    return env
 
-        rm._write_failed_state(str(exc))
-        log_fz_audit(run_id, "run_failed", "failed", "console", {"error": str(exc)})
-        raise
+
+def _monitor_fz_process(proc: subprocess.Popen, run_id: str) -> None:
+    import run_manager as rm
+
+    try:
+        proc.wait()
+        if proc.returncode != 0:
+            state = rm._read_run_state() or {}
+            if state.get("run_id") == run_id and state.get("status") == "running":
+                log_tail = ""
+                info = read_worker_info()
+                if info and info.get("log_path"):
+                    log_path = Path(info["log_path"])
+                    if log_path.is_file():
+                        log_tail = log_path.read_text(encoding="utf-8", errors="replace")[-2000:]
+                rm._write_failed_state(
+                    f"FZ worker exited with code {proc.returncode}."
+                    + (f"\n\n{log_tail}" if log_tail else "")
+                )
+                log_fz_audit(run_id, "run_failed", "failed", "console", {"exit_code": proc.returncode})
     finally:
-        os.chdir(original_cwd)
+        if rm._active_process is proc:
+            rm._active_process = None
+        _clear_worker_info()
 
 
-def start_fz_run(
+def start_fz_run_unlocked(
     project_name: str = "ecommerce-flutter-app",
     client_brief: str = "",
     complexity: str = "standard",
@@ -149,35 +163,71 @@ def start_fz_run(
     autonomy_level: str = "L2",  # noqa: ARG001
     deploy_environment: str = "staging",  # noqa: ARG001
 ) -> dict[str, Any]:
+    """Start an fz run. Caller must already hold run_manager._lock."""
     import run_manager as rm
 
-    with rm._lock:
-        rm._reconcile_stale_run()
-        if rm.is_running():
-            run_id = (rm._read_run_state() or {}).get("run_id", "")
-            raise RuntimeError(f"RUN_IN_PROGRESS:{run_id}")
-
-        _ensure_fz_env()
-
-        run_id = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-        rm._active_thread = threading.Thread(
-            target=_run_fz_flow,
-            kwargs={
-                "run_id": run_id,
-                "project_name": project_name,
-                "client_brief": client_brief,
-                "complexity": complexity,
-            },
-            name=f"ai-factory-fz-{run_id}",
-            daemon=True,
+    if not FZ_PYTHON.is_file():
+        raise RuntimeError(
+            "ai_factory_fz venv not found. Run: cd ai_factory_fz && ..\\ai_factory\\.venv\\Scripts\\uv.exe sync"
         )
-        rm._active_thread.start()
+    if not FZ_WORKER_SCRIPT.is_file():
+        raise RuntimeError(f"Missing worker script: {FZ_WORKER_SCRIPT}")
 
-        return {
-            "run_id": run_id,
-            "status": "started",
-            "project_name": project_name,
-            "complexity": complexity,
-            "estimated_minutes": COMPLEXITY_MINUTES.get(complexity, 90),
-            "factory_engine": "fz",
-        }
+    _ensure_fz_env()
+
+    run_id = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    payload = {
+        "run_id": run_id,
+        "project_name": project_name,
+        "client_brief": client_brief,
+        "complexity": complexity,
+    }
+
+    log_dir = ARTIFACTS_DIR / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / f"fz_worker_{run_id}.log"
+
+    with log_path.open("w", encoding="utf-8") as log_handle:
+        proc = subprocess.Popen(
+            [str(FZ_PYTHON), str(FZ_WORKER_SCRIPT), json.dumps(payload)],
+            cwd=str(AI_FACTORY_FZ_ROOT),
+            env=_worker_env(),
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0,
+        )
+
+    rm._active_process = proc
+    _write_worker_info(run_id, proc.pid, log_path)
+
+    # Seed UI state immediately (worker process publishes checkpoints as it runs).
+    brief = _resolve_brief(client_brief, project_name)
+    sys.path.insert(0, str(AI_FACTORY_FZ_ROOT / "src"))
+    from agentic_sdlc.state import ProjectState
+
+    seed = ProjectState(
+        run_id=run_id,
+        profile="flutter_nestjs_ecommerce",
+        pipeline="pipeline.ui",
+        brief=brief,
+        status="running",
+    )
+    publish_fz_run_state(seed, project_name=project_name, complexity=complexity, checkpoint_msg="Starting worker")
+
+    rm._active_thread = threading.Thread(
+        target=_monitor_fz_process,
+        args=(proc, run_id),
+        name=f"ai-factory-fz-monitor-{run_id}",
+        daemon=True,
+    )
+    rm._active_thread.start()
+
+    return {
+        "run_id": run_id,
+        "status": "started",
+        "project_name": project_name,
+        "complexity": complexity,
+        "estimated_minutes": COMPLEXITY_MINUTES.get(complexity, 90),
+        "factory_engine": "fz",
+        "worker_pid": proc.pid,
+    }
