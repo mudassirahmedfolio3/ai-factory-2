@@ -3,7 +3,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+from dotenv import load_dotenv
+
+API_DIR = Path(__file__).resolve().parent
+ROOT = API_DIR.parents[1]
+load_dotenv(API_DIR / ".env", override=False)
 AI_FACTORY_ROOT = Path(os.getenv("AI_FACTORY_ROOT", ROOT / "ai_factory")).resolve()
 AI_FACTORY_FZ_ROOT = Path(os.getenv("AI_FACTORY_FZ_ROOT", ROOT / "ai_factory_fz")).resolve()
 # integrated_ai_factory branch defaults to agentic_sdlc; set FACTORY_ENGINE=legacy for ai_factory.

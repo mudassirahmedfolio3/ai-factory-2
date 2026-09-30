@@ -33,6 +33,10 @@ class UsageRecord(BaseModel):
     cached_prompt_tokens: int = 0  # included in prompt_tokens; cheap cache reads
     completion_tokens: int = 0
     total_tokens: int = 0
+    task_key: str = ""
+    duration_ms: int = 0
+    started_at: str = ""
+    ended_at: str = ""
 
     @property
     def uncached_tokens(self) -> int:

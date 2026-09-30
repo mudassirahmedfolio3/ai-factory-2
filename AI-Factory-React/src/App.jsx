@@ -8,18 +8,22 @@ import {
   fetchArtifact,
   fetchAuditEvents,
   getCurrentRun,
-  listComplexityOptions,
   previewUrl as buildPreviewUrl,
+  getEmulatorStatus,
+  startEmulatorRun,
+  stopEmulatorRun,
   startRun,
 } from './api.js';
 import {
   buildClientBrief,
   deliveryStageCopy,
+  flutterRunReadyFromState,
   runStateToDashboard,
   slugProjectName,
 } from './phaseMap.js';
 import { buildProjectJourney } from './journeyMap.js';
 import { connectRun } from './runSync.js';
+import History from './History.jsx';
 
 function Brand() {
   return (
@@ -53,20 +57,18 @@ function projectFromRunState(state, fallbackText = '') {
     runId: state.run_id,
     text: fallbackText,
     files: [],
-    complexity: state.complexity || 'basic_plus',
+    complexity: state.complexity || 'standard',
     estimatedMinutes: state.estimated_minutes,
     projectName: state.project_name || 'Project',
   };
 }
 
-function Intake({ onStart }) {
+function Intake({ onStart, onOpenHistory }) {
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
   const [menu, setMenu] = useState(false);
   const [error, setError] = useState('');
   const [drag, setDrag] = useState(false);
-  const [complexity, setComplexity] = useState('basic_plus');
-  const [complexityOptions, setComplexityOptions] = useState([]);
   const [starting, setStarting] = useState(false);
   const [loadingBrief, setLoadingBrief] = useState(false);
   const [liveRun, setLiveRun] = useState(null);
@@ -84,27 +86,12 @@ function Intake({ onStart }) {
   }, []);
 
   useEffect(() => {
-    listComplexityOptions()
-      .then(setComplexityOptions)
-      .catch(() =>
-        setComplexityOptions([
-          { id: 'basic', label: 'Basic', estimated_minutes: 10 },
-          { id: 'basic_plus', label: 'Basic+', estimated_minutes: 25 },
-          { id: 'standard', label: 'Standard', estimated_minutes: 60 },
-          { id: 'full', label: 'Full', estimated_minutes: 120 },
-        ]),
-      );
-  }, []);
-
-  useEffect(() => {
     const close = (e) => {
       if (!menuRef.current?.contains(e.target)) setMenu(false);
     };
     document.addEventListener('pointerdown', close);
     return () => document.removeEventListener('pointerdown', close);
   }, []);
-
-  const selectedProfile = complexityOptions.find((o) => o.id === complexity);
 
   function addFiles(list) {
     const { accepted, errors } = validateFiles([...list]);
@@ -148,14 +135,14 @@ function Intake({ onStart }) {
       const result = await startRun({
         project_name,
         client_brief,
-        complexity,
+        complexity: 'standard',
       });
       onStart({
         runId: result.run_id,
         text: text.trim(),
         files,
-        complexity: result.complexity || complexity,
-        estimatedMinutes: result.estimated_minutes || selectedProfile?.estimated_minutes,
+        complexity: result.complexity || 'standard',
+        estimatedMinutes: result.estimated_minutes,
         projectName: project_name,
       });
     } catch (err) {
@@ -190,7 +177,12 @@ function Intake({ onStart }) {
       )}
       <header className="header intake-header">
         <Brand />
-        <span className="eyebrow">NEW PROJECT</span>
+        <div className="header-actions">
+          <button type="button" className="secondary header-btn" onClick={onOpenHistory}>
+            History
+          </button>
+          <span className="eyebrow">NEW PROJECT</span>
+        </div>
       </header>
       <main className="intake">
         <div className="welcome">
@@ -245,20 +237,6 @@ function Intake({ onStart }) {
                 </button>
               </div>
             ))}
-          </div>
-          <div className="complexity-picker">
-            <label htmlFor="complexity">Run complexity</label>
-            <select
-              id="complexity"
-              value={complexity}
-              onChange={(e) => setComplexity(e.target.value)}
-            >
-              {complexityOptions.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label} (~{o.estimated_minutes} min)
-                </option>
-              ))}
-            </select>
           </div>
           <div className="composer-actions">
             <div className="upload-wrap" ref={menuRef}>
@@ -328,10 +306,7 @@ function Intake({ onStart }) {
         <p className="next">
           <b>NEXT</b> Your Requirement specialist will review your brief and shape the product vision.
         </p>
-        <p className="demo-note">
-          Live run
-          {selectedProfile ? ` · ~${selectedProfile.estimated_minutes} min` : ''} · Powered by CrewAI
-        </p>
+        <p className="demo-note">Live run · Powered by CrewAI</p>
       </main>
     </>
   );
@@ -375,7 +350,7 @@ function providerLabel(provider) {
 function formatUsage(usage, live = false) {
   if (!usage && !live) return null;
   const calls = usage?.llm_calls ?? 0;
-  const total = usage?.total_tokens ?? 0;
+  const total = usage?.uncached_tokens ?? usage?.total_tokens ?? 0;
   const budget = usage?.token_budget ?? 0;
   const pct = usage?.usage_percent ?? 0;
   const provider = providerLabel(usage?.provider);
@@ -384,7 +359,7 @@ function formatUsage(usage, live = false) {
   if (budget > 0) {
     const budgetLabel = budget.toLocaleString();
     return calls
-      ? `${provider} · ${calls} calls · ${totalLabel} / ${budgetLabel} tokens (${pct}%)`
+      ? `${provider} · ${calls} calls · ${totalLabel} / ${budgetLabel} uncached (${pct}%)`
       : `${provider} · 0 / ${budgetLabel} tokens (0%)`;
   }
   const approx = usage?.estimated_calls ? '~' : '';
@@ -392,33 +367,50 @@ function formatUsage(usage, live = false) {
   return calls ? `${provider} · ${calls} LLM calls · ${label}` : `${provider} · tracking usage…`;
 }
 
+function formatDuration(ms) {
+  const n = Number(ms) || 0;
+  if (n <= 0) return null;
+  if (n < 1000) return `${n}ms`;
+  const s = Math.round(n / 1000);
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return rem ? `${m}m ${rem}s` : `${m}m`;
+}
+
 function formatActivityTokens(activity) {
   const total = activity?.total_tokens ?? 0;
   if (!total && activity?.status === 'running') return 'working…';
   const prefix = activity?.estimated ? '~' : '';
-  return total >= 1000 ? `${prefix}${Math.round(total / 1000)}k tokens` : `${prefix}${total} tokens`;
+  const tokens =
+    total >= 1000 ? `${prefix}${Math.round(total / 1000)}k tokens` : `${prefix}${total} tokens`;
+  const dur = formatDuration(activity?.duration_ms);
+  return dur ? `${tokens} · ${dur}` : tokens;
 }
 
-function UsageActivityFeed({ activities = [], live = false }) {
+function UsageActivityFeed({ activities = [], live = false, onSelect }) {
   const items = [...activities].reverse().slice(0, 8);
   if (!items.length && !live) return null;
 
   return (
     <ul className="usage-activity" aria-label="Model activity">
       {items.map((item) => (
-        <li
-          key={item.id}
-          className={`usage-activity-item usage-activity-${item.status || 'completed'}`}
-        >
-          <div className="usage-activity-main">
-            <span className={`usage-activity-dot ${item.status === 'running' ? 'pulse' : ''}`} aria-hidden="true" />
-            <div className="usage-activity-copy">
-              <span className="usage-activity-who">{item.agent || 'Agent'}</span>
-              <span className="usage-activity-model">{item.model || 'model'}</span>
+        <li key={item.id}>
+          <button
+            type="button"
+            className={`usage-activity-item usage-activity-${item.status || 'completed'} usage-activity-btn`}
+            onClick={() => onSelect?.(item)}
+          >
+            <div className="usage-activity-main">
+              <span className={`usage-activity-dot ${item.status === 'running' ? 'pulse' : ''}`} aria-hidden="true" />
+              <div className="usage-activity-copy">
+                <span className="usage-activity-who">{item.agent || 'Agent'}</span>
+                <span className="usage-activity-model">{item.model || 'model'}</span>
+              </div>
+              <span className="usage-activity-tokens">{formatActivityTokens(item)}</span>
             </div>
-            <span className="usage-activity-tokens">{formatActivityTokens(item)}</span>
-          </div>
-          {item.task && <p className="usage-activity-task">{item.task}</p>}
+            {item.task && <p className="usage-activity-task">{item.task}</p>}
+          </button>
         </li>
       ))}
       {live && !items.some((item) => item.status === 'running') && (
@@ -436,7 +428,50 @@ function UsageActivityFeed({ activities = [], live = false }) {
   );
 }
 
+function UsageDetailModal({ activity, onClose }) {
+  if (!activity) return null;
+  const title = activity.detail_title || activity.label || activity.agent || 'Activity';
+  const items = activity.detail_items || [];
+  const paths = activity.detail_paths || [];
+  return (
+    <Modal title={title} onClose={onClose}>
+      <div className="usage-detail">
+        <p className="usage-detail-meta">
+          {[activity.agent, activity.model, activity.phase || activity.task, formatActivityTokens(activity)]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
+        {items.length ? (
+          <ul className="usage-detail-list">
+            {items.map((line, i) => (
+              <li key={`${i}-${String(line).slice(0, 24)}`}>{line}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No detail recorded for this step yet.</p>
+        )}
+        {paths.length > 0 && (
+          <>
+            <h3 className="usage-detail-paths-heading">Artifacts</h3>
+            <ul className="usage-detail-paths">
+              {paths.map((p) => (
+                <li key={p}>
+                  <code>{p}</code>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+      <button type="button" className="primary" onClick={onClose}>
+        Close
+      </button>
+    </Modal>
+  );
+}
+
 function UsageBanner({ usage, live = false }) {
+  const [selected, setSelected] = useState(null);
   const budget = usage?.token_budget ?? 0;
   const provider = usage?.provider || 'llm';
   const activities = usage?.activities ?? [];
@@ -466,13 +501,14 @@ function UsageBanner({ usage, live = false }) {
           <div className="usage-meter-fill" style={{ width: `${Math.max(pct, live && !usage?.total_tokens ? 1 : 0)}%` }} />
         </div>
       )}
-      <UsageActivityFeed activities={activities} live={live} />
+      <UsageActivityFeed activities={activities} live={live} onSelect={setSelected} />
       {usage?.budget_warning && <small className="usage-warning">{usage.budget_warning}</small>}
+      {selected && <UsageDetailModal activity={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 }
 
-function Dashboard({ project, onReset }) {
+function Dashboard({ project, onReset, onOpenHistory }) {
   const [runState, setRunState] = useState(null);
   const [runLoading, setRunLoading] = useState(true);
   const [view, setView] = useState(null);
@@ -481,6 +517,8 @@ function Dashboard({ project, onReset }) {
   const [prdLoading, setPrdLoading] = useState(false);
   const [flutterManifest, setFlutterManifest] = useState('');
   const [flutterLoading, setFlutterLoading] = useState(false);
+  const [emulatorStatus, setEmulatorStatus] = useState(null);
+  const [emulatorBusy, setEmulatorBusy] = useState(false);
   const [auditEvents, setAuditEvents] = useState([]);
   const [journeyLoading, setJourneyLoading] = useState(false);
   const navRef = useRef();
@@ -513,7 +551,10 @@ function Dashboard({ project, onReset }) {
   const flutterDir =
     runState?.flutter_project_dir ||
     (project.runId ? `apps/${project.runId}/flutter` : null);
-  const flutterReady = Boolean(runState?.checks?.flutter_artifacts_ready || run.complete);
+  const flutterReady =
+    flutterRunReadyFromState(runState) ||
+    (run.complete && isFzEngine) ||
+    Boolean(runState?.flutter_ready);
   const deliveryCopy =
     stageIndex === 8 ? deliveryStageCopy(runState, displayName) : null;
   const journey = buildProjectJourney(auditEvents, runState);
@@ -576,6 +617,61 @@ function Dashboard({ project, onReset }) {
       .catch(() => setFlutterManifest(''))
       .finally(() => setFlutterLoading(false));
   }, [modal, project.runId]);
+
+  useEffect(() => {
+    if (!flutterReady || !project.runId) return;
+    let cancelled = false;
+    const refresh = () => {
+      getEmulatorStatus(project.runId)
+        .then((status) => {
+          if (!cancelled) setEmulatorStatus(status);
+        })
+        .catch(() => {
+          if (!cancelled) setEmulatorStatus(null);
+        });
+    };
+    refresh();
+    const timer = window.setInterval(refresh, 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [flutterReady, project.runId]);
+
+  const handleStartEmulator = async () => {
+    if (!project.runId || emulatorBusy) return;
+    setEmulatorBusy(true);
+    try {
+      const status = await startEmulatorRun(project.runId);
+      setEmulatorStatus(status);
+    } catch (err) {
+      setEmulatorStatus({
+        status: 'failed',
+        error: err instanceof Error ? err.message : 'Failed to start emulator',
+      });
+    } finally {
+      setEmulatorBusy(false);
+    }
+  };
+
+  const handleStopEmulator = async () => {
+    if (!project.runId || emulatorBusy) return;
+    setEmulatorBusy(true);
+    try {
+      const status = await stopEmulatorRun(project.runId);
+      setEmulatorStatus(status);
+    } catch (err) {
+      setEmulatorStatus({
+        status: 'failed',
+        error: err instanceof Error ? err.message : 'Failed to stop emulator session',
+      });
+    } finally {
+      setEmulatorBusy(false);
+    }
+  };
+
+  const emulatorActive =
+    emulatorStatus?.status === 'starting' || emulatorStatus?.status === 'running';
 
   useEffect(() => {
     if (modal !== 'brief' || !project.runId) return;
@@ -686,12 +782,17 @@ function Dashboard({ project, onReset }) {
             </button>
           ))}
         </nav>
-        <div className="project-progress">
-          <div>
-            <span>Project progress</span>
-            <b>{run.overall}%</b>
+        <div className="header-actions dashboard-header-actions">
+          <button type="button" className="secondary header-btn" onClick={onOpenHistory}>
+            History
+          </button>
+          <div className="project-progress">
+            <div>
+              <span>Project progress</span>
+              <b>{run.overall}%</b>
+            </div>
+            <Progress value={run.overall} label="Overall project progress" />
           </div>
-          <Progress value={run.overall} label="Overall project progress" />
         </div>
       </header>
       <main className="dashboard">
@@ -793,7 +894,16 @@ function Dashboard({ project, onReset }) {
                 )}
                 {flutterReady && (
                   <button
-                    className={isFzEngine ? 'primary' : 'secondary'}
+                    className="primary"
+                    onClick={handleStartEmulator}
+                    disabled={emulatorBusy || emulatorActive}
+                  >
+                    {emulatorActive ? 'Launching on emulator…' : 'Run on emulator'}
+                  </button>
+                )}
+                {flutterReady && (
+                  <button
+                    className="secondary"
                     onClick={() => setModal('flutter')}
                   >
                     View Flutter source
@@ -806,9 +916,28 @@ function Dashboard({ project, onReset }) {
             )}
             {!done && flutterReady && (
               <div className="stage-actions">
+                <button
+                  className="primary"
+                  onClick={handleStartEmulator}
+                  disabled={emulatorBusy || emulatorActive}
+                >
+                  {emulatorActive ? 'Launching on emulator…' : 'Run on emulator'}
+                </button>
+                {emulatorActive && (
+                  <button className="secondary" onClick={handleStopEmulator} disabled={emulatorBusy}>
+                    Stop emulator
+                  </button>
+                )}
                 <button className="secondary" onClick={() => setModal('flutter')}>
                   View Flutter source
                 </button>
+                {emulatorStatus?.status && emulatorStatus.status !== 'idle' && (
+                  <small>
+                    Emulator: {emulatorStatus.status}
+                    {emulatorStatus.device_id ? ` · ${emulatorStatus.device_id}` : ''}
+                    {emulatorStatus.error ? ` · ${emulatorStatus.error}` : ''}
+                  </small>
+                )}
               </div>
             )}
           </div>
@@ -930,8 +1059,38 @@ function Dashboard({ project, onReset }) {
         <Modal title={`${displayName} · Flutter source`} onClose={() => setModal(null)}>
           <p className="brief-text">
             There is no live Flutter preview in the browser. The factory writes a Flutter
-            project to disk — run it locally with the Flutter SDK.
+            project to disk — run it locally with the Flutter SDK or launch an emulator from here.
           </p>
+          {flutterReady && (
+            <div className="stage-actions">
+              <button
+                className="primary"
+                onClick={handleStartEmulator}
+                disabled={emulatorBusy || emulatorActive}
+              >
+                {emulatorActive ? 'Launching on emulator…' : 'Run on emulator'}
+              </button>
+              {emulatorActive && (
+                <button className="secondary" onClick={handleStopEmulator} disabled={emulatorBusy}>
+                  Stop
+                </button>
+              )}
+            </div>
+          )}
+          {emulatorStatus?.status && emulatorStatus.status !== 'idle' && (
+            <p className="brief-text">
+              Emulator: <strong>{emulatorStatus.status}</strong>
+              {emulatorStatus.device_id ? ` · ${emulatorStatus.device_id}` : ''}
+              {emulatorStatus.note ? ` · ${emulatorStatus.note}` : ''}
+              {emulatorStatus.error ? ` · ${emulatorStatus.error}` : ''}
+            </p>
+          )}
+          {emulatorStatus?.log_tail && (
+            <>
+              <h3>Launch log</h3>
+              <pre className="artifact-content">{emulatorStatus.log_tail}</pre>
+            </>
+          )}
           {flutterDir && (
             <p className="brief-text">
               Project folder: <code>{flutterDir}</code>
@@ -1024,10 +1183,41 @@ flutter run`}</pre>
 }
 
 export default function App() {
+  const [view, setView] = useState('intake');
   const [project, setProject] = useState(null);
-  return project ? (
-    <Dashboard project={project} onReset={() => setProject(null)} />
-  ) : (
-    <Intake onStart={setProject} />
-  );
+
+  function openHistory() {
+    setView('history');
+  }
+
+  function openIntake() {
+    setProject(null);
+    setView('intake');
+  }
+
+  function startProject(next) {
+    setProject(next);
+    setView('dashboard');
+  }
+
+  function openRun(run) {
+    setProject(projectFromRunState(run));
+    setView('dashboard');
+  }
+
+  if (view === 'history') {
+    return <History onOpenRun={openRun} onNewProject={openIntake} />;
+  }
+
+  if (view === 'dashboard' && project) {
+    return (
+      <Dashboard
+        project={project}
+        onReset={openIntake}
+        onOpenHistory={openHistory}
+      />
+    );
+  }
+
+  return <Intake onStart={startProject} onOpenHistory={openHistory} />;
 }

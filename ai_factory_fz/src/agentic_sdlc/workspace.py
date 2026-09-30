@@ -87,11 +87,25 @@ class Workspace:
 
     def commit(self, message: str) -> str | None:
         """Commit everything in the workspace. Returns the commit sha, or None if nothing changed."""
+        import os
+
+        # Avoid interactive prompts / credential helpers hanging headless worker runs.
+        env = os.environ.copy()
+        env.setdefault("GIT_TERMINAL_PROMPT", "0")
+        env.setdefault("GCM_INTERACTIVE", "never")
+        env.setdefault("GIT_OPTIONAL_LOCKS", "0")
         repo = Repo(self.root)
-        repo.git.add(A=True)
-        if repo.head.is_valid() and not repo.index.diff("HEAD"):
-            return None
-        return repo.index.commit(message, author=_AUTHOR, committer=_AUTHOR).hexsha
+        with repo.git.custom_environment(**env):
+            lock = self.root / ".git" / "index.lock"
+            if lock.exists():
+                try:
+                    lock.unlink()
+                except OSError:
+                    pass
+            repo.git.add(A=True)
+            if repo.head.is_valid() and not repo.index.diff("HEAD"):
+                return None
+            return repo.index.commit(message, author=_AUTHOR, committer=_AUTHOR).hexsha
 
     def tag(self, name: str) -> None:
         Repo(self.root).create_tag(name, message=name)

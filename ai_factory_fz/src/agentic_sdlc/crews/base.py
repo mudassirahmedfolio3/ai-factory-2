@@ -2,7 +2,9 @@
 
 import logging
 import re
+import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Callable, Generic, TypeVar
 
 from crewai import Crew, Process, Task
@@ -114,6 +116,8 @@ class TaskRunner:
                 guardrail_max_retries=2,
             )
             crew = Crew(agents=[agent], tasks=[task], process=Process.sequential, verbose=self.verbose)
+            started = datetime.now(timezone.utc)
+            t0 = time.perf_counter()
             try:
                 out = crew.kickoff()
             except Exception as e:  # provider errors, guardrail exhaustion, bad output
@@ -122,6 +126,8 @@ class TaskRunner:
                 log.warning("Task %s failed on %s: %s", task_key, model, e)
                 last_error = e
                 continue
+            ended = datetime.now(timezone.utc)
+            duration_ms = int((time.perf_counter() - t0) * 1000)
             artifact = out.pydantic or output_model.model_validate_json(out.raw)
             usage = out.token_usage
             return TaskResult(
@@ -134,6 +140,10 @@ class TaskRunner:
                     cached_prompt_tokens=usage.cached_prompt_tokens,
                     completion_tokens=usage.completion_tokens,
                     total_tokens=usage.total_tokens,
+                    task_key=task_key,
+                    duration_ms=duration_ms,
+                    started_at=started.isoformat(),
+                    ended_at=ended.isoformat(),
                 ),
             )
         raise PhaseError(f"Task '{task_key}' failed on all models for '{agent_key}': {last_error}")

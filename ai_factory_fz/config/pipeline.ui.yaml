@@ -1,5 +1,5 @@
 # UI-driven runs from ai_factory_ui (React console). Auto-approves gates; no release/docker emulator.
-# Use: FACTORY_ENGINE=fz via the FastAPI run manager.
+# Tuned for a fast local demo: small Flutter MVP that can reach build quickly.
 
 phases:
   discovery: true
@@ -10,13 +10,17 @@ phases:
 
 scope:
   guidance: >
-    Keep scope realistic for a first UI demo: product browse, detail, cart. Skip payments/checkout
-    unless the client brief explicitly requires them.
-  max_user_stories: 6
-  max_work_items: 10
-  max_milestones: 2
-  max_api_operations: 10
-  max_screens: 5
+    SPEED DEMO. Deliver the smallest runnable Flutter MVP only.
+    Must-have screens: product list (browse) and product detail. Optional: simple cart in memory.
+    NO auth, NO payments, NO checkout, NO backend API work in M1 if it slows delivery —
+    prefer a local/mock catalog in the Flutter app so the app runs on an emulator immediately.
+    NEVER create work items that require human approval, stakeholder sign-off, or "style approval".
+    Style tokens may be chosen by the agent without waiting. Start coding in the first build items.
+  max_user_stories: 3
+  max_work_items: 5
+  max_milestones: 1
+  max_api_operations: 4
+  max_screens: 3
 
 planning:
   # Developers re-estimate the items they will build; the PM reconciles big gaps.
@@ -39,9 +43,9 @@ guardrails:
 
 build:
   milestones: []
-  sandbox: docker
-  check_fix_attempts: 2
-  agent_timeout_s: 3600
+  sandbox: local
+  check_fix_attempts: 1
+  agent_timeout_s: 900
 
 gates:
   prd: true
@@ -51,9 +55,10 @@ gates:
 gate_mode: auto
 
 limits:
-  clarification_rounds: 2
-  gate_rejections: 3
-  qa_fix_rounds: 2
+  clarification_rounds: 1
+  gate_rejections: 2
+  qa_fix_rounds: 1
 
+# No hard stop on tokens — coding agents (esp. Flutter WI loops) routinely exceed 1M.
 budget:
-  max_total_tokens: 2000000
+  max_total_tokens: null

@@ -88,6 +88,27 @@ export function overallProgressFromState(runState) {
   return Math.min(99, Math.floor(sum / UI_STAGE_COUNT));
 }
 
+/** True when the backend build step finished successfully. */
+export function buildCompleteFromState(runState) {
+  if (!runState) return false;
+  if (runState.status === 'completed') return true;
+  const buildStep = (runState.pipeline_steps || []).find((step) => step.id === 'build');
+  return buildStep?.status === 'completed';
+}
+
+/** True when Flutter project is ready to run (build done + artifacts on disk). */
+export function flutterRunReadyFromState(runState) {
+  if (!runState) return false;
+  const checks = runState.checks || {};
+  if (runState.factory_engine !== 'fz') {
+    return Boolean(checks.flutter_artifacts_ready || runState.status === 'completed');
+  }
+  return Boolean(
+    checks.flutter_artifacts_ready &&
+      (buildCompleteFromState(runState) || runState.status === 'completed'),
+  );
+}
+
 /** True when the built app preview can be loaded in the phone iframe. */
 export function previewReadyFromState(runState) {
   if (!runState) return false;
@@ -140,7 +161,7 @@ export function runStateToDashboard(runState) {
   const active = activeUiStage(runState);
   const progress = stageProgress(statusMap, active);
   const complete = runState?.status === 'completed';
-  const failed = runState?.status === 'failed';
+  const failed = runState?.status === 'failed' || runState?.status === 'stale';
 
   return {
     active,
