@@ -1,0 +1,18 @@
+[build]
+  base = "AI-Factory-React"
+  command = "npm ci && npm run build"
+  publish = "AI-Factory-React/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/api/*"
+  to = ":BACKEND_URL/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

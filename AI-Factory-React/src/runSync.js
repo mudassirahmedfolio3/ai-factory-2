@@ -1,13 +1,17 @@
-import { subscribeEvents, getCurrentRun } from './api.js';
+import { subscribeEvents, getCurrentRun, getRun } from './api.js';
 import { runStateToDashboard } from './phaseMap.js';
 
 export { runStateToDashboard };
+
+function loadRunState(runId) {
+  return getRun(runId).catch(() => getCurrentRun());
+}
 
 /** Poll + SSE hook helper — returns unsubscribe function. */
 export function connectRun(runId, onRunState, onAudit) {
   let stopped = false;
 
-  getCurrentRun()
+  loadRunState(runId)
     .then((state) => {
       if (!stopped && state?.run_id === runId) onRunState(state);
     })
@@ -16,7 +20,7 @@ export function connectRun(runId, onRunState, onAudit) {
   const unsubscribe = subscribeEvents(
     runId,
     (state) => {
-      if (!stopped) onRunState(state);
+      if (!stopped && state?.run_id === runId) onRunState(state);
     },
     (event) => {
       if (!stopped && onAudit) onAudit(event);

@@ -41,7 +41,7 @@ test('buildProjectJourney explains preview QA and developer fix', () => {
     { complexity: 'basic' },
   );
 
-  assert.match(pipelineNote, /UI Designer/i);
+  assert.match(pipelineNote, /Flutter project/i);
   assert.equal(activities.length, 4);
   assert.match(activities[2].detail, /invalid/i);
   assert.match(activities[3].detail, /Auto-repaired/i);

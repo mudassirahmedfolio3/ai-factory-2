@@ -23,6 +23,10 @@ def _ensure_factory_env() -> None:
         )
     if provider == "openai" and not os.getenv("OPENAI_API_KEY", "").strip():
         raise RuntimeError("OPENAI_API_KEY is missing in ai_factory/.env")
+    if provider == "anthropic" and not os.getenv("ANTHROPIC_API_KEY", "").strip():
+        raise RuntimeError(
+            "ANTHROPIC_API_KEY is missing in ai_factory/.env — add your Claude key and restart the API."
+        )
     api_key = os.getenv("CURSOR_API_KEY", "").strip()
     if provider == "cursor_proxy" and not api_key:
         raise RuntimeError(

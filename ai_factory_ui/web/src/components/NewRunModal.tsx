@@ -60,7 +60,6 @@ export default function NewRunModal({ open, onClose, onSubmit, loading }: Props)
   const [briefLoading, setBriefLoading] = useState(false);
   const [complexity, setComplexity] = useState<ComplexityLevel>("basic");
   const [maxReleases, setMaxReleases] = useState(2);
-
   const selected = COMPLEXITY_OPTIONS.find((o) => o.id === complexity)!;
 
   const loadRandomBrief = useCallback(async () => {

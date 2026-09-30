@@ -20,6 +20,8 @@ from ai_factory.crews.sprint_planning_crew.sprint_planning_crew import SprintPla
 from ai_factory.complexity import get_profile
 from ai_factory.brief_generator import fetch_random_ecommerce_brief
 from ai_factory.browser_runner import run_browser_preview
+from ai_factory.flutter_artifacts import artifacts_enabled, generate_flutter_artifacts
+from ai_factory.flutter_emulator import emulator_enabled, run_flutter_emulator
 from ai_factory.ui_preview_agent import generate_ui_preview_html
 from ai_factory.fast_path import (
     auto_approval,
@@ -35,6 +37,10 @@ from ai_factory.fast_path import (
 from ai_factory.governance import GovernanceGate, GovernancePolicy
 from ai_factory.llm_config import get_llm
 from ai_factory.models import AIFactoryState, ChangeImpact, ClientApproval
+from ai_factory.llm_usage_hooks import register_usage_listeners
+from ai_factory.usage_tracker import get_usage_tracker
+
+register_usage_listeners()
 from ai_factory.utils import (
     archive_run,
     crew_inputs,
@@ -102,7 +108,7 @@ class AIFactoryFlow(Flow[AIFactoryState]):
             self.state.run_id = crewai_trigger_payload.get("run_id", self.state.run_id)
         if not self.state.run_id:
             self.state.run_id = new_run_id()
-        if self.state.complexity == "basic":
+        if self.state.complexity == "basic" and not self.state.client_brief.strip():
             brief = fetch_random_ecommerce_brief()
             self.state.project_name = brief.project_name
             self.state.client_brief = brief.client_brief
@@ -114,12 +120,26 @@ class AIFactoryFlow(Flow[AIFactoryState]):
                         "source": brief.source,
                         "project_name": brief.project_name,
                         "client_brief": brief.client_brief,
+                        "note": "Auto-generated demo brief — no client brief was provided.",
                     },
                     indent=2,
                 ),
             )
             print(f"Basic track: random e-commerce brief ({brief.niche}) via {brief.source}")
+        elif self.state.client_brief.strip():
+            save_artifact(
+                "requirements/client_brief.json",
+                json.dumps(
+                    {
+                        "project_name": self.state.project_name,
+                        "client_brief": self.state.client_brief,
+                        "source": "client_intake",
+                    },
+                    indent=2,
+                ),
+            )
         self.state.run_status = "running"
+        get_usage_tracker().reset()
         publish_run_state(self.state)
         sync_graph_from_state(self.state)
         log_audit(
@@ -416,8 +436,52 @@ Approve if MVP scope is clear; otherwise request specific changes.
                 pass
         return ClientApproval(decision="approved", feedback=[], priority_changes=[])
 
+    def _materialize_flutter_artifacts(self) -> None:
+        """Write a runnable Flutter project under apps/{run_id}/flutter."""
+        if not artifacts_enabled():
+            return
+        print("Flutter artifacts: materializing project...")
+        try:
+            result = generate_flutter_artifacts(self.state, self.state.run_id)
+            if result.success and result.project_dir:
+                self.state.flutter_project_dir = result.project_dir.as_posix()
+                log_audit(
+                    "flutter_artifacts",
+                    "completed",
+                    "flutter_engineer",
+                    {
+                        "project_dir": self.state.flutter_project_dir,
+                        "files": result.files,
+                        "file_count": result.file_count,
+                        "manifest": f"build/flutter/manifest.json",
+                        "mirror": "artifacts/build/flutter_project",
+                        "summary": result.message,
+                    },
+                    state=self.state,
+                )
+                print(f"Flutter artifacts: {result.message}")
+            else:
+                log_audit(
+                    "flutter_artifacts",
+                    "skipped",
+                    "flutter_engineer",
+                    {"reason": result.message, "log": result.log[:500]},
+                    state=self.state,
+                )
+                print(f"Flutter artifacts skipped: {result.message}")
+        except Exception as exc:
+            log_audit(
+                "flutter_artifacts",
+                "failed",
+                "flutter_engineer",
+                {"error": str(exc)},
+                state=self.state,
+            )
+            print(f"Flutter artifacts failed: {exc}")
+
     def _launch_browser_preview_and_report(self) -> None:
         """Open a mobile-style web preview in the browser (replaces deploy/emulator)."""
+        self._materialize_flutter_artifacts()
         self.state.phase = "browser"
         publish_run_state(self.state)
         rel = self.state.release_number
@@ -434,6 +498,19 @@ Approve if MVP scope is clear; otherwise request specific changes.
             ui_source = f"fallback_template ({exc})"
             self.state.ui_preview_html = ""
             print(f"UI Designer failed, using fallback template: {exc}")
+            log_audit(
+                "browser_preview",
+                "fallback_template",
+                "ui_designer",
+                {
+                    "reason": str(exc),
+                    "note": (
+                        "Product UI is a simplified fallback — not the full AI-designed app. "
+                        "Try Basic+ or Standard complexity, or a stronger/faster LLM provider."
+                    ),
+                },
+                state=self.state,
+            )
 
         print("Opening browser preview...")
         result = run_browser_preview(
@@ -490,6 +567,37 @@ Approve if MVP scope is clear; otherwise request specific changes.
                 },
                 state=self.state,
             )
+
+        if emulator_enabled() and result.success and result.url:
+            print("Flutter emulator: launching mobile shell with WebView preview...")
+            emu = run_flutter_emulator(
+                run_id=self.state.run_id,
+                project_name=self.state.project_name,
+                preview_url=result.url,
+            )
+            if emu.success:
+                report += (
+                    f"\n**Flutter emulator:** {emu.message}\n"
+                    f"**Device:** {emu.device_id}\n"
+                    f"**Project:** `{emu.project_dir}`\n"
+                )
+                log_audit(
+                    "emulator",
+                    "started",
+                    "flutter_runner",
+                    {"device": emu.device_id, "log": emu.log},
+                    state=self.state,
+                )
+            else:
+                report += f"\n**Flutter emulator:** skipped — {emu.message}\n"
+                log_audit(
+                    "emulator",
+                    "skipped",
+                    "flutter_runner",
+                    {"reason": emu.message},
+                    state=self.state,
+                )
+            save_artifact(f"browser/release_{rel}_preview.md", report)
             if qa.get("repairs"):
                 log_audit(
                     "developer_fix",
@@ -934,6 +1042,8 @@ Approve the release, request changes, or reject.
             "backend_recommendation": self.state.backend_recommendation[:500],
             "autonomy_level": self.state.autonomy_level,
             "phase": "complete",
+            "flutter_project_dir": self.state.flutter_project_dir or None,
+            "flutter_manifest": "artifacts/build/flutter/manifest.json",
             "knowledge_graph": "artifacts/knowledge_graph.json",
             "audit_trail": "artifacts/audit/",
         }

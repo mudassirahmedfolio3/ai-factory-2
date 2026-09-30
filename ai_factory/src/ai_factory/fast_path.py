@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from crewai import LLM
-
-from ai_factory.cursor_agent_llm import CursorAgentLLM
 from ai_factory.llm_config import get_llm
+from ai_factory.llm_invoke import invoke_llm
 from ai_factory.models import AIFactoryState, ClientApproval
 
 def basic_discovery_prompt(state: AIFactoryState) -> str:
@@ -133,16 +131,7 @@ def run_basic_agent(prompt: str, role: str, goal: str) -> str:
         "Do NOT ask clarifying questions or offer menus.\n\n"
         f"{prompt}"
     )
-    if isinstance(llm, CursorAgentLLM):
-        text = llm.call(wrapped)
-    elif isinstance(llm, LLM):
-        text = llm.call(wrapped)
-    elif isinstance(llm, str):
-        text = LLM(model=llm).call(wrapped)
-    else:
-        raise RuntimeError(f"Unsupported LLM type for basic path: {type(llm)}")
-
-    output = str(text).strip()
+    output = invoke_llm(llm, wrapped, agent_role=role, task_name=goal)
     if not output:
         raise RuntimeError(f"Empty LLM response for {role} (basic path)")
     return output

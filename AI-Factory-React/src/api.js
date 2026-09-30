@@ -1,4 +1,4 @@
-const BASE = '/api';
+const BASE = import.meta.env.VITE_API_URL || '/api';
 
 export class ApiError extends Error {
   constructor(message, { status, runId, code } = {}) {
@@ -10,8 +10,11 @@ export class ApiError extends Error {
   }
 }
 
-async function fetchJson(path, init) {
-  const res = await fetch(`${BASE}${path}`, init);
+async function fetchJson(path, init = {}) {
+  const res = await fetch(`${BASE}${path}`, {
+    ...init,
+    signal: init.signal ?? AbortSignal.timeout(8000),
+  });
   if (!res.ok) {
     const raw = await res.text();
     let message = raw || res.statusText;

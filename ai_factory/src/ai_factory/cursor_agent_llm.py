@@ -14,6 +14,8 @@ from pydantic import BaseModel
 from crewai.llms.base_llm import BaseLLM
 from crewai.utilities.types import LLMMessage
 
+from ai_factory.usage_tracker import get_usage_tracker
+
 
 def _parse_version_dir(name: str) -> int:
     date_part = name.split("-")[0]
@@ -124,6 +126,17 @@ class CursorAgentLLM(BaseLLM):
             )
 
         prompt = _messages_to_prompt(messages)
+        agent_role = ""
+        task_name = ""
+        if from_agent is not None:
+            agent_role = str(getattr(from_agent, "role", None) or "")
+            if not agent_role and isinstance(from_agent, dict):
+                agent_role = str(from_agent.get("role") or "")
+        if from_task is not None:
+            task_name = str(getattr(from_task, "name", None) or "")
+            if not task_name and isinstance(from_task, dict):
+                task_name = str(from_task.get("name") or "")
+
         prompt = (
             "You are executing an automated CrewAI pipeline task.\n"
             "Produce the complete final deliverable now.\n"
@@ -150,6 +163,12 @@ class CursorAgentLLM(BaseLLM):
             cmd = [node_exe, index_js, "-p", "--trust"]
         else:
             cmd = [node_exe, "-p", "--trust"]
+
+        activity_id = get_usage_tracker().begin_activity(
+            model=self.model,
+            agent=agent_role,
+            task=task_name,
+        )
         result = subprocess.run(
             cmd,
             input=prompt,
@@ -164,11 +183,27 @@ class CursorAgentLLM(BaseLLM):
         )
 
         if result.returncode != 0:
+            get_usage_tracker().finish_activity(
+                activity_id,
+                status="failed",
+                model=self.model,
+                agent=agent_role,
+                task=task_name,
+            )
             stderr = (result.stderr or result.stdout or "").strip()
             raise RuntimeError(f"Cursor agent failed (exit {result.returncode}): {stderr}")
 
         text = (result.stdout or "").strip()
         self._token_usage["successful_requests"] += 1
+        get_usage_tracker().finish_activity(
+            activity_id,
+            prompt=prompt,
+            completion=text,
+            estimated=True,
+            model=self.model,
+            agent=agent_role,
+            task=task_name,
+        )
 
         if response_model is not None:
             import json

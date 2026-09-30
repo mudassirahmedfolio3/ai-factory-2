@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import sys
 from typing import Any
 
 from artifact_reader import (
@@ -24,9 +26,17 @@ load_dotenv(AI_FACTORY_ROOT / ".env", override=True)
 
 app = FastAPI(title="AI Factory Console API", version="0.1.0")
 
+
+def _cors_origins() -> list[str]:
+    raw = os.getenv("CORS_ORIGINS", "")
+    if raw.strip():
+        return [o.strip() for o in raw.split(",") if o.strip()]
+    return ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

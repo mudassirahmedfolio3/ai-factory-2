@@ -58,12 +58,19 @@ def get_llm(tier: str = "strong") -> LLM | str:
             )
         claude_model = os.getenv(
             "ANTHROPIC_STRONG_MODEL" if tier == "strong" else "ANTHROPIC_FAST_MODEL",
-            "claude-opus-5" if tier == "strong" else "claude-sonnet-5",
+            "claude-sonnet-4-6" if tier == "strong" else "claude-haiku-4-5",
+        )
+        # Keep max_tokens modest by default — saves Claude spend on long outputs.
+        max_tokens = int(
+            os.getenv(
+                "ANTHROPIC_MAX_TOKENS" if tier == "strong" else "ANTHROPIC_FAST_MAX_TOKENS",
+                "8192" if tier == "strong" else "2048",
+            )
         )
         return LLM(
             model=f"anthropic/{claude_model}",
             api_key=api_key,
-            max_tokens=int(os.getenv("ANTHROPIC_MAX_TOKENS", "16000")),
+            max_tokens=max_tokens,
             timeout=int(os.getenv("ANTHROPIC_TIMEOUT", "600")),
         )
 

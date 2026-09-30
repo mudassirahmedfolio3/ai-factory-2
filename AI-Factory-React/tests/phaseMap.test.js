@@ -96,9 +96,14 @@ test('runStateToDashboard exposes browserReady from post_deploy checks', () => {
 
 test('deliveryStageCopy uses project name and release number', () => {
   const copy = deliveryStageCopy(
-    { status: 'running', release_number: 1, checks: { post_deploy_passed: true } },
+    {
+      status: 'running',
+      release_number: 1,
+      checks: { post_deploy_passed: true, flutter_artifacts_ready: true },
+    },
     'womens-jewellery',
   );
   assert.match(copy.card1Name, /womens-jewellery/);
-  assert.match(copy.deployLines[0], /Complete/);
+  assert.match(copy.deployLines[0], /Flutter project/);
+  assert.match(copy.deployLines[1], /HTML preview/);
 });

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 
 from ai_factory.complexity import get_profile
 from ai_factory.knowledge_graph import DeliveryKnowledgeGraph
+from ai_factory.usage_tracker import get_usage_tracker
 
 if TYPE_CHECKING:
     from ai_factory.models import AIFactoryState
@@ -86,12 +87,14 @@ def publish_run_state(state: "AIFactoryState", status: str | None = None) -> Pat
         "estimated_minutes": _estimated_minutes(state.complexity),
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "pipeline_steps": steps,
+        "flutter_project_dir": state.flutter_project_dir or None,
         "checks": {
             "code_review_passed": state.code_review_passed,
             "security_passed": state.security_passed,
             "qa_passed": state.qa_passed,
             "post_deploy_passed": state.post_deploy_passed,
             "deploy_approved": state.deploy_approved,
+            "flutter_artifacts_ready": bool(state.flutter_project_dir),
         },
         "approvals": {
             "prd": state.prd_approval.decision if state.prd_approval else None,
@@ -99,6 +102,10 @@ def publish_run_state(state: "AIFactoryState", status: str | None = None) -> Pat
             "deploy": state.deploy_approval.decision if state.deploy_approval else None,
         },
         "artifacts_index": list_artifacts(),
+        "usage": {
+            **get_usage_tracker().snapshot().to_dict(),
+            "budget_warning": get_usage_tracker().budget_warning(),
+        },
     }
     RUN_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
     RUN_STATE_PATH.write_text(json.dumps(payload, indent=2), encoding="utf-8")

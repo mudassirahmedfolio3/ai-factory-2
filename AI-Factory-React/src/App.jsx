@@ -145,7 +145,11 @@ function Intake({ onStart }) {
     const project_name = slugProjectName(text);
     try {
       const client_brief = buildClientBrief(text, files);
-      const result = await startRun({ project_name, client_brief, complexity });
+      const result = await startRun({
+        project_name,
+        client_brief,
+        complexity,
+      });
       onStart({
         runId: result.run_id,
         text: text.trim(),
@@ -357,12 +361,126 @@ function Modal({ title, children, onClose }) {
   );
 }
 
+function providerLabel(provider) {
+  const labels = {
+    anthropic: 'Claude',
+    cursor_cli: 'Cursor',
+    cursor_proxy: 'Cursor',
+    openai: 'OpenAI',
+    groq: 'Groq',
+  };
+  return labels[provider] || provider || 'LLM';
+}
+
+function formatUsage(usage, live = false) {
+  if (!usage && !live) return null;
+  const calls = usage?.llm_calls ?? 0;
+  const total = usage?.total_tokens ?? 0;
+  const budget = usage?.token_budget ?? 0;
+  const pct = usage?.usage_percent ?? 0;
+  const provider = providerLabel(usage?.provider);
+  if (!calls && !live && !budget) return null;
+  const totalLabel = total.toLocaleString();
+  if (budget > 0) {
+    const budgetLabel = budget.toLocaleString();
+    return calls
+      ? `${provider} · ${calls} calls · ${totalLabel} / ${budgetLabel} tokens (${pct}%)`
+      : `${provider} · 0 / ${budgetLabel} tokens (0%)`;
+  }
+  const approx = usage?.estimated_calls ? '~' : '';
+  const label = total >= 1000 ? `${approx}${Math.round(total / 1000)}k tokens` : `${approx}${total} tokens`;
+  return calls ? `${provider} · ${calls} LLM calls · ${label}` : `${provider} · tracking usage…`;
+}
+
+function formatActivityTokens(activity) {
+  const total = activity?.total_tokens ?? 0;
+  if (!total && activity?.status === 'running') return 'working…';
+  const prefix = activity?.estimated ? '~' : '';
+  return total >= 1000 ? `${prefix}${Math.round(total / 1000)}k tokens` : `${prefix}${total} tokens`;
+}
+
+function UsageActivityFeed({ activities = [], live = false }) {
+  const items = [...activities].reverse().slice(0, 8);
+  if (!items.length && !live) return null;
+
+  return (
+    <ul className="usage-activity" aria-label="Model activity">
+      {items.map((item) => (
+        <li
+          key={item.id}
+          className={`usage-activity-item usage-activity-${item.status || 'completed'}`}
+        >
+          <div className="usage-activity-main">
+            <span className={`usage-activity-dot ${item.status === 'running' ? 'pulse' : ''}`} aria-hidden="true" />
+            <div className="usage-activity-copy">
+              <span className="usage-activity-who">{item.agent || 'Agent'}</span>
+              <span className="usage-activity-model">{item.model || 'model'}</span>
+            </div>
+            <span className="usage-activity-tokens">{formatActivityTokens(item)}</span>
+          </div>
+          {item.task && <p className="usage-activity-task">{item.task}</p>}
+        </li>
+      ))}
+      {live && !items.some((item) => item.status === 'running') && (
+        <li className="usage-activity-item usage-activity-waiting">
+          <div className="usage-activity-main">
+            <span className="usage-activity-dot pulse" aria-hidden="true" />
+            <div className="usage-activity-copy">
+              <span className="usage-activity-who">Pipeline</span>
+              <span className="usage-activity-model">waiting for next model call</span>
+            </div>
+          </div>
+        </li>
+      )}
+    </ul>
+  );
+}
+
+function UsageBanner({ usage, live = false }) {
+  const budget = usage?.token_budget ?? 0;
+  const provider = usage?.provider || 'llm';
+  const activities = usage?.activities ?? [];
+  const show =
+    live ||
+    budget > 0 ||
+    (usage?.total_tokens ?? 0) > 0 ||
+    activities.length > 0 ||
+    provider === 'anthropic' ||
+    provider === 'cursor_cli';
+  if (!show) return null;
+
+  const pct = Math.min(100, usage?.usage_percent ?? 0);
+  const level = pct >= 90 ? 'critical' : pct >= 70 ? 'warn' : 'ok';
+  const label =
+    formatUsage(usage, live) ||
+    `${providerLabel(provider)} · token usage tracking…`;
+
+  return (
+    <div
+      className={`usage-banner usage-${level}`}
+      title={usage?.budget_warning || 'LLM token usage for this run'}
+    >
+      <p className="usage-banner-text">{label}</p>
+      {budget > 0 && (
+        <div className="usage-meter-track" aria-hidden="true">
+          <div className="usage-meter-fill" style={{ width: `${Math.max(pct, live && !usage?.total_tokens ? 1 : 0)}%` }} />
+        </div>
+      )}
+      <UsageActivityFeed activities={activities} live={live} />
+      {usage?.budget_warning && <small className="usage-warning">{usage.budget_warning}</small>}
+    </div>
+  );
+}
+
 function Dashboard({ project, onReset }) {
   const [runState, setRunState] = useState(null);
+  const [runLoading, setRunLoading] = useState(true);
   const [view, setView] = useState(null);
   const [modal, setModal] = useState(null);
   const [prdContent, setPrdContent] = useState('');
   const [prdLoading, setPrdLoading] = useState(false);
+  const [flutterManifest, setFlutterManifest] = useState('');
+  const [flutterLoading, setFlutterLoading] = useState(false);
   const [auditEvents, setAuditEvents] = useState([]);
   const [journeyLoading, setJourneyLoading] = useState(false);
   const navRef = useRef();
@@ -381,6 +499,7 @@ function Dashboard({ project, onReset }) {
         checks: {},
         releaseNumber: 1,
       };
+
   const stageIndex = view ?? run.active;
   const stage = stages[stageIndex];
   const viewing = view !== null && view !== run.active;
@@ -389,6 +508,10 @@ function Dashboard({ project, onReset }) {
   const preview = run.browserReady && project.runId ? buildPreviewUrl(project.runId) : null;
   const showPreview = Boolean(preview && (run.browserReady || run.complete));
   const displayName = runState?.project_name || project.projectName || 'Project';
+  const flutterDir =
+    runState?.flutter_project_dir ||
+    (project.runId ? `apps/${project.runId}/flutter` : null);
+  const flutterReady = Boolean(runState?.checks?.flutter_artifacts_ready || run.complete);
   const deliveryCopy =
     stageIndex === 8 ? deliveryStageCopy(runState, displayName) : null;
   const journey = buildProjectJourney(auditEvents, runState);
@@ -401,17 +524,29 @@ function Dashboard({ project, onReset }) {
   }, []);
 
   useEffect(() => {
-    const disconnect = connectRun(project.runId, setRunState, (event) => {
-      setAuditEvents((prev) => {
-        if (prev.some((e) => e.timestamp === event.timestamp && e.event === event.event)) {
-          return prev;
-        }
-        return [...prev, event].sort((a, b) =>
-          (a.timestamp || '').localeCompare(b.timestamp || ''),
-        );
-      });
-    });
-    return disconnect;
+    setRunLoading(true);
+    const loadingTimeout = window.setTimeout(() => setRunLoading(false), 10000);
+    const disconnect = connectRun(
+      project.runId,
+      (state) => {
+        setRunState(state);
+        setRunLoading(false);
+      },
+      (event) => {
+        setAuditEvents((prev) => {
+          if (prev.some((e) => e.timestamp === event.timestamp && e.event === event.event)) {
+            return prev;
+          }
+          return [...prev, event].sort((a, b) =>
+            (a.timestamp || '').localeCompare(b.timestamp || ''),
+          );
+        });
+      },
+    );
+    return () => {
+      window.clearTimeout(loadingTimeout);
+      disconnect();
+    };
   }, [project.runId]);
 
   useEffect(() => {
@@ -430,6 +565,15 @@ function Dashboard({ project, onReset }) {
       inline: 'center',
     });
   }, [stageIndex]);
+
+  useEffect(() => {
+    if (modal !== 'flutter' || !project.runId) return;
+    setFlutterLoading(true);
+    fetchArtifact('build/flutter/manifest.json', project.runId)
+      .then((res) => setFlutterManifest(res.content || ''))
+      .catch(() => setFlutterManifest(''))
+      .finally(() => setFlutterLoading(false));
+  }, [modal, project.runId]);
 
   useEffect(() => {
     if (modal !== 'brief' || !project.runId) return;
@@ -469,6 +613,8 @@ function Dashboard({ project, onReset }) {
         version: '1.0.0',
         approval: run.approval,
         pipeline: runState?.pipeline_steps,
+        flutter_project_dir: runState?.flutter_project_dir || null,
+        flutter_manifest: 'build/flutter/manifest.json',
       },
       null,
       2,
@@ -479,6 +625,37 @@ function Dashboard({ project, onReset }) {
     a.download = `${displayName}-handover.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  if (runLoading && !runState) {
+    return (
+      <>
+        <header className="header dashboard-header">
+          <Brand />
+        </header>
+        <main className="dashboard dashboard-loading">
+          <p role="status">Connecting to factory run…</p>
+        </main>
+      </>
+    );
+  }
+
+  if (!runState) {
+    return (
+      <>
+        <header className="header dashboard-header">
+          <Brand />
+        </header>
+        <main className="dashboard dashboard-loading">
+          <p className="error" role="alert">
+            Could not load run state. Check that the API is running on port 8001, then refresh.
+          </p>
+          <button type="button" className="secondary" onClick={onReset}>
+            Back to intake
+          </button>
+        </main>
+      </>
+    );
   }
 
   return (
@@ -570,6 +747,7 @@ function Dashboard({ project, onReset }) {
           <div className="studio-heading">
             <div>
               <h2>{displayName}</h2>
+              <UsageBanner usage={runState?.usage} live={!run.complete && !run.failed} />
               <p>
                 {stage.key} ·{' '}
                 {stageIndex === 8 && !done
@@ -603,13 +781,26 @@ function Dashboard({ project, onReset }) {
                 <small>Live preview ready · finalizing handover package</small>
               </div>
             )}
+           
             {done && (
               <div className="stage-actions">
                 <button className="primary" onClick={() => setModal('app')}>
-                  View application
+                  View HTML preview
                 </button>
+                {flutterReady && (
+                  <button className="secondary" onClick={() => setModal('flutter')}>
+                    View Flutter source
+                  </button>
+                )}
                 <button className="secondary" onClick={() => setModal('journey')}>
                   Project journey
+                </button>
+              </div>
+            )}
+            {!done && flutterReady && (
+              <div className="stage-actions">
+                <button className="secondary" onClick={() => setModal('flutter')}>
+                  View Flutter source
                 </button>
               </div>
             )}
@@ -728,8 +919,34 @@ function Dashboard({ project, onReset }) {
           )}
         </Modal>
       )}
+      {modal === 'flutter' && (
+        <Modal title={`${displayName} · Flutter source`} onClose={() => setModal(null)}>
+          <p className="brief-text">
+            There is no live Flutter preview in the browser. The factory writes a Flutter
+            project to disk — run it locally with the Flutter SDK.
+          </p>
+          {flutterDir && (
+            <p className="brief-text">
+              Project folder: <code>{flutterDir}</code>
+            </p>
+          )}
+          <pre className="brief-text">{`cd ai_factory/${flutterDir || `apps/${project.runId}/flutter`}
+flutter pub get
+flutter run`}</pre>
+          {flutterLoading ? (
+            <p>Loading manifest…</p>
+          ) : flutterManifest ? (
+            <>
+              <h3>Manifest</h3>
+              <pre className="artifact-content">{flutterManifest}</pre>
+            </>
+          ) : (
+            <p>Manifest not ready yet — check again after the Delivery stage.</p>
+          )}
+        </Modal>
+      )}
       {modal === 'app' && (
-        <Modal title={`${displayName} · Preview`} onClose={() => setModal(null)}>
+        <Modal title={`${displayName} · HTML preview`} onClose={() => setModal(null)}>
           <div className="app-modal">
             <MobileFrame previewUrl={preview} wide>
               {!preview && <ReadyApp />}

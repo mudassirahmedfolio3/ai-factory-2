@@ -108,19 +108,21 @@ export function deliveryStageCopy(runState, displayName) {
   return {
     card1Title: 'Release Artifacts',
     card1Name: `${displayName} · Release v${release}.0.0`,
-    card1Sub: 'Source · Build · Browser preview',
+    card1Sub: 'Flutter project · HTML preview · Docs',
     card1Foot: complete
-      ? 'Tests, security and UAT passed'
+      ? 'Flutter MVP, preview, and handover ready'
       : previewReady
-        ? 'Browser preview ready · Finalizing handover'
-        : 'Packaging source, build and documentation',
+        ? checks.flutter_artifacts_ready
+          ? 'Flutter project ready · Finalizing handover'
+          : 'Browser preview ready · Building Flutter project'
+        : 'Packaging Flutter source, preview, and documentation',
     deployLines: [
+      checks.flutter_artifacts_ready || complete
+        ? 'Flutter project · Ready'
+        : 'Flutter project · Generating',
       previewReady || complete
-        ? 'Production deployment · Complete'
-        : 'Production deployment · Preparing',
-      checks.qa_passed || complete
-        ? 'Health checks · Passed'
-        : 'Health checks · Checking',
+        ? 'HTML preview · Ready'
+        : 'HTML preview · Preparing',
       complete ? 'Handover package · Ready' : 'Handover package · Preparing',
     ],
   };

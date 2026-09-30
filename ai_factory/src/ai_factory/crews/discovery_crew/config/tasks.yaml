@@ -6,7 +6,8 @@ intake_client_brief:
     {client_brief}
 
     List assumptions, open questions, and constraints. Identify MVP vs
-    post-MVP scope for an e-commerce Flutter mobile app.
+    post-MVP scope for the Flutter mobile app described in the client brief
+    (e.g. blog, portal, shop — do NOT assume ecommerce unless the brief says so).
   expected_output: >
     Structured intake summary with assumptions, open questions, MVP scope,
     and post-MVP backlog items in markdown.
@@ -21,7 +22,7 @@ write_prd:
     - Executive summary
     - User personas
     - User stories with acceptance criteria (Given/When/Then)
-    - MVP feature list prioritized for e-commerce mobile
+    - MVP feature list prioritized for the product type in the client brief
     - Non-functional requirements (performance, security, offline)
     - Out of scope items
 
@@ -34,19 +35,17 @@ write_prd:
 
 domain_review:
   description: >
-    Review the PRD against e-commerce mobile best practices.
+    Review the PRD against mobile UX best practices for the product domain
+    implied by the client brief (blog, portal, shop, etc.).
 
-    Validate:
-    - Catalog browse and search flows
-    - Cart behavior (guest vs authenticated)
-    - Checkout and payment UX
-    - Order confirmation and tracking
-    - Account and address management
+    Validate the core user journeys from the brief — auth, primary content/workflow,
+    navigation, and account/settings. Only include catalog/cart/checkout checks
+    when the brief is for a shopping app.
 
     Incorporate any critical gaps into the final requirements document.
   expected_output: >
-    Final requirements document merging PRD content with e-commerce domain
-    review notes and any required story additions or corrections.
+    Final requirements document merging PRD content with domain review notes
+    and any required story additions or corrections.
   agent: ecommerce_advisor
   context:
     - write_prd
