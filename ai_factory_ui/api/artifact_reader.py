@@ -52,15 +52,12 @@ def list_runs() -> list[dict[str, Any]]:
                 snap["is_live"] = False
                 state = read_json(run_dir / "run_state.json") or {}
                 usage = state.get("usage")
+                if not usage or not usage.get("activities"):
+                    rebuilt = _usage_from_fz_state(run_dir.name)
+                    if rebuilt:
+                        usage = rebuilt
                 if usage:
-                    snap["usage"] = {
-                        "total_tokens": usage.get("total_tokens", 0),
-                        "uncached_tokens": usage.get("uncached_tokens", 0),
-                        "llm_calls": usage.get("llm_calls", 0),
-                        "token_budget": usage.get("token_budget", 0),
-                        "usage_percent": usage.get("usage_percent", 0),
-                        "provider": usage.get("provider"),
-                    }
+                    snap["usage"] = usage
                 runs.append(snap)
 
     seen: set[str] = set()
@@ -97,6 +94,12 @@ def get_run(run_id: str) -> dict[str, Any] | None:
         }
         if state.get("usage"):
             payload["usage"] = state["usage"]
+        usage = payload.get("usage") or {}
+        # Older archives may have totals but no per-agent activity rows — rebuild from fz state.
+        if not usage.get("activities"):
+            rebuilt = _usage_from_fz_state(run_id)
+            if rebuilt:
+                payload["usage"] = rebuilt
         if state.get("pipeline_steps") and not payload.get("pipeline_steps"):
             payload["pipeline_steps"] = state["pipeline_steps"]
         if state.get("checks") and not payload.get("checks"):
@@ -107,10 +110,6 @@ def get_run(run_id: str) -> dict[str, Any] | None:
             payload["error"] = state["error"]
         if not payload.get("artifacts_index"):
             payload["artifacts_index"] = state.get("artifacts_index") or _list_archived_artifacts(run_id)
-        if not payload.get("usage"):
-            rebuilt = _usage_from_fz_state(run_id)
-            if rebuilt:
-                payload["usage"] = rebuilt
         payload["flutter_ready"] = flutter_project_ready(run_id, payload)
         return payload
 

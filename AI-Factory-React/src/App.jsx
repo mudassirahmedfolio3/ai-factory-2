@@ -8,6 +8,7 @@ import {
   fetchArtifact,
   fetchAuditEvents,
   getCurrentRun,
+  getRun,
   previewUrl as buildPreviewUrl,
   getEmulatorStatus,
   startEmulatorRun,
@@ -388,9 +389,58 @@ function formatActivityTokens(activity) {
   return dur ? `${tokens} · ${dur}` : tokens;
 }
 
+function groupActivitiesByPhase(activities = []) {
+  const groups = [];
+  const index = new Map();
+  for (const item of activities) {
+    const phase = item.phase || item.task || 'other';
+    if (!index.has(phase)) {
+      index.set(phase, groups.length);
+      groups.push({ phase, items: [] });
+    }
+    groups[index.get(phase)].items.push(item);
+  }
+  return groups;
+}
+
 function UsageActivityFeed({ activities = [], live = false, onSelect }) {
-  const items = [...activities].reverse().slice(0, 8);
+  const all = [...activities];
+  const items = live ? all.reverse().slice(0, 12) : all;
   if (!items.length && !live) return null;
+
+  if (!live && items.length) {
+    const groups = groupActivitiesByPhase(items);
+    return (
+      <div className="usage-activity-archive" aria-label="Model activity by stage">
+        {groups.map((group) => (
+          <div key={group.phase} className="usage-activity-group">
+            <h4 className="usage-activity-phase">{group.phase}</h4>
+            <ul className="usage-activity">
+              {group.items.map((item) => (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    className={`usage-activity-item usage-activity-${item.status || 'completed'} usage-activity-btn`}
+                    onClick={() => onSelect?.(item)}
+                  >
+                    <div className="usage-activity-main">
+                      <span className="usage-activity-dot" aria-hidden="true" />
+                      <div className="usage-activity-copy">
+                        <span className="usage-activity-who">{item.agent || 'Agent'}</span>
+                        <span className="usage-activity-model">{item.model || 'model'}</span>
+                      </div>
+                      <span className="usage-activity-tokens">{formatActivityTokens(item)}</span>
+                    </div>
+                    {item.task && <p className="usage-activity-task">{item.task}</p>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <ul className="usage-activity" aria-label="Model activity">
@@ -481,7 +531,8 @@ function UsageBanner({ usage, live = false }) {
     (usage?.total_tokens ?? 0) > 0 ||
     activities.length > 0 ||
     provider === 'anthropic' ||
-    provider === 'cursor_cli';
+    provider === 'cursor_cli' ||
+    provider === 'agentic_sdlc';
   if (!show) return null;
 
   const pct = Math.min(100, usage?.usage_percent ?? 0);
@@ -1200,8 +1251,15 @@ export default function App() {
     setView('dashboard');
   }
 
-  function openRun(run) {
-    setProject(projectFromRunState(run));
+  async function openRun(run) {
+    const runId = run?.run_id;
+    if (!runId) return;
+    try {
+      const full = await getRun(runId);
+      setProject(projectFromRunState(full || run));
+    } catch {
+      setProject(projectFromRunState(run));
+    }
     setView('dashboard');
   }
 
