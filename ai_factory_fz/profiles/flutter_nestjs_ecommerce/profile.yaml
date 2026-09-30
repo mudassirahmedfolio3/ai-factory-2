@@ -93,6 +93,12 @@ guardrails:
   forbidden_platforms: [web app, web client, website, desktop, electron, pwa]
   money_fields: [price, amount, total, subtotal, cost, fee, tax, discount]
   min_adrs: 3
+  # Agent guardrails (DV3: copies of the approved contract must not drift)
+  contract_copies:
+    docs/openapi.yaml: [server/openapi.yaml, app/openapi.yaml]
+    docs/schema.prisma: [server/prisma/schema.prisma]
+  scope_also_allowed: []        # extra paths any coding item may change (e.g. [.github/])
+  secret_scan_ignore: []        # paths skipped by the secret scan
 
 # Release phase: how staging runs and is checked.
 release:

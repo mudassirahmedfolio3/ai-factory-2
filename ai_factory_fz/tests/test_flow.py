@@ -199,7 +199,8 @@ def _release_flow(tmp_path, canned, answers, worker):
     from test_release import FakeStaging
 
     pipeline = {**PIPELINE, "phases": {**PIPELINE["phases"], "build": True, "release": True},
-                "build": {"milestones": ["M1"]}, "release": {"fix_rounds": 1}}
+                "build": {"milestones": ["M1"]}, "release": {"fix_rounds": 1},
+                "guardrails": {"agents": []}}   # fakes write no real files; guardrails are tested separately
     answers = iter(answers)
 
     def deps_factory(state):

@@ -16,6 +16,7 @@ from agentic_sdlc.build.coders import Worker, make_worker
 from agentic_sdlc.build.loop import BuildConfig, Builder
 from agentic_sdlc import preflight
 from agentic_sdlc.crews import design, discovery, estimation, planning
+from agentic_sdlc.guardrails import agents as agent_guardrails
 from agentic_sdlc.guardrails import architecture as architecture_guardrails
 from agentic_sdlc.crews.base import TaskResult, TaskRunner
 from agentic_sdlc.gates.human import InputFn, gate_mode, request_approval
@@ -193,7 +194,8 @@ class SDLCFlow(Flow[ProjectState]):
             self._checkpoint("Discovery: product brief")
         if not self.state.clarifications:
             max_rounds = self.deps.pipeline.get("limits", {}).get("clarification_rounds", 3)
-            history, results = discovery.clarify(runner, self.state.product_brief, [], max_rounds)
+            history, results = discovery.clarify(runner, self.state.product_brief, [], max_rounds,
+                                                 agent_guardrails.enabled(self.deps.pipeline))
             for r in results:
                 self._record(r)
             self.state.clarifications = history
@@ -253,7 +255,8 @@ class SDLCFlow(Flow[ProjectState]):
         if (self._phase_enabled("design") and self.state.design is None and self.state.architecture is not None
                 and self._can_continue()):
             self.state.design = self._record(design.design_ui(
-                self.deps.runner, self.state.prd, self.state.architecture, self._scope, notes))
+                self.deps.runner, self.state.prd, self.state.architecture, self._scope, notes,
+                agent_guardrails.enabled(self.deps.pipeline)))
             ws.save_artifact("design_system", self.state.design)
             self._checkpoint("Design: design system and screen specs")
         if (self._phase_enabled("planning") and self.state.backlog is None and self.state.architecture is not None
@@ -367,6 +370,7 @@ class SDLCFlow(Flow[ProjectState]):
             can_continue=self._can_continue,
             stop=self._stop,
             emulator=self.deps.emulator,
+            guard_rules=agent_guardrails.enabled(self.deps.pipeline),
         )
 
     @router(or_("release_requested", "revise_release"))

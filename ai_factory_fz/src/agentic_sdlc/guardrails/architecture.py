@@ -19,6 +19,7 @@ from typing import Any, Callable
 import yaml
 
 from agentic_sdlc.artifacts.architecture import ArchitectureDoc
+from agentic_sdlc.guardrails import secrets
 from agentic_sdlc.registry.profiles import Profile
 from agentic_sdlc.release.contract import operations as contract_operations
 from agentic_sdlc.release.contract import strip_prefix
@@ -26,15 +27,6 @@ from agentic_sdlc.release.contract import strip_prefix
 ALL_RULES = ["A1", "A2", "B1", "B2", "B3", "B4", "B5", "B6", "C1", "C2", "C3", "D1", "D2", "D3"]
 _METHODS = {"get", "post", "put", "patch", "delete"}
 _PARAM = re.compile(r"\{[^}]+\}|:[A-Za-z_]\w*")
-_SECRET_PATTERNS = [
-    (re.compile(r"\bsk_(live|test)_[A-Za-z0-9]{10,}"), "a Stripe secret key"),
-    (re.compile(r"\bAKIA[0-9A-Z]{16}\b"), "an AWS access key"),
-    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"), "a private key"),
-    (re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}"), "a GitHub token"),
-    (re.compile(r"\bxox[abpr]-[A-Za-z0-9-]{10,}"), "a Slack token"),
-    (re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"), "a JWT"),
-    (re.compile(r"\b(postgres(?:ql)?|mysql|mongodb(?:\+srv)?)://[^\s:/@]+:[^\s@/]+@"), "a connection string with a password"),
-]
 
 
 class Context:
@@ -277,9 +269,8 @@ def d2_security_basics(c: Context) -> list[str]:
 
 
 def d3_no_secrets(c: Context) -> list[str]:
-    text = c.text()
     return [f"D3: the design contains what looks like {what}; use a placeholder or an environment variable"
-            for pattern, what in _SECRET_PATTERNS if pattern.search(text)]
+            for what in secrets.find(c.text())]
 
 
 RULES: dict[str, Callable[[Context], list[str]]] = {

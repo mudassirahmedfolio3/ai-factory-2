@@ -64,6 +64,24 @@ Rules live in `src/agentic_sdlc/guardrails/architecture.py`; the facts they chec
 platform, money fields) in the profile's `guardrails:` section; which rules are on in each pipeline's
 `guardrails.architect` list. A new profile brings its own stack and platform rules.
 
+## Agent guardrails
+
+The other agents' work is checked too (code checks; a failing result goes back to the same agent):
+
+| Rule | Agent | Checks |
+|---|---|---|
+| DV1 | Backend / Frontend / Deployment | no deleted test files, no fewer test cases, no newly skipped tests |
+| DV2 | Backend / Frontend / Deployment | no real-looking secrets in changed files (placeholders and test values are fine) |
+| DV3 | Backend / Frontend / Deployment | changes stay in the item's component folder; contract copies equal `docs/` |
+| QA1 / QA2 | QA engineer, Integration pass | verdict matches the bugs; bugs name real work items with steps, expected, actual |
+| DE1 | Deployment engineer | Dockerfile runs as non-root and uses the build toolchain's Node major |
+| ST1 | Smoke tester | smoke suite has enough journeys, uses `SMOKE_BASE_URL`, no app imports or mocks; device suite has real tests |
+| CU1 | Customer | every clarification question is answered |
+| UX1 | UI/UX designer | hex colours, unique routes, `onX`/`X` text contrast at least WCAG AA (4.5:1, computed) |
+
+A work item that still breaks a rule after its retries is failed and its changes are discarded, so
+nothing rejected is ever committed. Rules are switched on in each pipeline's `guardrails.agents`.
+
 ## Machine setup (once)
 
 ```bash

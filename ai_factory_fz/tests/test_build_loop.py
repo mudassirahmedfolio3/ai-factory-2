@@ -281,3 +281,42 @@ def test_developer_prompt_includes_what_the_item_builds(tmp_path, prd, profile):
     b.run()
     desc = next(j for j in worker.jobs if j.task_key == "implement_work_item").inputs["item_description"]
     assert "Planned scope: API operations: listProducts; data models: Product" in desc
+
+
+class FileWritingWorker(ScriptedWorker):
+    """Writes the given file contents on successive implement/fix jobs."""
+
+    def __init__(self, ws_ref, contents):
+        super().__init__()
+        self.ws_ref, self.contents = ws_ref, list(contents)
+
+    def run(self, job):
+        if job.task_key in ("implement_work_item", "fix_work_item") and self.contents:
+            self.ws_ref[0].write_text("server/src/pay.ts", self.contents.pop(0))
+        return super().run(job)
+
+
+def test_guardrail_violation_is_fed_back_and_only_the_clean_change_is_committed(tmp_path, prd, profile):
+    from git import Repo
+    ref = [None]
+    worker = FileWritingWorker(ref, ["const k = 'sk_live_51Habcdefghijklmnop';\n", "const k = process.env.STRIPE_KEY;\n"])
+    b, s, _, _ = make_builder(tmp_path, prd, profile, [item("WI-001")], [Milestone(id="M1", name="m", goal="g", work_item_ids=["WI-001"])],
+                              worker=worker, cfg=BuildConfig(milestones=[], guard_rules={"DV2"}))
+    ref[0] = b.ws
+    b.run()
+    fix = [j for j in worker.jobs if j.task_key == "fix_work_item"][0]
+    assert "DV2: server/src/pay.ts contains what looks like a Stripe secret key" in fix.inputs["problems"]
+    assert s.build.item("WI-001").status == "done"
+    committed = Repo(b.ws.root).git.show("HEAD:server/src/pay.ts")
+    assert "process.env" in committed and "sk_live" not in Repo(b.ws.root).git.log("-p")
+
+
+def test_persistent_violation_fails_the_item_and_discards_its_changes(tmp_path, prd, profile):
+    ref = [None]
+    worker = FileWritingWorker(ref, ["const k = 'sk_live_51Habcdefghijklmnop';\n"] * 5)
+    b, s, _, _ = make_builder(tmp_path, prd, profile, [item("WI-001")], [Milestone(id="M1", name="m", goal="g", work_item_ids=["WI-001"])],
+                              worker=worker, cfg=BuildConfig(milestones=[], check_fix_attempts=1, guard_rules={"DV2"}))
+    ref[0] = b.ws
+    b.run()
+    assert s.build.item("WI-001").status == "failed" and "changes discarded" in s.build.item("WI-001").reason
+    assert not (b.ws.root / "server/src/pay.ts").exists()

@@ -22,7 +22,8 @@ from typing import Any, Generic, Protocol, TypeVar
 
 from pydantic import BaseModel
 
-from agentic_sdlc.crews.base import PhaseError, TaskResult, TaskRunner, UsageLimitError, fill_template, is_usage_limit
+from agentic_sdlc.crews.base import (PhaseError, TaskResult, TaskRunner, UsageLimitError, feedback_text,
+                                     fill_template, is_usage_limit)
 from agentic_sdlc.llms.backend import CLAUDE_CODE_PREFIX
 from agentic_sdlc.registry.agents import AgentRegistry
 from agentic_sdlc.state import UsageRecord
@@ -43,6 +44,7 @@ class Job(Generic[T]):
     workdir: str                  # component directory, relative to the workspace
     runtime: str | None           # toolchain the agent may run commands with
     extra_runtimes: list[str] = field(default_factory=list)
+    feedback: str = ""            # guardrail problems from a rejected previous attempt
 
 
 class Worker(Protocol):
@@ -128,7 +130,8 @@ class ClaudeCodeWorker:
         d = self.agents.definition(job.agent_key)
         system = f"You are the {d['role']}. {d['goal'].strip()}\n\n{d['backstory'].strip()}"
         tdef = self.tasks[job.task_key]
-        prompt = fill_template(tdef["description"], {**job.inputs, "tooling": self.tooling_text(job)})
+        prompt = fill_template(tdef["description"], {**job.inputs, "tooling": self.tooling_text(job)}) \
+            + feedback_text(job.feedback)
         env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
         env.update(self.sandbox.config.env)
         wrappers = self._install_wrappers(self._runtimes(job))
@@ -207,7 +210,7 @@ class CrewAIWorker:
             if cmds else "You cannot run commands; the build and tests are run for you after you finish."
         )
         return self.runner.run(job.phase, job.task_key, {**job.inputs, "tooling": tooling}, job.output_model,
-                               agent_key=job.agent_key)
+                               agent_key=job.agent_key, feedback=job.feedback)
 
 
 def make_worker(agent_key: str, agents: AgentRegistry, tasks: dict[str, dict[str, Any]], workspace: Workspace,

@@ -43,6 +43,12 @@ class TaskResult(Generic[T]):
     usage: UsageRecord
 
 
+def feedback_text(feedback: str) -> str:
+    """Appended to a task when its previous attempt was rejected by guardrails."""
+    return (f"\n\nYour previous attempt was rejected by automated checks. Fix all of these:\n{feedback}"
+            if feedback else "")
+
+
 def fill_template(template: str, values: dict[str, Any]) -> str:
     """Replace {name} placeholders in one pass, so braces inside values are left alone."""
 
@@ -88,12 +94,13 @@ class TaskRunner:
         guardrail: Guardrail | None = None,
         agent_key: str | None = None,
         with_tools: bool = True,
+        feedback: str = "",
     ) -> TaskResult[T]:
         """Run a task from tasks.yaml. `agent_key` overrides the task's default agent;
         with_tools=False runs it without the agent's tools (review-only tasks)."""
         tdef = self.tasks[task_key]
         agent_key = agent_key or tdef["agent"]
-        description = fill_template(tdef["description"], inputs)
+        description = fill_template(tdef["description"], inputs) + feedback_text(feedback)
         last_error: Exception | None = None
 
         for model in self.agents.models.spec_for(agent_key).candidates():
