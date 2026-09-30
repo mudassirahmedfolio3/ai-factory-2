@@ -55,13 +55,16 @@ class ClaudeCodeLLM(BaseLLM):
     effort: str | None = None
     timeout: float = 900
     cli_path: str = "claude"
+    # Permission rules for Claude Code's web tools, e.g. ["WebSearch", "WebFetch"]; empty = no tools.
+    web_rules: list[str] = []
 
     def build_command(self, system: str, response_model: type[BaseModel] | None) -> list[str]:
         cmd = [
             self.cli_path, "-p",
             "--output-format", "json",
             "--model", self.model,
-            "--tools", "",
+            *(["--tools", "WebSearch,WebFetch", "--permission-mode", "dontAsk", "--allowedTools", *self.web_rules]
+              if self.web_rules else ["--tools", ""]),
             "--no-session-persistence",
             "--setting-sources", "",
             "--strict-mcp-config",

@@ -373,3 +373,40 @@ write_device_tests:
       device (e.g. cleartext HTTP blocked), leave the test as is: that failure goes to the
       frontend developer.
   expected_output: A report of the on-device tests you wrote.
+
+# ---------- estimation review (bottom-up) ----------
+
+review_estimates:
+  agent: backend_developer   # run as each component's developer (see profile components)
+  description: |
+    You will build the work items below. The Project manager drafted them with estimates; give
+    your own estimate for each, as the person who will do the work.
+
+    Your work items:
+    {items}
+
+    The solution they are part of:
+    {solution}
+
+    Stack: {stack}
+
+    For every item: points (1-8, same scale as the PM: 1 = trivial, 3 = a solid half-day of
+    focused work including tests, 8 = the largest item worth keeping together), complexity, risk
+    and confidence (low/medium/high), and a one-line rationale naming what drives the effort.
+    Include writing tests and getting the build green. Use `concerns` for anything the plan misses
+    or underestimates (hidden work, missing dependency, unclear requirement). Estimate honestly:
+    do not simply copy the PM's number, and do not pad.
+  expected_output: One estimate per work item.
+
+reconcile_estimates:
+  agent: project_manager
+  description: |
+    The developers re-estimated your work breakdown. For these items the two estimates are far
+    apart:
+
+    {disagreements}
+
+    Decide the final estimate for each, between the two numbers, and say why in one line. Weigh
+    the builder's concrete reasons (hidden work, concerns) against your view of scope. Where the
+    builder names work the plan misses, lean towards their number.
+  expected_output: One decision per disputed item.

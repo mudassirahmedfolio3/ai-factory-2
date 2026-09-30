@@ -24,11 +24,20 @@ class FakeRunner:
         self.canned = canned
         self.calls: list[tuple[str, dict]] = []
 
-    def run(self, phase, task_key, inputs, output_model, guardrail=None):
+    def run(self, phase, task_key, inputs, output_model, guardrail=None, agent_key=None, with_tools=True):
         self.calls.append((task_key, inputs))
-        artifact = self.canned[task_key].model_copy(deep=True)
+        if task_key == "review_estimates":
+            # Each developer agrees with the PM's draft (disagreements are tested in test_estimation.py).
+            import re
+            from agentic_sdlc.artifacts.estimates import EstimateReview, ItemEstimate
+            estimates = [ItemEstimate(item_id=i, points=int(p), complexity="medium", risk="medium",
+                                      confidence="medium", rationale="ok")
+                         for i, p in re.findall(r"- (WI-\d+) .*?PM estimate: (\d+) pts", inputs["items"], re.S)]
+            artifact = EstimateReview(estimates=estimates)
+        else:
+            artifact = self.canned[task_key].model_copy(deep=True)
         assert isinstance(artifact, output_model)
-        return TaskResult(artifact=artifact, usage=UsageRecord(phase=phase, agent=task_key, model="fake", total_tokens=10))
+        return TaskResult(artifact=artifact, usage=UsageRecord(phase=phase, agent=agent_key or task_key, model="fake", total_tokens=10))
 
     def keys(self):
         return [k for k, _ in self.calls]
@@ -64,13 +73,14 @@ def test_happy_path_runs_all_built_phases(tmp_path, canned):
     assert runner.keys() == [
         "customer_brief", "spec_questions", "customer_answers", "spec_questions",
         "customer_answers", "write_prd", "design_architecture", "design_ui", "plan_backlog",
+        "review_estimates", "review_estimates",
     ]
     assert [(g.gate, g.approved) for g in s.gate_history] == [("prd", True), ("architecture", True)]
     root = tmp_path / "r1"
     for f in ("prd.md", "backlog.md", "architecture.md", "openapi.yaml", "schema.prisma", "design_system.md"):
         assert (root / "docs" / f).exists(), f
     assert json.loads((root / "state.json").read_text())["status"] == "completed"
-    assert "Total tokens: 90" in (root / "reports" / "run_summary.md").read_text()
+    assert "Total tokens: 110" in (root / "reports" / "run_summary.md").read_text()  # 11 agent calls
 
 
 def test_rejected_prd_is_rewritten_with_feedback(tmp_path, canned):
@@ -256,3 +266,12 @@ def test_preflight_problems_stop_the_run_before_any_agent(tmp_path, canned):
     assert flow.state.status == "stopped"
     assert "uv run setup" in flow.state.stop_reason and "uv run resume rp" in flow.state.stop_reason
     assert runner.calls == []
+
+
+def test_estimation_review_can_be_switched_off(tmp_path, canned):
+    runner = FakeRunner(canned)
+    pipeline = {**PIPELINE, "planning": {"estimation_review": False}}
+    flow = make_flow(tmp_path, runner, ["y", "", "y", ""], pipeline=pipeline)
+    flow.kickoff(inputs={"run_id": "re", "brief": "shop"})
+    assert flow.state.status == "completed" and "review_estimates" not in runner.keys()
+    assert not flow.state.backlog.estimation_reviewed

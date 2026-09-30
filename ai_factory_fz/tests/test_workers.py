@@ -64,7 +64,7 @@ def test_claude_code_worker_local_mode(tmp_path, monkeypatch):
     rec = json.loads(log.read_text())
     argv = rec["argv"]
     assert rec["cwd"] == str(ws.root / "server")
-    assert argv[argv.index("--model") + 1] == "claude-opus-5-5"
+    assert argv[argv.index("--model") + 1] == "claude-sonnet-5-5"
     assert argv[argv.index("--permission-mode") + 1] == "dontAsk"
     allowed = argv[argv.index("--allowedTools") + 1 : argv.index("--disallowedTools")]
     assert {"Read", "Edit", "Write", "Bash(npm test)", "Bash(npm test *)"} <= set(allowed)
@@ -146,4 +146,4 @@ def test_usage_limit_stops_without_trying_the_fallback_model(tmp_path):
     cli, log = fake_cli(tmp_path, {**REPLY, "is_error": False, "result": "You've hit your session limit · resets 8:10pm", "structured_output": None})
     with pytest.raises(UsageLimitError, match="resets 8:10pm"):
         ClaudeCodeWorker(agents, load_config("tasks"), ws, sandbox, cli_path=cli).run(job())
-    assert "claude-opus-5-5" in json.loads(log.read_text())["argv"]  # only the primary model was tried
+    assert "claude-sonnet-5-5" in json.loads(log.read_text())["argv"]  # the primary model (Sonnet since the Opus switch)

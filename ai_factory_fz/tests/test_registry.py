@@ -104,3 +104,10 @@ def test_pipeline_model_overrides():
     assert ModelRegistry.from_config().spec_for("architect").model.endswith("claude-opus-5-5")  # full runs unchanged
     with pytest.raises(KeyError, match="unknown agents"):
         ModelRegistry.from_config({"nobody": "fast"})
+
+
+def test_review_only_tasks_build_developers_without_tools():
+    profile = Profile.load("flutter_nestjs_ecommerce")
+    reg = AgentRegistry(load_config("agents"), ModelRegistry.from_config(), profile)  # no tool resolver
+    agent = reg.build("backend_developer", with_tools=False)
+    assert agent.tools == []

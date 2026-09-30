@@ -106,7 +106,7 @@ class ClaudeCodeWorker:
 
     def build_command(self, job: Job, model: str, system: str) -> list[str]:
         docs = str(self.workspace.root / "docs")
-        allowed = ["Read", "Glob", "Grep", "Edit", "Write"]
+        allowed = ["Read", "Glob", "Grep", "Edit", "Write", *self.agents.web_rules(job.agent_key)]
         for c in allowed_commands(self.sandbox, self._runtimes(job)):
             allowed += [f"Bash({c})", f"Bash({c} *)"]
         return [

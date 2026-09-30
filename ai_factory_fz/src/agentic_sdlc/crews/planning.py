@@ -5,6 +5,8 @@ breakdown and estimates are built on the actual solution: every API operation, d
 screen must be covered by a work item, and app items depend on the backend items they call.
 """
 
+from typing import Callable
+
 from agentic_sdlc.artifacts.architecture import ArchitectureDoc
 from agentic_sdlc.artifacts.backlog import Backlog
 from agentic_sdlc.artifacts.design import DesignSystem
@@ -22,8 +24,11 @@ def design_architecture(
     domain_entities: list[str],
     revision_notes: str,
     scope: Scope | None = None,
+    guardrails: Callable[[ArchitectureDoc], list[str]] | None = None,
 ) -> TaskResult[ArchitectureDoc]:
+    """`guardrails`: extra checks on the design (see guardrails/architecture.py)."""
     scope = scope or Scope()
+    extra = guardrails or (lambda a: [])
     return runner.run(
         PHASE,
         "design_architecture",
@@ -36,7 +41,8 @@ def design_architecture(
         },
         ArchitectureDoc,
         guardrail=artifact_guardrail(
-            ArchitectureDoc, lambda a: a.openapi_errors() + a.prisma_errors() + scope.architecture_errors(a)
+            ArchitectureDoc,
+            lambda a: a.openapi_errors() + a.prisma_errors() + scope.architecture_errors(a) + extra(a),
         ),
     )
 

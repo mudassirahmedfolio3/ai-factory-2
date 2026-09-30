@@ -87,15 +87,17 @@ class TaskRunner:
         output_model: type[T],
         guardrail: Guardrail | None = None,
         agent_key: str | None = None,
+        with_tools: bool = True,
     ) -> TaskResult[T]:
-        """Run a task from tasks.yaml. `agent_key` overrides the task's default agent."""
+        """Run a task from tasks.yaml. `agent_key` overrides the task's default agent;
+        with_tools=False runs it without the agent's tools (review-only tasks)."""
         tdef = self.tasks[task_key]
         agent_key = agent_key or tdef["agent"]
         description = fill_template(tdef["description"], inputs)
         last_error: Exception | None = None
 
         for model in self.agents.models.spec_for(agent_key).candidates():
-            agent = self.agents.build(agent_key, model)
+            agent = self.agents.build(agent_key, model, with_tools=with_tools)
             task = Task(
                 description=description,
                 expected_output=tdef["expected_output"].strip(),

@@ -3,6 +3,9 @@
 # stack-specific context to the backstory.
 #
 # tools: names from src/agentic_sdlc/tools/registry.py
+# web:   true = may search the web and read pages; a list of domains = page reads limited to those
+#        (search stays allowed). Claude Code path: built-in WebSearch/WebFetch. API path: CrewAI
+#        web tools (page reading; search needs SERPER_API_KEY).
 
 customer:
   role: Customer / Product Owner
@@ -50,6 +53,7 @@ architect:
     relational databases. You prefer boring, proven technology, write clear
     architecture decision records, and design APIs contract-first.
   tools: []
+  web: true
 
 ui_ux_designer:
   role: UI/UX Designer
@@ -69,6 +73,7 @@ backend_developer:
     You are a senior backend engineer. You follow the architecture and API
     contract exactly, write focused unit tests, and keep changes small.
   tools: [fs_read, fs_write, fs_list, sandbox_exec]
+  web: true
 
 frontend_developer:
   role: Mobile Frontend Developer
@@ -78,6 +83,7 @@ frontend_developer:
     architecture, use the generated API client instead of hand-written HTTP
     calls, and write widget tests.
   tools: [fs_read, fs_write, fs_list, sandbox_exec]
+  web: true
 
 qa_engineer:
   role: QA Engineer

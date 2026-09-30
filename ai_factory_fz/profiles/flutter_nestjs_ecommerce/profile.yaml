@@ -82,6 +82,18 @@ components:
     runtime: null
     checks: []
 
+# What the Architect's output is checked against (see src/agentic_sdlc/guardrails/architecture.py).
+guardrails:
+  required_stack: [flutter, nestjs, prisma, postgresql]   # must appear in the components
+  forbidden_stack: [react, react native, angular, vue, next.js, express, django, rails, laravel, spring,
+                    mongodb, mysql, firestore, firebase auth, cloud functions, supabase, graphql,
+                    kotlin, swift, xamarin, ionic]    # backends/clients outside the stack (SDKs like analytics are fine)
+  platform: flutter mobile (Android and iOS)
+  platform_technology: flutter
+  forbidden_platforms: [web app, web client, website, desktop, electron, pwa]
+  money_fields: [price, amount, total, subtotal, cost, fee, tax, discount]
+  min_adrs: 3
+
 # Release phase: how staging runs and is checked.
 release:
   api_component: backend

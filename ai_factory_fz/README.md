@@ -29,16 +29,40 @@ architecture and the release. Any pipeline file can set the same `scope:` limits
 
 ```
 Customer ⇄ Spec writer ─► Gate 1 (PRD)
-  ─► Architect ─► UI/UX designer ─► Project manager (WBS + estimates) ─► Gate 2 (solution + plan)
+  ─► Architect ─► UI/UX designer ─► Project manager (WBS + draft estimates)
+  ─► Backend/Frontend/Deployment developers re-estimate their items ─► PM reconciles big gaps
+  ─► Gate 2 (solution + plan)
   ─► Build: developers per work item (checks) ─► QA per milestone
   ─► Release: staging, contract check, integration pass, smoke + device tests ─► Gate 3 ─► production
 ```
+
+Estimates are bottom-up: after the Project manager drafts the plan, each developer agent
+re-estimates the items it will build (one call per agent, no tools). A small gap adopts the
+builder's number; a big gap (`planning.big_gap_points` / `big_gap_ratio`) is reconciled by the PM,
+between the two numbers, with a reason. `docs/backlog.md` shows PM, developer and final points,
+and lists the disagreements as the highest estimate risk. Switch off with `planning.estimation_review: false`.
 
 The Project manager plans the *solution*: each work item links to the API operations, data models
 and screens it builds, with points, risk, confidence and a rationale. The plan is rejected (and
 redone) unless every operation, model and screen is covered and app items depend on the backend
 items they call. `docs/backlog.md` shows the plan with totals and the critical path. Rejecting
 Gate 2 rewrites architecture, design and plan together with your feedback.
+
+## Architect guardrails
+
+The Architect's design is checked in code before anyone sees it; a failing design goes back to the
+Architect with the list of problems (up to 2 retries, then the run stops with the reasons).
+
+| Group | Rules |
+|---|---|
+| Stack and platform | A1 no technology outside the profile's stack, core stack used · A2 Flutter mobile app only |
+| API contract | B1 module endpoints match `openapi.yaml` · B2 health endpoint · B3 `/api/v1` prefix · B4 one shared error schema · B5 typed responses · B6 every operation secured or explicitly public |
+| Data model | C1 module entities exist in `schema.prisma` · C2 money fields are `Int` (cents) · C3 `@id`, `createdAt`, `updatedAt` |
+| Decisions and security | D1 at least 3 complete ADRs · D2 authentication, input validation, secrets covered · D3 no secrets in the design |
+
+Rules live in `src/agentic_sdlc/guardrails/architecture.py`; the facts they check against (stack,
+platform, money fields) in the profile's `guardrails:` section; which rules are on in each pipeline's
+`guardrails.architect` list. A new profile brings its own stack and platform rules.
 
 ## Machine setup (once)
 

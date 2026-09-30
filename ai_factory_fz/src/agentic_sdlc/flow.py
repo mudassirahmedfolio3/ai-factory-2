@@ -15,7 +15,8 @@ from pydantic import PrivateAttr
 from agentic_sdlc.build.coders import Worker, make_worker
 from agentic_sdlc.build.loop import BuildConfig, Builder
 from agentic_sdlc import preflight
-from agentic_sdlc.crews import design, discovery, planning
+from agentic_sdlc.crews import design, discovery, estimation, planning
+from agentic_sdlc.guardrails import architecture as architecture_guardrails
 from agentic_sdlc.crews.base import TaskResult, TaskRunner
 from agentic_sdlc.gates.human import InputFn, gate_mode, request_approval
 from agentic_sdlc.registry.agents import AgentRegistry
@@ -242,6 +243,7 @@ class SDLCFlow(Flow[ProjectState]):
             arch = self._record(planning.design_architecture(
                 self.deps.runner, self.state.prd, self.deps.profile.stack_summary(),
                 self.deps.profile.domain_entities, notes, self._scope,
+                guardrails=architecture_guardrails.checker(self.deps.profile, self.deps.pipeline),
             ))
             self.state.architecture = arch
             ws.save_artifact("architecture", arch)
@@ -262,6 +264,15 @@ class SDLCFlow(Flow[ProjectState]):
             ))
             ws.save_artifact("backlog", self.state.backlog)
             self._checkpoint("Planning: work breakdown and estimates")
+        est = estimation.EstimationConfig.from_pipeline(self.deps.pipeline)
+        # Only while Gate 2 is open: an approved plan is not re-estimated behind the reviewer's back.
+        if est.enabled and self.state.backlog is not None and not self.state.backlog.estimation_reviewed \
+                and not self.state.gate_approved("architecture") and self._can_continue():
+            for result in estimation.review_estimates(self.deps.runner, self.state.backlog, self.state.architecture,
+                                                      self.deps.profile, est):
+                self._record(result)
+            ws.save_artifact("backlog", self.state.backlog)
+            self._checkpoint("Planning: developers' estimation review")
 
     @router(or_(solution_phase, "revise_solution"))
     def architecture_gate(self) -> Literal["architecture_approved", "architecture_rejected", "stopped"]:
@@ -276,6 +287,11 @@ class SDLCFlow(Flow[ProjectState]):
             f"{len(a.data_models())} data models{screens}, {len(a.adrs)} ADRs. Plan: {len(b.work_items)} work items, "
             f"{b.total_points()} points in {len(b.milestones)} milestones; critical path {' → '.join(b.critical_path())}."
         )
+        if b.estimation_reviewed:
+            changed = sum(1 for w in b.work_items if w.pm_points is not None and w.pm_points != w.estimate_points)
+            disputed = sum(1 for w in b.work_items if w.disagreement)
+            summary += (f" Estimates reviewed by the developers: {changed} changed from the PM's draft, "
+                        f"{disputed} big disagreements reconciled (see docs/backlog.md).")
         docs = ["docs/architecture.md", "docs/openapi.yaml", "docs/schema.prisma", "docs/design_system.md", "docs/backlog.md"]
 
         def discard() -> None:
@@ -391,6 +407,8 @@ class SDLCFlow(Flow[ProjectState]):
     def _summary_markdown(self) -> str:
         s = self.state
         lines = [f"# Run {s.run_id}", "", f"Status: **{s.status}**"]
+        lines.append("Architect guardrails enforced: "
+                     + ", ".join(architecture_guardrails.enabled_rules(self.deps.pipeline)))
         if s.stop_reason:
             lines.append(f"Stop reason: {s.stop_reason}")
         lines += ["", "## Gates", "| Gate | Approved | By | Feedback | At |", "|---|---|---|---|---|"]

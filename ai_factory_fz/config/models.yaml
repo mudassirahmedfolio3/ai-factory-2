@@ -17,7 +17,7 @@ tiers:
     fallbacks: [anthropic/claude-sonnet-5-5]
   balanced:
     model: anthropic/claude-sonnet-5-5
-    fallbacks: [anthropic/claude-opus-5-5]
+    fallbacks: []
   fast:
     model: anthropic/claude-haiku-4-5-20251001
     fallbacks: [anthropic/claude-sonnet-5-5]
@@ -34,8 +34,8 @@ agents:
     effort: high
     timeout: 1800
   ui_ux_designer: balanced
-  backend_developer: reasoning
-  frontend_developer: reasoning
+  backend_developer: balanced
+  frontend_developer: balanced
   qa_engineer: balanced
   deployment_engineer: balanced
   integration_pass: balanced
