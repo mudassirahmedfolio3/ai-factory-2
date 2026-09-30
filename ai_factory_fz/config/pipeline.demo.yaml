@@ -1,0 +1,63 @@
+# Demo pipeline: a very small app, built and released end to end in one sitting.
+# Use it with:  uv run kickoff --brief briefs/demo_mini.md --pipeline pipeline.demo
+
+phases:
+  discovery: true
+  planning: true
+  design: true
+  build: true
+  release: true
+
+# Hard limits for the planning agents; their output is rejected if it goes over.
+scope:
+  guidance: >
+    This is a demo build. Keep only the core journey: browse products, see one product,
+    add it to a cart, view the cart. No user accounts or sign-in (the app creates an anonymous
+    cart id and keeps it on the device), no payments or checkout, no admin tools, no emails.
+    Seed a handful of demo products in the database.
+  max_user_stories: 4
+  max_work_items: 6
+  max_milestones: 2
+  max_api_operations: 6
+  max_screens: 3
+
+# Model overrides for this pipeline (same format as config/models.yaml `agents:`).
+# Sonnet instead of Opus for the heaviest agents: about twice as fast, for a quick demo.
+models:
+  architect: balanced
+  backend_developer: balanced
+  frontend_developer: balanced
+
+build:
+  milestones: []             # all of them (the scope keeps it to two)
+  sandbox: docker            # SDLC_SANDBOX=local overrides
+  check_fix_attempts: 2
+  agent_timeout_s: 1800
+
+release:
+  staging_port: 3100
+  startup_timeout_s: 120
+  fix_rounds: 1
+  # Run the mobile app on an Android emulator against staging (needs `uv run setup-android` once).
+  device:
+    enabled: true
+    headless: true           # pipeline runs; `uv run showcase` opens a window
+    boot_timeout_s: 420
+  production_command: ""     # package only
+  production_timeout_s: 900
+
+# Every gate asks you (y/n) on the terminal.
+gates:
+  prd: true
+  architecture: true
+  release: true
+
+gate_mode: console
+
+limits:
+  clarification_rounds: 1
+  gate_rejections: 3
+  qa_fix_rounds: 2
+
+budget:
+  max_total_tokens: 1500000  # uncached tokens

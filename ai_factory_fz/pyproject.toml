@@ -1,0 +1,38 @@
+[project]
+name = "agentic_sdlc"
+version = "0.1.0"
+description = "agentic_sdlc using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[anthropic,tools]>=1.15.22,<2.0.0",
+    "gitpython>=3.1.62",
+    "openapi-spec-validator>=0.9.0",
+    "python-dotenv>=1.2.3",
+    "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+kickoff = "agentic_sdlc.main:kickoff"
+run_crew = "agentic_sdlc.main:kickoff"
+resume = "agentic_sdlc.main:resume"
+setup-android = "agentic_sdlc.main:setup_android"
+showcase = "agentic_sdlc.main:showcase"
+plot = "agentic_sdlc.main:plot"
+run_with_trigger = "agentic_sdlc.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "flow"
+project_id = "875015c9-1614-4931-b0f4-3209d6bcb011"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

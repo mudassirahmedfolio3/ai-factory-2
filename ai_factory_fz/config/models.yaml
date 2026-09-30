@@ -1,0 +1,42 @@
+# Model registry: which LLM each agent uses.
+#
+# How anthropic/... models are called is chosen in .env, not here:
+#   CLAUDE_CODE_ENABLE=true   -> through Claude Code (`claude -p`) with CLAUDE_CODE_OAUTH_TOKEN
+#   CLAUDE_CODE_ENABLE=false  -> the Claude API with ANTHROPIC_API_KEY
+#
+# Other providers work too (need their API key in .env): openai/gpt-5, gemini/gemini-2.5-pro,
+# ollama/llama3.3, ... A model written as claude-code/<model> always uses Claude Code.
+
+defaults:
+  max_tokens: 16000   # API path only; Claude Code chooses its own output limit
+  timeout: 1200       # seconds per call
+
+tiers:
+  reasoning:
+    model: anthropic/claude-opus-5-5
+    fallbacks: [anthropic/claude-sonnet-5-5]
+  balanced:
+    model: anthropic/claude-sonnet-5-5
+    fallbacks: [anthropic/claude-opus-5-5]
+  fast:
+    model: anthropic/claude-haiku-4-5-20251001
+    fallbacks: [anthropic/claude-sonnet-5-5]
+
+# agent key -> tier name, or an inline {model, fallbacks, timeout, effort, ...} mapping.
+# `effort` (low | medium | high | xhigh | max) applies on the Claude Code path only.
+agents:
+  customer: balanced
+  spec_writer: balanced
+  project_manager: fast
+  architect:
+    model: anthropic/claude-opus-5-5
+    fallbacks: [anthropic/claude-sonnet-5-5]
+    effort: high
+    timeout: 1800
+  ui_ux_designer: balanced
+  backend_developer: reasoning
+  frontend_developer: reasoning
+  qa_engineer: balanced
+  deployment_engineer: balanced
+  integration_pass: balanced
+  smoke_tester: fast
