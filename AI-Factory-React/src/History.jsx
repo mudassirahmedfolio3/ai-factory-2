@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { listRuns } from './api.js';
+import { listRuns, startEmulatorRun } from './api.js';
 
 function Brand() {
   return (
@@ -50,6 +50,8 @@ export default function History({ onOpenRun, onNewProject }) {
   const [runs, setRuns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [emulatorBusyId, setEmulatorBusyId] = useState(null);
+  const [emulatorMsg, setEmulatorMsg] = useState('');
 
   const load = useCallback(() => {
     setLoading(true);
@@ -73,6 +75,25 @@ export default function History({ onOpenRun, onNewProject }) {
     return () => window.removeEventListener('focus', onFocus);
   }, [load]);
 
+  async function handleRunEmulator(run) {
+    if (!run?.run_id || emulatorBusyId) return;
+    setEmulatorBusyId(run.run_id);
+    setEmulatorMsg('');
+    try {
+      const status = await startEmulatorRun(run.run_id);
+      setEmulatorMsg(
+        status.message ||
+          `Emulator ${status.status || 'starting'} for ${run.project_name || run.run_id}` +
+            (status.device_id ? ` · ${status.device_id}` : '') +
+            (status.note ? ` · ${status.note}` : ''),
+      );
+    } catch (err) {
+      setEmulatorMsg(err.message || 'Failed to start emulator');
+    } finally {
+      setEmulatorBusyId(null);
+    }
+  }
+
   return (
     <>
       <header className="header history-header">
@@ -86,8 +107,18 @@ export default function History({ onOpenRun, onNewProject }) {
       <main className="history">
         <div className="history-intro">
           <h1>Run history</h1>
-          <p>Recent factory runs and their status. Open any run for full details.</p>
+          <p>
+            Recent factory runs and their status. Open any run for full details, or launch a
+            Flutter app on your local emulator when sources are available under{' '}
+            <code>ai_factory/apps</code>.
+          </p>
         </div>
+
+        {emulatorMsg && (
+          <p className="history-emulator-msg" role="status">
+            {emulatorMsg}
+          </p>
+        )}
 
         {loading && (
           <p className="history-status" role="status">
@@ -123,22 +154,43 @@ export default function History({ onOpenRun, onNewProject }) {
                     <span className={`run-status run-status-${statusClass(run)}`}>
                       {statusLabel(run)}
                     </span>
+                    {run.flutter_ready ? (
+                      <span className="run-status run-status-flutter">Flutter</span>
+                    ) : null}
                   </div>
                   <div className="history-row-meta">
                     <span title="Run ID">{run.run_id}</span>
                     {run.phase ? <span>{run.phase}</span> : null}
                     {run.complexity ? <span>{run.complexity}</span> : null}
+                    {run.usage?.total_tokens ? (
+                      <span title="LLM tokens">
+                        {(run.usage.uncached_tokens ?? run.usage.total_tokens).toLocaleString()} tokens
+                        {run.usage.llm_calls ? ` · ${run.usage.llm_calls} calls` : ''}
+                      </span>
+                    ) : null}
                     <span>{formatWhen(run)}</span>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="primary"
-                  onClick={() => onOpenRun(run)}
-                  disabled={!run.run_id}
-                >
-                  View details
-                </button>
+                <div className="history-row-actions">
+                  {run.flutter_ready ? (
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => handleRunEmulator(run)}
+                      disabled={Boolean(emulatorBusyId)}
+                    >
+                      {emulatorBusyId === run.run_id ? 'Starting…' : 'Run on emulator'}
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="primary"
+                    onClick={() => onOpenRun(run)}
+                    disabled={!run.run_id}
+                  >
+                    View details
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

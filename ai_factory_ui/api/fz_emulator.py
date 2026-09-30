@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from config import AI_FACTORY_FZ_ROOT, ARTIFACTS_DIR, FZ_RUNS_DIR
+from config import AI_FACTORY_FZ_ROOT, AI_FACTORY_ROOT, ARTIFACTS_DIR, FZ_RUNS_DIR
 
 EMULATOR_DIR = ARTIFACTS_DIR / "emulator"
 _lock = threading.Lock()
@@ -117,6 +117,10 @@ def _pid_alive(pid: int) -> bool:
 
 
 def resolve_flutter_project(run_id: str, run_state: dict[str, Any] | None = None) -> Path | None:
+    """Locate a runnable Flutter project for a run id.
+
+    Order: explicit flutter_project_dir → fz runs/{id}/app → legacy ai_factory/apps/{id}/flutter.
+    """
     if run_state:
         raw = run_state.get("flutter_project_dir")
         if raw:
@@ -126,7 +130,14 @@ def resolve_flutter_project(run_id: str, run_state: dict[str, Any] | None = None
     app_dir = FZ_RUNS_DIR / run_id / "app"
     if (app_dir / "pubspec.yaml").is_file():
         return app_dir
+    legacy = AI_FACTORY_ROOT / "apps" / run_id / "flutter"
+    if (legacy / "pubspec.yaml").is_file():
+        return legacy
     return None
+
+
+def flutter_project_ready(run_id: str, run_state: dict[str, Any] | None = None) -> bool:
+    return resolve_flutter_project(run_id, run_state) is not None
 
 
 def _run_flutter(
@@ -353,7 +364,8 @@ def start(run_id: str, device_id: str | None = None, run_state: dict[str, Any] |
     project = resolve_flutter_project(run_id, run_state)
     if not project:
         raise ValueError(
-            "Flutter project not found for this run. Wait until the build phase creates ai_factory_fz/runs/{run_id}/app."
+            "Flutter project not found for this run. Expected "
+            f"ai_factory_fz/runs/{run_id}/app or ai_factory/apps/{run_id}/flutter with a pubspec.yaml."
         )
 
     with _lock:

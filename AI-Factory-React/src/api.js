@@ -56,10 +56,6 @@ export function fetchRandomBrief() {
   return fetchJson('/briefs/random');
 }
 
-export function listComplexityOptions() {
-  return fetchJson('/complexity-options');
-}
-
 export function startRun(body) {
   return fetchJson('/runs', {
     method: 'POST',

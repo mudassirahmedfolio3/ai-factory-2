@@ -13,11 +13,11 @@ defaults:
 
 tiers:
   reasoning:
-    model: anthropic/claude-opus-5-5
+    model: anthropic/claude-sonnet-5-5
     fallbacks: [anthropic/claude-sonnet-5-5]
   balanced:
     model: anthropic/claude-sonnet-5-5
-    fallbacks: [anthropic/claude-opus-5-5]
+    fallbacks: [anthropic/claude-sonnet-5-5]
   fast:
     model: anthropic/claude-haiku-4-5-20251001
     fallbacks: [anthropic/claude-sonnet-5-5]

@@ -237,10 +237,12 @@ def emulator_status(run_id: str) -> dict[str, Any]:
 
 @app.post("/runs/{run_id}/emulator/start")
 def emulator_start(run_id: str, body: EmulatorStartRequest | None = None) -> dict[str, Any]:
-    from fz_emulator import start as start_emulator
+    from fz_emulator import flutter_project_ready, start as start_emulator
 
     run = get_run(run_id)
-    if not run:
+    # Allow launching when Flutter sources exist under apps/{id}/flutter even if
+    # the run is not in the archived snapshot index.
+    if not run and not flutter_project_ready(run_id):
         raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
     try:
         return start_emulator(run_id, device_id=body.device_id if body else None, run_state=run)

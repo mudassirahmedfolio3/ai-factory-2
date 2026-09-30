@@ -36,6 +36,8 @@ def get_current_run_state() -> dict[str, Any] | None:
 
 
 def list_runs() -> list[dict[str, Any]]:
+    from fz_emulator import flutter_project_ready
+
     runs: list[dict[str, Any]] = []
     current = get_current_run_state()
     if current and current.get("status") == "running":
@@ -48,6 +50,17 @@ def list_runs() -> list[dict[str, Any]]:
             snap = read_json(run_dir / "snapshot.json")
             if snap:
                 snap["is_live"] = False
+                state = read_json(run_dir / "run_state.json") or {}
+                usage = state.get("usage")
+                if usage:
+                    snap["usage"] = {
+                        "total_tokens": usage.get("total_tokens", 0),
+                        "uncached_tokens": usage.get("uncached_tokens", 0),
+                        "llm_calls": usage.get("llm_calls", 0),
+                        "token_budget": usage.get("token_budget", 0),
+                        "usage_percent": usage.get("usage_percent", 0),
+                        "provider": usage.get("provider"),
+                    }
                 runs.append(snap)
 
     seen: set[str] = set()
@@ -58,25 +71,124 @@ def list_runs() -> list[dict[str, Any]]:
             continue
         if rid:
             seen.add(rid)
-        unique.append(run)
+        unique.append({**run, "flutter_ready": flutter_project_ready(rid, run)})
     return unique
 
 
 def get_run(run_id: str) -> dict[str, Any] | None:
+    from fz_emulator import flutter_project_ready
+
     current = get_current_run_state()
     if current and current.get("run_id") == run_id:
-        return {**current, "is_live": current.get("status") == "running"}
+        return {
+            **current,
+            "is_live": current.get("status") == "running",
+            "flutter_ready": flutter_project_ready(run_id, current),
+        }
 
     archived = read_json(RUNS_DIR / run_id / "snapshot.json")
     if archived:
-        state = read_json(RUNS_DIR / run_id / "run_state.json")
-        return {
+        state = read_json(RUNS_DIR / run_id / "run_state.json") or {}
+        # Full run_state (usage, checks, …) with snapshot metadata on top for status/labels.
+        payload = {
+            **state,
             **archived,
             "is_live": False,
-            "pipeline_steps": (state or {}).get("pipeline_steps", []),
-            "artifacts_index": _list_archived_artifacts(run_id),
+        }
+        if state.get("usage"):
+            payload["usage"] = state["usage"]
+        if state.get("pipeline_steps") and not payload.get("pipeline_steps"):
+            payload["pipeline_steps"] = state["pipeline_steps"]
+        if state.get("checks") and not payload.get("checks"):
+            payload["checks"] = state["checks"]
+        if state.get("approvals") and not payload.get("approvals"):
+            payload["approvals"] = state["approvals"]
+        if state.get("error") and not payload.get("error"):
+            payload["error"] = state["error"]
+        if not payload.get("artifacts_index"):
+            payload["artifacts_index"] = state.get("artifacts_index") or _list_archived_artifacts(run_id)
+        if not payload.get("usage"):
+            rebuilt = _usage_from_fz_state(run_id)
+            if rebuilt:
+                payload["usage"] = rebuilt
+        payload["flutter_ready"] = flutter_project_ready(run_id, payload)
+        return payload
+
+    # Live fz workspace still on disk (e.g. failed before archive).
+    live_fz = _run_state_from_fz_workspace(run_id)
+    if live_fz:
+        live_fz["flutter_ready"] = flutter_project_ready(run_id, live_fz)
+        return live_fz
+
+    if flutter_project_ready(run_id):
+        return {
+            "run_id": run_id,
+            "project_name": run_id,
+            "status": "completed",
+            "phase": "complete",
+            "is_live": False,
+            "flutter_ready": True,
+            "pipeline_steps": [],
         }
     return None
+
+
+def _ensure_fz_pythonpath() -> None:
+    import sys
+
+    from config import AI_FACTORY_FZ_ROOT
+
+    src = str(AI_FACTORY_FZ_ROOT / "src")
+    if src not in sys.path:
+        sys.path.insert(0, src)
+
+
+def _usage_from_fz_state(run_id: str) -> dict[str, Any] | None:
+    """Rebuild usage payload from agentic_sdlc state.json when UI archive lacks it."""
+    state_path = FZ_RUNS_DIR / run_id / "state.json"
+    archived_state = RUNS_DIR / run_id / "fz_workspace" / "state.json"
+    path = state_path if state_path.is_file() else archived_state
+    if not path.is_file():
+        return None
+    try:
+        _ensure_fz_pythonpath()
+        from agentic_sdlc.state import ProjectState
+        from fz_bridge import _usage_payload
+
+        state = ProjectState.model_validate_json(path.read_text(encoding="utf-8"))
+        return _usage_payload(state)
+    except Exception:
+        return None
+
+
+def _run_state_from_fz_workspace(run_id: str) -> dict[str, Any] | None:
+    state_path = FZ_RUNS_DIR / run_id / "state.json"
+    if not state_path.is_file():
+        return None
+    try:
+        _ensure_fz_pythonpath()
+        from agentic_sdlc.state import ProjectState
+        from fz_bridge import _usage_payload, infer_ui_phase, list_fz_artifacts
+
+        state = ProjectState.model_validate_json(state_path.read_text(encoding="utf-8"))
+        return {
+            "run_id": run_id,
+            "project_name": run_id,
+            "phase": infer_ui_phase(state),
+            "status": (
+                "completed"
+                if state.status == "completed"
+                else ("failed" if state.status == "stopped" else state.status)
+            ),
+            "is_live": False,
+            "factory_engine": "fz",
+            "artifacts_index": list_fz_artifacts(run_id),
+            "usage": _usage_payload(state),
+            "error": state.stop_reason or None,
+            "pipeline_steps": [],
+        }
+    except Exception:
+        return None
 
 
 def _list_archived_artifacts(run_id: str) -> list[dict[str, str]]:
