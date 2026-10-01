@@ -1,0 +1,6 @@
+.venv/
+.deepeval/
+.env
+__pycache__/
+.pytest_cache/
+run/inputs/
