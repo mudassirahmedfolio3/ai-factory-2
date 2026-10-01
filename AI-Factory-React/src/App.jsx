@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { stages, examples } from './data';
 import { validateFiles } from './engine';
+import { gates } from './gates.js';
+import { GateReview, MockupReview } from './GateReview.jsx';
 import { MobileFrame, StageSkeleton, ReadyApp } from './Phone';
 import {
   ApiError,
@@ -572,8 +574,10 @@ function Dashboard({ project, onReset, onOpenHistory }) {
   const [emulatorBusy, setEmulatorBusy] = useState(false);
   const [auditEvents, setAuditEvents] = useState([]);
   const [journeyLoading, setJourneyLoading] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
   const navRef = useRef();
 
+  const lastStage = stages.length - 1;
   const run = runState
     ? runStateToDashboard(runState)
     : {
@@ -593,7 +597,9 @@ function Dashboard({ project, onReset, onOpenHistory }) {
   const stage = stages[stageIndex];
   const viewing = view !== null && view !== run.active;
   const progress = viewing ? (stageIndex < run.active ? 100 : 0) : run.progress;
-  const done = run.complete && stageIndex === 8;
+  const done = run.complete && stageIndex === lastStage;
+  const isDeliveryStage = stageIndex === lastStage;
+  const gateInfo = gates.find((g) => g.index === stageIndex);
   const isFzEngine = runState?.factory_engine === 'fz';
   const preview =
     !isFzEngine && run.browserReady && project.runId ? buildPreviewUrl(project.runId) : null;
@@ -607,7 +613,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
     (run.complete && isFzEngine) ||
     Boolean(runState?.flutter_ready);
   const deliveryCopy =
-    stageIndex === 8 ? deliveryStageCopy(runState, displayName) : null;
+    isDeliveryStage ? deliveryStageCopy(runState, displayName) : null;
   const journey = buildProjectJourney(auditEvents, runState);
 
   useEffect(() => {
@@ -728,7 +734,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
     if (modal !== 'brief' || !project.runId) return;
     setPrdLoading(true);
     const artifactPath =
-      stageIndex === 8 ? 'releases/release_1_notes.md' : 'requirements/prd.md';
+      stageIndex === lastStage ? 'releases/release_1_notes.md' : 'requirements/prd.md';
     fetchArtifact(artifactPath, project.runId)
       .then((res) => setPrdContent(res.content || ''))
       .catch(() => setPrdContent(''))
@@ -817,21 +823,25 @@ function Dashboard({ project, onReset, onOpenHistory }) {
       <header className="header dashboard-header">
         <Brand />
         <nav className="stepper" aria-label="AI Factory stages" ref={navRef}>
-          {stages.map((s, i) => (
+          {stages.map((s, i) => {
+            const completed = i < run.active || run.complete;
+            const inProgress = !completed && i === run.active;
+            return (
             <button
               key={s.key}
-              className={`step ${i === stageIndex ? 'selected' : ''} ${i < run.active || run.complete ? 'completed' : ''}`}
+              className={`step ${i === stageIndex ? 'selected' : ''} ${completed ? 'completed' : ''} ${inProgress ? 'inprogress' : ''}`}
               aria-current={i === stageIndex ? 'step' : undefined}
               onClick={() => review(i)}
             >
               <span className="step-circle">
-                {i < run.active || run.complete ? '✓' : <img src={s.icon} alt="" />}
+                {completed ? '✓' : <img src={s.icon} alt="" />}
               </span>
-              <span>
+              <span className="step-label">
                 {String(i + 1).padStart(2, '0')} {s.key}
               </span>
             </button>
-          ))}
+            );
+          })}
         </nav>
         <div className="header-actions dashboard-header-actions">
           <button type="button" className="secondary header-btn" onClick={onOpenHistory}>
@@ -850,7 +860,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
         <section className="factory-floor">
           <div className="stage-hero" key={stage.key}>
             <span className="eyebrow">
-              STEP {stageIndex + 1} OF 9&nbsp; / &nbsp;{stage.key.toUpperCase()}
+              STEP {stageIndex + 1} OF {stages.length}&nbsp; / &nbsp;{stage.key.toUpperCase()}
             </span>
             <h1>{stage.title}</h1>
             <p>{stage.description}</p>
@@ -904,7 +914,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
               <UsageBanner usage={runState?.usage} live={!run.complete && !run.failed} />
               <p>
                 {stage.key} ·{' '}
-                {stageIndex === 8 && !done
+                {stageIndex === lastStage && !done
                   ? 'Packaging the application for delivery'
                   : stage.right}
               </p>
@@ -919,6 +929,14 @@ function Dashboard({ project, onReset, onOpenHistory }) {
                 <StageSkeleton stage={stageIndex} progress={progress} />
               )}
             </MobileFrame>
+            {gateInfo && (
+              <div className="stage-actions">
+                <button className="secondary" type="button" onClick={() => setGateOpen(true)}>
+                  {gateInfo.label}
+                </button>
+                <small>Open the review pack for this stage.</small>
+              </div>
+            )}
             {stageIndex === 7 && !viewing && !run.complete && (
               <div className="stage-actions">
                 <span className="approval-status">
@@ -927,7 +945,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
                 <small>Approval is handled by the simulated client in the pipeline.</small>
               </div>
             )}
-            {stageIndex === 8 && showPreview && !done && (
+            {stageIndex === lastStage && showPreview && !done && (
               <div className="stage-actions">
                 <button className="primary" onClick={() => setModal('app')}>
                   View application
@@ -997,7 +1015,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
               <span>
                 {done
                   ? 'Production release complete'
-                  : stageIndex === 8
+                  : stageIndex === lastStage
                     ? 'Preparing production release'
                     : stage.progress}
               </span>
@@ -1023,7 +1041,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
                 {deliveryCopy?.card1Foot ||
                   (done
                     ? 'Handover package ready'
-                    : stageIndex === 8
+                    : stageIndex === lastStage
                       ? 'Packaging source, build and documentation'
                       : stage.card1[3])}
               </p>
@@ -1043,7 +1061,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
                   </span>
                   {deliveryCopy
                     ? x
-                    : stageIndex === 8 && !done
+                    : stageIndex === lastStage && !done
                       ? x
                           .replace('Complete', 'Preparing')
                           .replace('Passed', 'Checking')
@@ -1079,16 +1097,16 @@ function Dashboard({ project, onReset, onOpenHistory }) {
       </footer>
       <div className="sr-only" aria-live="polite">
         {run.complete
-          ? 'All nine stages complete. Your application is ready.'
+          ? 'All stages complete. Your application is ready.'
           : `Current stage: ${stages[run.active].key}`}
       </div>
       {modal === 'brief' && (
         <Modal
-          title={stageIndex === 8 ? 'Release notes' : 'Project brief'}
+          title={stageIndex === lastStage ? 'Release notes' : 'Project brief'}
           onClose={() => setModal(null)}
         >
           {prdLoading ? (
-            <p>{stageIndex === 8 ? 'Loading release notes…' : 'Loading PRD…'}</p>
+            <p>{stageIndex === lastStage ? 'Loading release notes…' : 'Loading PRD…'}</p>
           ) : prdContent ? (
             <pre className="brief-text artifact-content">{prdContent}</pre>
           ) : (
@@ -1228,6 +1246,22 @@ flutter run`}</pre>
             </button>
           </div>
         </Modal>
+      )}
+      {gateOpen && gateInfo?.kind === 'design' && (
+        <MockupReview
+          onClose={() => setGateOpen(false)}
+          onApprove={() => setGateOpen(false)}
+          onReject={() => setGateOpen(false)}
+        />
+      )}
+      {gateOpen && gateInfo && gateInfo.kind !== 'design' && (
+        <GateReview
+          kind={gateInfo.kind}
+          project={project}
+          onClose={() => setGateOpen(false)}
+          onApprove={() => setGateOpen(false)}
+          onReject={() => setGateOpen(false)}
+        />
       )}
     </>
   );

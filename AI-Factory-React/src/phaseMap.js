@@ -1,14 +1,16 @@
-/** Maps 9 Figma UI stages to backend pipeline step IDs. */
+/** Maps 11 UI stages (react-base) to backend pipeline step IDs. */
 export const UI_STAGE_BACKEND_IDS = [
-  ['discovery'],
-  ['discovery'],
-  ['design'],
-  ['design'],
-  ['sprint'],
-  ['build'],
-  ['code_review', 'security', 'qa'],
-  ['release', 'client_review'],
-  ['browser'],
+  ['discovery'], // Customer
+  ['discovery'], // Spec Writer
+  ['design'], // Architect
+  ['design'], // UI/UX Designer
+  ['sprint'], // Project Manager
+  ['build'], // Backend Developer
+  ['build'], // Frontend Developer
+  ['release'], // Deployment Engineer
+  ['code_review', 'security', 'qa'], // QA Engineer
+  ['qa', 'browser'], // Smoke Tester
+  ['browser', 'client_review'], // Integration Pass
 ];
 
 export const UI_STAGE_COUNT = UI_STAGE_BACKEND_IDS.length;
