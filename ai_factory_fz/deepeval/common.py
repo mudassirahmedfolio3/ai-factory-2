@@ -66,6 +66,15 @@ def brief() -> str:
     return read("docs/product_brief.md")
 
 
+def judge_model():
+    """OpenAI (DeepEval's default) when OPENAI_API_KEY is set, otherwise Claude via ANTHROPIC_API_KEY."""
+    if os.environ.get("OPENAI_API_KEY") or not os.environ.get("ANTHROPIC_API_KEY"):
+        return None
+    from deepeval.models import AnthropicModel
+
+    return AnthropicModel(model=os.environ.get("DEEPEVAL_JUDGE_MODEL", "claude-sonnet-5-5"))
+
+
 def judge(name: str, criteria: str, input_text: str, output_text: str, threshold: float = 0.6) -> None:
     """Score `output_text` against `criteria` with an LLM judge and fail below `threshold`."""
     metric = GEval(
@@ -73,5 +82,6 @@ def judge(name: str, criteria: str, input_text: str, output_text: str, threshold
         criteria=criteria,
         evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
         threshold=threshold,
+        model=judge_model(),
     )
     assert_test(LLMTestCase(input=input_text, actual_output=output_text), [metric])
