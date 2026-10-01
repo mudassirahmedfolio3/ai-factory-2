@@ -8,8 +8,8 @@
 # ollama/llama3.3, ... A model written as claude-code/<model> always uses Claude Code.
 
 defaults:
-  max_tokens: 16000   # API path only; Claude Code chooses its own output limit
-  timeout: 1200       # seconds per call
+  max_tokens: 16000 # API path only; Claude Code chooses its own output limit
+  timeout: 1200 # seconds per call
 
 tiers:
   reasoning:
@@ -33,10 +33,10 @@ agents:
     fallbacks: [anthropic/claude-sonnet-5-5]
     effort: high
     timeout: 1800
-    max_tokens: 32000  # ArchitectureDoc includes full OpenAPI + Prisma; 16k truncates often
+    max_tokens: 32000 # ArchitectureDoc includes full OpenAPI + Prisma; 16k truncates often
   ui_ux_designer: balanced
-  backend_developer: reasoning
-  frontend_developer: reasoning
+  backend_developer: balanced
+  frontend_developer: balanced
   qa_engineer: balanced
   deployment_engineer: balanced
   integration_pass: balanced

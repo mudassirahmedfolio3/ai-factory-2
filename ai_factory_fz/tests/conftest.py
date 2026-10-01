@@ -67,8 +67,11 @@ def backlog() -> Backlog:
     return Backlog(
         epics=[Epic(id="E-01", title="Catalog", story_ids=["US-001"])],
         work_items=[
-            WorkItem(id="WI-001", title="Products API", description="d", epic_id="E-01", component="backend", story_ids=["US-001"], estimate_points=3),
-            WorkItem(id="WI-002", title="Products screen", description="d", epic_id="E-01", component="frontend", story_ids=["US-001"], depends_on=["WI-001"], estimate_points=3),
+            WorkItem(id="WI-001", title="Products API", description="d", epic_id="E-01", component="backend", story_ids=["US-001"], estimate_points=3,
+                     feature="Catalog API", modules=["catalog"], api_operations=["listProducts"], data_models=["Product"],
+                     estimate_rationale="one paginated endpoint"),
+            WorkItem(id="WI-002", title="Products screen", description="d", epic_id="E-01", component="frontend", story_ids=["US-001"], depends_on=["WI-001"], estimate_points=3,
+                     feature="Catalog screen", api_operations=["listProducts"], screens=["SCR-01"]),
         ],
         milestones=[Milestone(id="M1", name="Catalog", goal="browse", work_item_ids=["WI-001", "WI-002"])],
     )
@@ -112,3 +115,10 @@ def canned(product_brief, prd, backlog, architecture, design_system):
         "design_architecture": architecture,
         "design_ui": design_system,
     }
+
+
+@pytest.fixture(autouse=True)
+def docker_reachable_directly(monkeypatch):
+    """Tests must not depend on this machine's Docker setup: assume direct access."""
+    from agentic_sdlc.tools import docker_access
+    monkeypatch.setattr(docker_access, "access_mode", lambda: "direct")

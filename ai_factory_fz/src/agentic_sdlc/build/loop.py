@@ -15,13 +15,15 @@ run continues where it stopped.
 
 import logging
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from agentic_sdlc.artifacts.backlog import Milestone, WorkItem
 from agentic_sdlc.artifacts.reports import Bug, QAReport, WorkItemResult
 from agentic_sdlc.build.coders import Job, Worker
 from agentic_sdlc.build.scaffold import ScaffoldError, required_runtimes, scaffold
+from agentic_sdlc.guardrails import agents as agent_guardrails
+from agentic_sdlc.guardrails import code as code_guardrails
 from agentic_sdlc.crews.base import PhaseError, TaskResult, UsageLimitError
 from agentic_sdlc.registry.profiles import Component, Profile
 from agentic_sdlc.state import ProjectState
@@ -37,6 +39,7 @@ class BuildConfig:
     milestones: list[str]          # empty = all, in backlog order
     check_fix_attempts: int = 2
     qa_fix_rounds: int = 3
+    guard_rules: set[str] = field(default_factory=set)   # agent guardrails on (DV*, QA*)
 
     @classmethod
     def from_pipeline(cls, pipeline: dict[str, Any]) -> "BuildConfig":
@@ -47,6 +50,7 @@ class BuildConfig:
             milestones=milestones,
             check_fix_attempts=b.get("check_fix_attempts", 2),
             qa_fix_rounds=pipeline.get("limits", {}).get("qa_fix_rounds", 3),
+            guard_rules=agent_guardrails.enabled(pipeline),
         )
 
 
@@ -190,6 +194,14 @@ class Builder:
                 out += [f"  - Given {c.given} when {c.when} then {c.then}" for c in s.acceptance_criteria]
         return "\n".join(out) or "(no user stories: technical item)"
 
+    @staticmethod
+    def links_text(item: WorkItem) -> str:
+        """What the plan says this item builds, so the developer knows exactly what it owns."""
+        parts = [(label, values) for label, values in (
+            ("API operations", item.api_operations), ("data models", item.data_models),
+            ("screens", item.screens), ("modules", item.modules)) if values]
+        return ("\nPlanned scope: " + "; ".join(f"{label}: {', '.join(v)}" for label, v in parts)) if parts else ""
+
     def done_summary(self) -> str:
         lines = [f"- {wid} {self.items[wid].title}: {p.summary[:200]}" for wid, p in self.s.build.items.items()
                  if p.status == "done" and wid in self.items]
@@ -199,7 +211,7 @@ class Builder:
         return {
             "item_id": item.id,
             "item_title": item.title,
-            "item_description": item.description,
+            "item_description": item.description + self.links_text(item),
             "component": item.component,
             "milestone": f"{m.id} {m.name}: {m.goal}",
             "stories": self.stories_text(item.story_ids),
@@ -238,19 +250,28 @@ class Builder:
         p = self.s.build.item(item.id)
         task_key = first_task
         result = None
+        code_rules = self.cfg.guard_rules & set(code_guardrails.CODE_RULES)
         for attempt in range(1, self.cfg.check_fix_attempts + 2):
             p.attempts += 1
             result = self._work(comp, task_key, self.item_inputs(m, item, comp, problems))
             if result is None:
+                code_guardrails.discard_changes(self.ws, comp.workdir)
                 return "failed", None, "the developer agent failed (see reports/agent_failures and logs)"
             if result.blocked:
                 return "blocked", result, result.blocked_reason or "agent reported blocked"
+            task_key = "fix_work_item"
+            violations = code_guardrails.check_changes(self.ws, comp, self.profile, code_rules) if code_rules else []
+            if violations:
+                output = "\n".join(violations)
+                problems = f"Guardrails rejected your change. Fix all of these:\n{output}"
+                continue
             ok, output = self.run_checks(comp)
             if ok:
                 return "done", result, ""
             problems = f"The checks failed after your change. Fix the cause.\n{output}"
-            task_key = "fix_work_item"
-        return "failed", result, f"checks still failing after {attempt} attempt(s). Last output:\n{output[-1500:]}"
+        # Nothing half-done may slip into the next item's commit.
+        code_guardrails.discard_changes(self.ws, comp.workdir)
+        return "failed", result, f"still failing after {attempt} attempt(s); changes discarded. Last output:\n{output[-1500:]}"
 
     def _work(self, comp: Component, task_key: str, inputs: dict[str, Any]) -> WorkItemResult | None:
         job = Job(PHASE, comp.agent, task_key, inputs, WorkItemResult, comp.workdir, comp.runtime)
@@ -312,7 +333,15 @@ class Builder:
         }
         job = Job(PHASE, "qa_engineer", "qa_milestone", inputs, QAReport, ".", runtimes[0] if runtimes else None, runtimes[1:])
         try:
-            return self.record(self.worker_for("qa_engineer").run(job))
+            report = self.record(self.worker_for("qa_engineer").run(job))
+            errors = agent_guardrails.report_errors(report, [i.id for i in done], self.cfg.guard_rules)
+            if errors:  # one retry with the reasons
+                job.feedback = "\n".join(errors)
+                report = self.record(self.worker_for("qa_engineer").run(job))
+                if agent_guardrails.report_errors(report, [i.id for i in done], self.cfg.guard_rules):
+                    log.warning("QA report still inconsistent; deriving the verdict from its bugs")
+                    report.passed = not report.blocking_bugs()
+            return report
         except UsageLimitError as e:
             self.stop(f"{e}. Resume the run after the limit resets (uv run resume <run_id>).")
             return None

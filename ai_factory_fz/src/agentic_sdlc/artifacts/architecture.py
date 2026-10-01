@@ -1,5 +1,7 @@
 """Architecture artifact, including the OpenAPI contract and Prisma schema."""
 
+import re
+
 import yaml
 from openapi_spec_validator import validate
 from pydantic import BaseModel, Field
@@ -72,6 +74,33 @@ class ArchitectureDoc(BaseModel):
         if "model " not in s:
             errors.append("Prisma schema defines no models")
         return errors
+
+    def operations(self) -> dict[str, str]:
+        """operationId -> 'METHOD /path' from the OpenAPI document (empty if it does not parse)."""
+        try:
+            spec = yaml.safe_load(self.openapi_yaml) or {}
+        except yaml.YAMLError:
+            return {}
+        ops = {}
+        for path, item in (spec.get("paths") or {}).items():
+            for method, op in (item or {}).items():
+                if method in {"get", "post", "put", "patch", "delete"} and isinstance(op, dict) and op.get("operationId"):
+                    ops[op["operationId"]] = f"{method.upper()} {path}"
+        return ops
+
+    def data_models(self) -> list[str]:
+        """Model names from the Prisma schema."""
+        return re.findall(r"^model\s+(\w+)\s*\{", self.prisma_schema, flags=re.MULTILINE)
+
+    def solution_summary(self) -> str:
+        """Compact view of what must be built, for planning."""
+        lines = ["Backend modules:"]
+        lines += [f"- {m.name}: {m.responsibility} (entities: {', '.join(m.entities) or '-'})" for m in self.backend_modules]
+        lines += ["", "API operations (operationId: method path):"]
+        lines += [f"- {op}: {route}" for op, route in self.operations().items()]
+        lines += ["", "Data models: " + ", ".join(self.data_models())]
+        lines += ["", "App features:", self.app_features_summary()]
+        return "\n".join(lines)
 
     def app_features_summary(self) -> str:
         return "\n".join(

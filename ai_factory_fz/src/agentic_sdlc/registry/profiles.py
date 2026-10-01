@@ -85,6 +85,7 @@ class Profile(BaseModel):
     sandbox: SandboxConfig = Field(default_factory=SandboxConfig)
     release: ReleaseConfig = Field(default_factory=ReleaseConfig)
     device: DeviceConfig | None = None
+    guardrails: dict[str, Any] = Field(default_factory=dict)   # facts the output guardrails check against
     root: Path
 
     @classmethod

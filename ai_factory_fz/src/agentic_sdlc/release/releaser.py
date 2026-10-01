@@ -23,6 +23,8 @@ from typing import Any, Callable
 from agentic_sdlc.artifacts.reports import QAReport, WorkItemResult
 from agentic_sdlc.build.coders import Job, Worker
 from agentic_sdlc.crews.base import PhaseError, TaskResult, UsageLimitError
+from agentic_sdlc.guardrails import agents as agent_guardrails
+from agentic_sdlc.guardrails import code as code_guardrails
 from agentic_sdlc.registry.profiles import Profile
 from agentic_sdlc.release.device import DeviceError, Emulator
 from agentic_sdlc.release.contract import contract_diff
@@ -50,8 +52,10 @@ class Releaser:
         can_continue: Callable[[], bool],
         stop: Callable[[str], None],
         emulator: Emulator | None = None,
+        guard_rules: set[str] | None = None,
     ):
         self.emulator = emulator
+        self.guard_rules = guard_rules or set()
         self.s = state
         self.r = state.release
         self.ws = workspace
@@ -86,9 +90,9 @@ class Releaser:
         return "\n".join(lines) or "(none)"
 
     def _job(self, agent: str, task_key: str, inputs: dict[str, Any], model, workdir: str,
-             runtime: str | None = "api") -> Any:
+             runtime: str | None = "api", feedback: str = "") -> Any:
         rt = self.api.runtime if runtime == "api" else runtime
-        job = Job(PHASE, agent, task_key, {**self._common(), **inputs}, model, workdir, rt)
+        job = Job(PHASE, agent, task_key, {**self._common(), **inputs}, model, workdir, rt, feedback=feedback)
         try:
             return self.record(self.worker_for(agent).run(job))
         except UsageLimitError as e:
@@ -114,6 +118,42 @@ class Releaser:
             "api_base_example": f"http://localhost:{self.staging.port}{self.profile.release.api_prefix}",
             "toolchain_image": self.profile.sandbox.runtimes[self.api.runtime].image if self.api.runtime else "(none)",
         }
+
+    # ---------- guardrails ----------
+
+    def _guarded(self, agent: str, task_key: str, inputs: dict[str, Any], model, workdir: str,
+                 runtime: str | None, check: Callable[[Any], list[str]], what: str) -> Any:
+        """Run a job; if its guardrail check fails, re-run it once with the reasons. If it still
+        fails, discard its uncommitted changes and stop the run. Returns the result or None."""
+        result = self._job(agent, task_key, inputs, model, workdir, runtime)
+        if result is None or result.blocked:
+            return result
+        problems = check(result)
+        if problems:
+            result = self._job(agent, task_key, inputs, model, workdir, runtime, feedback="\n".join(problems))
+            problems = check(result) if result is not None and not result.blocked else problems
+        if problems:
+            code_guardrails.discard_changes(self.ws, workdir)
+            self.stop(f"{what} was rejected by guardrails:\n- " + "\n- ".join(problems))
+            return None
+        return result
+
+    def _code_rules(self) -> set[str]:
+        return self.guard_rules & set(code_guardrails.CODE_RULES)
+
+    def _deployment_problems(self, _result: Any) -> list[str]:
+        problems = agent_guardrails.de1_container(self.ws, self.profile) if "DE1" in self.guard_rules else []
+        if "DV2" in self.guard_rules:
+            problems += code_guardrails.dv2_secrets(self.ws, self.profile, code_guardrails.changed_files(self.ws))
+        return problems
+
+    def _smoke_problems(self, _result: Any) -> list[str]:
+        if "ST1" not in self.guard_rules:
+            return []
+        return agent_guardrails.st1_smoke_suite(self.ws, self.profile, self.cfg.get("min_smoke_tests", 3))
+
+    def _device_suite_problems(self, _result: Any) -> list[str]:
+        return agent_guardrails.st1_device_suite(self.ws, self.profile) if "ST1" in self.guard_rules else []
 
     # ---------- device ----------
 
@@ -184,11 +224,11 @@ class Releaser:
 
     def _write_device_suite(self) -> bool:
         dev, app = self.profile.device, self.app
-        result = self._job("smoke_tester", "write_device_tests", {
+        result = self._guarded("smoke_tester", "write_device_tests", {
             "app_dir": app.workdir, "test_dir": dev.test_dir, "device_api_base": self.device_api_base,
             "test_command": dev.test_command.format(api_base=self.device_api_base, serial=self.emulator.serial),
             "host_alias": dev.host_alias,
-        }, WorkItemResult, app.workdir, runtime=app.runtime)
+        }, WorkItemResult, app.workdir, app.runtime, self._device_suite_problems, "The on-device test suite")
         if result is None or result.blocked:
             self.stop(f"Smoke tester could not write the device tests: {result.blocked_reason if result else 'agent failed'}")
             return False
@@ -215,8 +255,8 @@ class Releaser:
         if self.r.verified:
             return
         if self.r.deployment is None:
-            result = self._job(self.profile.components.get("infra", self.api).agent, "deploy_staging", {},
-                               WorkItemResult, ".")
+            result = self._guarded(self.profile.components.get("infra", self.api).agent, "deploy_staging", {},
+                                   WorkItemResult, ".", "api", self._deployment_problems, "The staging deployment")
             if result is None or result.blocked:
                 self.stop(f"Deployment engineer could not prepare staging: {result.blocked_reason if result else 'agent failed'}")
                 return
@@ -224,7 +264,8 @@ class Releaser:
             self.ws.commit("Release: staging deployment files (deployment_engineer)")
             self.checkpoint("Release: deployment files")
         if self.r.smoke_suite is None and self.profile.release.smoke_command:
-            result = self._job("smoke_tester", "write_smoke_tests", {}, WorkItemResult, self.api.workdir)
+            result = self._guarded("smoke_tester", "write_smoke_tests", {}, WorkItemResult, self.api.workdir, "api",
+                                   self._smoke_problems, "The smoke test suite")
             if result is None or result.blocked:
                 self.stop(f"Smoke tester could not write the smoke suite: {result.blocked_reason if result else 'agent failed'}")
                 return
@@ -284,11 +325,19 @@ class Releaser:
                     if status == 200 else [f"GET {rel.openapi_json_path} returned {status or 'no response'}"]
                 )
                 self.r.contract_issues = self._built_scope(self.r.contract_issues)
-            self.r.integration = self._job("integration_pass", "integration_review", {
+            inputs = {
                 "base_url": self.api_base_url,
                 "contract_issues": "\n".join(self.r.contract_issues) or "(none)",
                 "staging_logs": self.staging.logs(3000),
-            }, QAReport, ".")
+            }
+            item_ids = [w.id for w in self.s.backlog.work_items]
+            report = self._job("integration_pass", "integration_review", inputs, QAReport, ".")
+            errors = agent_guardrails.report_errors(report, item_ids, self.guard_rules, ("RELEASE",)) if report else []
+            if errors:  # one retry with the reasons, then derive the verdict from the bugs
+                report = self._job("integration_pass", "integration_review", inputs, QAReport, ".", feedback="\n".join(errors))
+                if report and agent_guardrails.report_errors(report, item_ids, self.guard_rules, ("RELEASE",)):
+                    report.passed = not report.blocking_bugs()
+            self.r.integration = report
             if self.profile.release.smoke_command:
                 res = self.sandbox.run_trusted(self.api.runtime, self.api.workdir, rel.smoke_command,
                                                env={"SMOKE_BASE_URL": self.api_base_url}, host_network=True)
@@ -323,7 +372,10 @@ class Releaser:
             "milestone": "Release", "stories": "(see the problems)", "checks": "; ".join(comp.checks) or "(none)",
             "problems": problems, "done_items": self.built_summary(),
         }
-        result = self._job(comp.agent, "fix_work_item", inputs, WorkItemResult, comp.workdir, runtime=comp.runtime)
+        code_rules = self._code_rules()
+        result = self._guarded(comp.agent, "fix_work_item", inputs, WorkItemResult, comp.workdir, comp.runtime,
+                               lambda _r: code_guardrails.check_changes(self.ws, comp, self.profile, code_rules)
+                               if code_rules else [], f"The {component} fix")
         if result is not None:
             self.ws.commit(f"Release: fixes from staging verification ({comp.agent})")
         self.checkpoint("Release: fixes applied")

@@ -22,6 +22,7 @@ from crewai.tools import BaseTool
 from pydantic import BaseModel, Field, PrivateAttr
 
 from agentic_sdlc.registry.profiles import SandboxConfig
+from agentic_sdlc.tools import docker_access
 from agentic_sdlc.workspace import Workspace
 
 log = logging.getLogger(__name__)
@@ -84,12 +85,12 @@ class SandboxRunner:
             rt = self.config.runtimes.get(runtime)
             if rt is None or runtime in self._image_errors:
                 continue
-            if subprocess.run(["docker", "image", "inspect", rt.image], capture_output=True).returncode == 0:
+            if docker_access.run(["docker", "image", "inspect", rt.image], capture_output=True).returncode == 0:
                 continue
             log.warning("Pulling %s for the %s runtime (first use; this can take a few minutes)", rt.image, runtime)
             print(f"Pulling {rt.image} for the {runtime} runtime (first use; this can take a few minutes)...", flush=True)
             try:
-                r = subprocess.run(["docker", "pull", rt.image], capture_output=True, text=True, timeout=pull_timeout_s)
+                r = docker_access.run(["docker", "pull", rt.image], capture_output=True, text=True, timeout=pull_timeout_s)
                 if r.returncode != 0:
                     self._image_errors[runtime] = f"could not pull {rt.image}: {(r.stderr or r.stdout).strip()[-300:]}"
             except subprocess.TimeoutExpired:
@@ -100,10 +101,7 @@ class SandboxRunner:
 
     @staticmethod
     def _docker_problem() -> str | None:
-        probe = subprocess.run(["docker", "info"], capture_output=True, text=True) if shutil.which("docker") else None
-        if probe is None or probe.returncode != 0:
-            return "Docker is not usable by this user (install it, or add the user to the 'docker' group)"
-        return None
+        return docker_access.problem()
 
     def unavailable_reason(self, runtime: str) -> str | None:
         """None if commands for this runtime can run, else a human-readable reason."""
@@ -194,10 +192,10 @@ class SandboxRunner:
                 cmd = [resolved, *cmd[1:]]
             cmd = ["cmd.exe", "/c", *cmd]
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True, timeout=limit, cwd=cwd, env=env)
+            proc = subprocess.run(docker_access.argv(cmd), capture_output=True, text=True, timeout=limit, cwd=cwd, env=env)
         except subprocess.TimeoutExpired:
             if name:
-                subprocess.run(["docker", "kill", name], capture_output=True)
+                docker_access.run(["docker", "kill", name], capture_output=True)
             return SandboxResult(exit_code=124, output=f"Timed out after {limit}s")
         except FileNotFoundError as e:
             return SandboxResult(exit_code=127, output=str(e))

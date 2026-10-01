@@ -22,6 +22,25 @@ scope:
   max_api_operations: 4
   max_screens: 3
 
+planning:
+  # Developers re-estimate the items they will build; the PM reconciles big gaps.
+  estimation_review: true
+  big_gap_points: 3          # a gap this big (or a 2x ratio) goes to the PM to reconcile
+  big_gap_ratio: 2.0
+
+guardrails:
+  # Checks on the Architect's output; a failing design goes back to the Architect.
+  # A1 stack, A2 mobile platform, B1 prose matches contract, B2 health endpoint, B3 API prefix,
+  # B4 shared error schema, B5 typed responses, B6 auth per operation, C1 entities exist,
+  # C2 money as integers, C3 id + timestamps, D1 3+ ADRs, D2 security basics, D3 no secrets.
+  architect: [A1, A2, B1, B2, B3, B4, B5, B6, C1, C2, C3, D1, D2, D3]
+  # Checks on the other agents' work (a failing result goes back to the same agent):
+  # DV1 no weakening tests, DV2 no secrets, DV3 stay in scope (coding agents); QA1 consistent
+  # verdict, QA2 real work items (QA engineer, Integration pass); DE1 container hygiene
+  # (Deployment engineer); ST1 real smoke/device suites (Smoke tester); CU1 all questions answered
+  # (Customer); UX1 valid colours, unique routes, WCAG AA contrast (UI/UX designer).
+  agents: [DV1, DV2, DV3, QA1, QA2, DE1, ST1, CU1, UX1]
+
 build:
   milestones: []
   sandbox: local

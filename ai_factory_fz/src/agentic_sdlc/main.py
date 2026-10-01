@@ -73,6 +73,92 @@ def _apply_milestones(milestones: str | None) -> None:
         os.environ["SDLC_BUILD_MILESTONES"] = milestones
 
 
+def _machine(profile_name: str, pipeline_name: str):
+    from agentic_sdlc.registry.models import ModelRegistry
+    from agentic_sdlc.registry.profiles import Profile
+    from agentic_sdlc.settings import load_config
+    from agentic_sdlc.tools.sandbox_exec import SandboxRunner, sandbox_mode
+
+    profile = Profile.load(profile_name)
+    pipeline = load_config(pipeline_name)
+    probe = Workspace.create(".preflight")   # scratch workspace, only used to run image checks
+    sandbox = SandboxRunner(probe, profile.sandbox, sandbox_mode((pipeline.get("build") or {}).get("sandbox", "docker")))
+    return profile, pipeline, sandbox, ModelRegistry.from_config(pipeline.get("models"))
+
+
+def preflight_cmd() -> None:
+    """Check this machine for a pipeline without starting a run."""
+    from agentic_sdlc import preflight
+
+    parser = argparse.ArgumentParser(description="Check the machine is ready for a pipeline")
+    parser.add_argument("--pipeline", default="pipeline")
+    parser.add_argument("--profile", default=DEFAULT_PROFILE)
+    args = parser.parse_args()
+    profile, pipeline, sandbox, models = _machine(args.profile, args.pipeline)
+    problems = preflight.check(pipeline=pipeline, profile=profile, sandbox=sandbox, models=models)
+    print(preflight.report(problems))
+    raise SystemExit(1 if problems else 0)
+
+
+def setup() -> None:
+    """One-time machine setup. Everything is automatic except what needs you: your sudo password
+    (Docker install / docker group) and accepting the Android SDK licence."""
+    import getpass
+    import shutil
+    import subprocess
+
+    from agentic_sdlc import preflight
+    from agentic_sdlc.build.scaffold import required_runtimes
+    from agentic_sdlc.release.device import AndroidToolchain
+    from agentic_sdlc.tools import docker_access
+
+    parser = argparse.ArgumentParser(description="Prepare this machine for the SDLC pipeline")
+    parser.add_argument("--pipeline", default="pipeline.demo")
+    parser.add_argument("--profile", default=DEFAULT_PROFILE)
+    args = parser.parse_args()
+    user = getpass.getuser()
+
+    def sudo(cmd: list[str], why: str) -> None:
+        print(f"\n{why}\n  sudo {' '.join(cmd)}\n(you will be asked for your password)", flush=True)
+        subprocess.run(["sudo", *cmd], check=True)
+
+    print("1/4 Docker", flush=True)
+    if not shutil.which("docker"):
+        if not shutil.which("apt-get"):
+            raise SystemExit("Docker is not installed and this is not an apt-based system: "
+                             "install Docker (https://docs.docker.com/engine/install/), then run setup again.")
+        sudo(["apt-get", "install", "-y", "docker.io", "docker-compose-v2"], "Installing Docker:")
+        sudo(["systemctl", "enable", "--now", "docker"], "Starting the Docker service:")
+    if not docker_access.in_docker_group(user):
+        sudo(["usermod", "-aG", "docker", user], f"Adding '{user}' to the docker group:")
+    docker_access.access_mode.cache_clear()
+    mode = docker_access.access_mode()
+    print(f"   Docker access: {mode}" + (" (no need to log out: the pipeline uses sg docker)" if mode == "sg" else ""))
+
+    profile, pipeline, sandbox, models = _machine(args.profile, args.pipeline)
+    print("\n2/4 Toolchain images", flush=True)
+    runtimes = sorted({rt for c in profile.components.values() for rt in required_runtimes(c)})
+    for rt, err in sandbox.prepare(runtimes).items():
+        print(f"   {rt}: {err}")
+
+    print("\n3/4 Android emulator", flush=True)
+    if profile.device and ((pipeline.get("release") or {}).get("device") or {}).get("enabled"):
+        tc = AndroidToolchain(profile.device)
+        if tc.not_ready_reason():
+            tc.install()
+        else:
+            print("   ready")
+    else:
+        print("   not needed by this pipeline")
+
+    print("\n4/4 Claude access", flush=True)
+    problems = preflight.check(profile=profile, pipeline=pipeline, sandbox=sandbox, models=models)
+    if any("CLAUDE_CODE_OAUTH_TOKEN" in p or "ANTHROPIC_API_KEY" in p for p in problems):
+        print("   Create a token with `claude setup-token` and put it in .env as CLAUDE_CODE_OAUTH_TOKEN "
+              "(with CLAUDE_CODE_ENABLE=true). This is your account's secret, so you add it yourself.")
+    print("\n" + preflight.report(problems))
+
+
 def setup_android() -> None:
     """One-time: install the Android SDK + emulator for this system (you accept the licence)."""
     from agentic_sdlc.registry.profiles import Profile

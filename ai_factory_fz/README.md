@@ -9,7 +9,7 @@ The first target app type is a Flutter e-commerce app with a NestJS + PostgreSQL
 |---|---|---|
 | M0 Foundation | model/agent/profile registries, run workspace, file + sandbox tools, checkpoints | done |
 | M1 Discovery | Customer ⇄ Spec writer clarification loop, PRD, **Gate 1** | done |
-| M2 Planning & design | Backlog, architecture + OpenAPI + Prisma, **Gate 2**, design system | done |
+| M2 Solution & plan | Architect (architecture, OpenAPI, Prisma) → UI/UX (design system) → Project manager (work breakdown + estimates, checked for coverage) → **Gate 2** | done |
 | M3 Build loop | Scaffold, Backend/Frontend devs per work item with build+test checks, QA fix loop per milestone | done |
 | M4 Release | Staging deploy, contract check, Integration pass, Smoke tester, **Gate 3**, production packaging/deploy | done |
 
@@ -24,6 +24,78 @@ uv run kickoff --brief briefs/demo_mini.md --pipeline pipeline.demo
 `config/pipeline.demo.yaml` caps the scope (4 stories, 6 work items, 2 milestones, 6 API operations,
 3 screens) and runs every phase with every gate: it stops for your approval of the PRD, the
 architecture and the release. Any pipeline file can set the same `scope:` limits.
+
+## Lifecycle order
+
+```
+Customer ⇄ Spec writer ─► Gate 1 (PRD)
+  ─► Architect ─► UI/UX designer ─► Project manager (WBS + draft estimates)
+  ─► Backend/Frontend/Deployment developers re-estimate their items ─► PM reconciles big gaps
+  ─► Gate 2 (solution + plan)
+  ─► Build: developers per work item (checks) ─► QA per milestone
+  ─► Release: staging, contract check, integration pass, smoke + device tests ─► Gate 3 ─► production
+```
+
+Estimates are bottom-up: after the Project manager drafts the plan, each developer agent
+re-estimates the items it will build (one call per agent, no tools). A small gap adopts the
+builder's number; a big gap (`planning.big_gap_points` / `big_gap_ratio`) is reconciled by the PM,
+between the two numbers, with a reason. `docs/backlog.md` shows PM, developer and final points,
+and lists the disagreements as the highest estimate risk. Switch off with `planning.estimation_review: false`.
+
+The Project manager plans the *solution*: each work item links to the API operations, data models
+and screens it builds, with points, risk, confidence and a rationale. The plan is rejected (and
+redone) unless every operation, model and screen is covered and app items depend on the backend
+items they call. `docs/backlog.md` shows the plan with totals and the critical path. Rejecting
+Gate 2 rewrites architecture, design and plan together with your feedback.
+
+## Architect guardrails
+
+The Architect's design is checked in code before anyone sees it; a failing design goes back to the
+Architect with the list of problems (up to 2 retries, then the run stops with the reasons).
+
+| Group | Rules |
+|---|---|
+| Stack and platform | A1 no technology outside the profile's stack, core stack used · A2 Flutter mobile app only |
+| API contract | B1 module endpoints match `openapi.yaml` · B2 health endpoint · B3 `/api/v1` prefix · B4 one shared error schema · B5 typed responses · B6 every operation secured or explicitly public |
+| Data model | C1 module entities exist in `schema.prisma` · C2 money fields are `Int` (cents) · C3 `@id`, `createdAt`, `updatedAt` |
+| Decisions and security | D1 at least 3 complete ADRs · D2 authentication, input validation, secrets covered · D3 no secrets in the design |
+
+Rules live in `src/agentic_sdlc/guardrails/architecture.py`; the facts they check against (stack,
+platform, money fields) in the profile's `guardrails:` section; which rules are on in each pipeline's
+`guardrails.architect` list. A new profile brings its own stack and platform rules.
+
+## Agent guardrails
+
+The other agents' work is checked too (code checks; a failing result goes back to the same agent):
+
+| Rule | Agent | Checks |
+|---|---|---|
+| DV1 | Backend / Frontend / Deployment | no deleted test files, no fewer test cases, no newly skipped tests |
+| DV2 | Backend / Frontend / Deployment | no real-looking secrets in changed files (placeholders and test values are fine) |
+| DV3 | Backend / Frontend / Deployment | changes stay in the item's component folder; contract copies equal `docs/` |
+| QA1 / QA2 | QA engineer, Integration pass | verdict matches the bugs; bugs name real work items with steps, expected, actual |
+| DE1 | Deployment engineer | Dockerfile runs as non-root and uses the build toolchain's Node major |
+| ST1 | Smoke tester | smoke suite has enough journeys, uses `SMOKE_BASE_URL`, no app imports or mocks; device suite has real tests |
+| CU1 | Customer | every clarification question is answered |
+| UX1 | UI/UX designer | hex colours, unique routes, `onX`/`X` text contrast at least WCAG AA (4.5:1, computed) |
+
+A work item that still breaks a rule after its retries is failed and its changes are discarded, so
+nothing rejected is ever committed. Rules are switched on in each pipeline's `guardrails.agents`.
+
+## Machine setup (once)
+
+```bash
+uv sync
+cp .env.example .env          # set CLAUDE_CODE_ENABLE=true and CLAUDE_CODE_OAUTH_TOKEN (claude setup-token)
+uv run setup                  # Docker, docker group, toolchain images, Android emulator
+uv run preflight --pipeline pipeline.demo   # optional: check without starting a run
+```
+
+`uv run setup` does everything itself except what needs you: your sudo password (installing Docker,
+adding you to the `docker` group) and accepting the Android SDK licence. No logout is needed after
+joining the `docker` group: the pipeline notices the old session and runs Docker through `sg docker`.
+Every run also starts with the same preflight check and stops before any agent runs (no tokens spent)
+if something is missing, with the fix to apply.
 
 ## Setup
 

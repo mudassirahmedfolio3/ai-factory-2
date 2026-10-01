@@ -24,11 +24,20 @@ class FakeRunner:
         self.canned = canned
         self.calls: list[tuple[str, dict]] = []
 
-    def run(self, phase, task_key, inputs, output_model, guardrail=None):
+    def run(self, phase, task_key, inputs, output_model, guardrail=None, agent_key=None, with_tools=True):
         self.calls.append((task_key, inputs))
-        artifact = self.canned[task_key].model_copy(deep=True)
+        if task_key == "review_estimates":
+            # Each developer agrees with the PM's draft (disagreements are tested in test_estimation.py).
+            import re
+            from agentic_sdlc.artifacts.estimates import EstimateReview, ItemEstimate
+            estimates = [ItemEstimate(item_id=i, points=int(p), complexity="medium", risk="medium",
+                                      confidence="medium", rationale="ok")
+                         for i, p in re.findall(r"- (WI-\d+) .*?PM estimate: (\d+) pts", inputs["items"], re.S)]
+            artifact = EstimateReview(estimates=estimates)
+        else:
+            artifact = self.canned[task_key].model_copy(deep=True)
         assert isinstance(artifact, output_model)
-        return TaskResult(artifact=artifact, usage=UsageRecord(phase=phase, agent=task_key, model="fake", total_tokens=10))
+        return TaskResult(artifact=artifact, usage=UsageRecord(phase=phase, agent=agent_key or task_key, model="fake", total_tokens=10))
 
     def keys(self):
         return [k for k, _ in self.calls]
@@ -63,14 +72,15 @@ def test_happy_path_runs_all_built_phases(tmp_path, canned):
     assert s.status == "completed", s.stop_reason
     assert runner.keys() == [
         "customer_brief", "spec_questions", "customer_answers", "spec_questions",
-        "customer_answers", "write_prd", "plan_backlog", "design_architecture", "design_ui",
+        "customer_answers", "write_prd", "design_architecture", "design_ui", "plan_backlog",
+        "review_estimates", "review_estimates",
     ]
     assert [(g.gate, g.approved) for g in s.gate_history] == [("prd", True), ("architecture", True)]
     root = tmp_path / "r1"
     for f in ("prd.md", "backlog.md", "architecture.md", "openapi.yaml", "schema.prisma", "design_system.md"):
         assert (root / "docs" / f).exists(), f
     assert json.loads((root / "state.json").read_text())["status"] == "completed"
-    assert "Total tokens: 90" in (root / "reports" / "run_summary.md").read_text()
+    assert "Total tokens: 110" in (root / "reports" / "run_summary.md").read_text()  # 11 agent calls
 
 
 def test_rejected_prd_is_rewritten_with_feedback(tmp_path, canned):
@@ -85,14 +95,25 @@ def test_rejected_prd_is_rewritten_with_feedback(tmp_path, canned):
     assert prd_calls[1]["revision_notes"] == "Add guest checkout"
 
 
-def test_rejected_architecture_is_rewritten_and_backlog_is_kept(tmp_path, canned):
+def test_rejected_solution_rewrites_architecture_design_and_plan_with_feedback(tmp_path, canned):
     runner = FakeRunner(canned)
     flow = make_flow(tmp_path, runner, ["y", "", "n", "Use Redis for carts", "y", ""])
     flow.kickoff(inputs={"run_id": "r3", "brief": "shop"})
 
     assert flow.state.status == "completed", flow.state.stop_reason
-    assert runner.keys().count("design_architecture") == 2
-    assert runner.keys().count("plan_backlog") == 1
+    for key in ("design_architecture", "design_ui", "plan_backlog"):
+        assert runner.keys().count(key) == 2, key
+        assert [i for k, i in runner.calls if k == key][1]["revision_notes"] == "Use Redis for carts", key
+
+
+def test_pm_plans_from_the_architecture_and_screens(tmp_path, canned):
+    runner = FakeRunner(canned)
+    flow = make_flow(tmp_path, runner, ["y", "", "y", ""])
+    flow.kickoff(inputs={"run_id": "r9", "brief": "shop"})
+    inputs = next(i for k, i in runner.calls if k == "plan_backlog")
+    assert "listProducts: GET /api/v1/products" in inputs["solution"]
+    assert "Data models: Product" in inputs["solution"]
+    assert "SCR-01 Products (/products)" in inputs["screens"]
 
 
 def test_too_many_rejections_stop_the_run(tmp_path, canned):
@@ -178,7 +199,8 @@ def _release_flow(tmp_path, canned, answers, worker):
     from test_release import FakeStaging
 
     pipeline = {**PIPELINE, "phases": {**PIPELINE["phases"], "build": True, "release": True},
-                "build": {"milestones": ["M1"]}, "release": {"fix_rounds": 1}}
+                "build": {"milestones": ["M1"]}, "release": {"fix_rounds": 1},
+                "guardrails": {"agents": []}}   # fakes write no real files; guardrails are tested separately
     answers = iter(answers)
 
     def deps_factory(state):
@@ -230,3 +252,27 @@ def test_scope_rules_reach_the_planning_prompts(tmp_path, canned):
     for key in ("write_prd", "plan_backlog", "design_architecture", "design_ui"):
         inputs = next(i for k, i in runner.calls if k == key)
         assert "Demo only." in inputs["scope_rules"] and "at most 5 work items" in inputs["scope_rules"], key
+
+
+def test_preflight_problems_stop_the_run_before_any_agent(tmp_path, canned):
+    runner = FakeRunner(canned)
+
+    def deps_factory(state):
+        return Deps(workspace=Workspace.create(state.run_id, runs_dir=tmp_path), profile=Profile.load("flutter_nestjs_ecommerce"),
+                    runner=runner, pipeline=PIPELINE, input_fn=lambda _p: "y",
+                    preflight=lambda: ["Docker is not usable: run `uv run setup` once"])
+
+    flow = SDLCFlow(deps_factory=deps_factory)
+    flow.kickoff(inputs={"run_id": "rp", "brief": "shop"})
+    assert flow.state.status == "stopped"
+    assert "uv run setup" in flow.state.stop_reason and "uv run resume rp" in flow.state.stop_reason
+    assert runner.calls == []
+
+
+def test_estimation_review_can_be_switched_off(tmp_path, canned):
+    runner = FakeRunner(canned)
+    pipeline = {**PIPELINE, "planning": {"estimation_review": False}}
+    flow = make_flow(tmp_path, runner, ["y", "", "y", ""], pipeline=pipeline)
+    flow.kickoff(inputs={"run_id": "re", "brief": "shop"})
+    assert flow.state.status == "completed" and "review_estimates" not in runner.keys()
+    assert not flow.state.backlog.estimation_reviewed

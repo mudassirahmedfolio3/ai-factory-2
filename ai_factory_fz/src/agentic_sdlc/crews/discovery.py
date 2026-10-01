@@ -2,6 +2,7 @@
 
 from agentic_sdlc.artifacts.prd import PRD, CustomerAnswers, ProductBrief, QAPair, SpecQuestions
 from agentic_sdlc.crews.base import TaskResult, TaskRunner, artifact_guardrail
+from agentic_sdlc.guardrails.agents import cu1_answers
 from agentic_sdlc.scope import Scope
 
 PHASE = "discovery"
@@ -29,7 +30,8 @@ def expand_brief(runner: TaskRunner, brief: str) -> TaskResult[ProductBrief]:
 
 
 def clarify(
-    runner: TaskRunner, product_brief: ProductBrief, history: list[QAPair], max_rounds: int
+    runner: TaskRunner, product_brief: ProductBrief, history: list[QAPair], max_rounds: int,
+    guard_rules: set[str] | frozenset = frozenset(),
 ) -> tuple[list[QAPair], list[TaskResult]]:
     """Spec writer asks, Customer answers, until the spec writer is ready or rounds run out."""
     history = list(history)
@@ -51,6 +53,8 @@ def clarify(
             "customer_answers",
             {"product_brief": brief_md, "questions": "\n".join(f"- {q}" for q in questions)},
             CustomerAnswers,
+            guardrail=artifact_guardrail(CustomerAnswers, lambda a, qs=questions: cu1_answers(a, qs))
+            if "CU1" in guard_rules else None,
         )
         results.append(answered)
         history.extend(answered.artifact.answers)
