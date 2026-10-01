@@ -1,0 +1,11 @@
+[project]
+name = "agentic-sdlc-deepeval"
+version = "0.1.0"
+description = "DeepEval evaluations for the agentic_sdlc pipeline"
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "deepeval>=4.2.7",
+]
+
+[tool.uv]
+package = false
