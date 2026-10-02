@@ -19,6 +19,7 @@ import {
 } from './api.js';
 import {
   buildClientBrief,
+  deliveryStageCopy,
   filterUsageForStage,
   flutterRunReadyFromState,
   runStateToDashboard,
@@ -26,6 +27,7 @@ import {
 } from './phaseMap.js';
 import { buildProjectJourney } from './journeyMap.js';
 import { buildStageIterations } from './stageIterations.js';
+import { stageDocumentCandidates } from './stageDocuments.js';
 import { connectRun } from './runSync.js';
 import History from './History.jsx';
 
@@ -574,6 +576,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
   const [modal, setModal] = useState(null);
   const [prdContent, setPrdContent] = useState('');
   const [prdLoading, setPrdLoading] = useState(false);
+  const [prdMeta, setPrdMeta] = useState({ title: 'Document', path: '' });
   const [flutterManifest, setFlutterManifest] = useState('');
   const [flutterLoading, setFlutterLoading] = useState(false);
   const [emulatorStatus, setEmulatorStatus] = useState(null);
@@ -625,6 +628,8 @@ function Dashboard({ project, onReset, onOpenHistory }) {
     flutterRunReadyFromState(runState) ||
     (run.complete && isFzEngine) ||
     Boolean(runState?.flutter_ready);
+  const isDeliveryStage = stageIndex === lastStage;
+  const deliveryCopy = isDeliveryStage ? deliveryStageCopy(runState, displayName) : null;
   const journey = buildProjectJourney(auditEvents, runState);
   const stageIterations = buildStageIterations(auditEvents, stageIndex, {
     isLiveStage: !viewing,
@@ -634,6 +639,25 @@ function Dashboard({ project, onReset, onOpenHistory }) {
     future: isFutureStage,
   });
   const stageUsage = filterUsageForStage(runState?.usage, stageIndex);
+  const featureLines = deliveryCopy?.deployLines || stage.card2.slice(1);
+  const stageDoc = stageDocumentCandidates(stageIndex, runState?.artifacts_index || []);
+
+  const card1Title = deliveryCopy?.card1Title || stage.card1[0];
+  const card1Name =
+    stageIndex === 0 && project.files.length
+      ? project.files[0].name
+      : deliveryCopy?.card1Name ||
+        stage.card1[1].replace(/^NOVA\s*·\s*/i, `${displayName} · `);
+  const card1Sub =
+    deliveryCopy?.card1Sub ||
+    (stageDoc.paths[0] ? stageDoc.paths[0] : stage.card1[2]);
+  const card1Foot =
+    deliveryCopy?.card1Foot ||
+    (done
+      ? 'Handover package ready'
+      : stageDoc.paths.length
+        ? `Open ${stageDoc.title}`
+        : stage.card1[3]);
 
   useEffect(() => {
     stages.forEach((s) => {
@@ -751,14 +775,44 @@ function Dashboard({ project, onReset, onOpenHistory }) {
 
   useEffect(() => {
     if (modal !== 'brief' || !project.runId) return;
+    let cancelled = false;
     setPrdLoading(true);
-    const artifactPath =
-      stageIndex === lastStage ? 'releases/release_1_notes.md' : 'requirements/prd.md';
-    fetchArtifact(artifactPath, project.runId)
-      .then((res) => setPrdContent(res.content || ''))
-      .catch(() => setPrdContent(''))
-      .finally(() => setPrdLoading(false));
-  }, [modal, project.runId, stageIndex]);
+    setPrdContent('');
+    setPrdMeta({ title: stageDoc.title, path: '' });
+
+    const candidates = stageDoc.paths.length
+      ? stageDoc.paths
+      : stageDocumentCandidates(stageIndex, runState?.artifacts_index || []).paths;
+
+    (async () => {
+      for (const path of candidates) {
+        try {
+          const res = await fetchArtifact(path, project.runId);
+          if (cancelled) return;
+          if (res?.content) {
+            setPrdContent(res.content);
+            setPrdMeta({ title: stageDoc.title, path });
+            setPrdLoading(false);
+            return;
+          }
+        } catch {
+          /* try next candidate */
+        }
+      }
+      if (cancelled) return;
+      // Fall back to the intake text for this run — never a shared leftover PRD.
+      setPrdContent(project.text || '');
+      setPrdMeta({
+        title: stageDoc.title,
+        path: project.text ? '(intake brief)' : '',
+      });
+      setPrdLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [modal, project.runId, project.text, stageIndex, stageDoc.title, stageDoc.paths.join('|'), runState?.artifacts_index]);
 
   const status = run.failed
     ? 'Failed'
@@ -942,7 +996,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
                     />
                   </div>
                   <div className="detail-block">
-                    <small>Artifacts</small>
+                    <small>{card1Title}</small>
                     <button
                       type="button"
                       className="detail-document"
@@ -950,14 +1004,40 @@ function Dashboard({ project, onReset, onOpenHistory }) {
                     >
                       <img src="/assets/11e0d.svg" alt="" />
                       <span>
-                        <b>
-                          {stageIndex === 0 && project.files.length
-                            ? project.files[0].name
-                            : `${displayName} · brief / PRD`}
-                        </b>
-                        <small>Open run documents</small>
+                        <b>{card1Name}</b>
+                        <small>{card1Sub}</small>
                       </span>
                     </button>
+                    <p>{card1Foot}</p>
+                  </div>
+                  <div className="detail-block">
+                    <small>{stage.card2[0]}</small>
+                    <div className="detail-features">
+                      {featureLines.map((x, i) => (
+                        <p className="detail-feature" key={x}>
+                          <span>
+                            {deliveryCopy
+                              ? run.complete ||
+                                (i === 0 && run.browserReady) ||
+                                (i === 1 && run.checks?.qa_passed) ||
+                                (i === 2 && run.complete)
+                                ? '✓'
+                                : ''
+                              : progress >= (i + 1) * 30
+                                ? '✓'
+                                : ''}
+                          </span>
+                          {deliveryCopy
+                            ? x
+                            : stageIndex === lastStage && !done
+                              ? x
+                                  .replace('Complete', 'Preparing')
+                                  .replace('Passed', 'Checking')
+                                  .replace('Ready', 'Preparing')
+                              : x}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                   <div className="detail-block">
                     <small>Iterations</small>
@@ -1162,16 +1242,21 @@ function Dashboard({ project, onReset, onOpenHistory }) {
           : `Current stage: ${stages[run.active].key}`}
       </div>
       {modal === 'brief' && (
-        <Modal
-          title={stageIndex === lastStage ? 'Release notes' : 'Project brief'}
-          onClose={() => setModal(null)}
-        >
+        <Modal title={prdMeta.title || stageDoc.title} onClose={() => setModal(null)}>
+          {prdMeta.path ? (
+            <p className="usage-detail-meta" style={{ marginTop: 0 }}>
+              {prdMeta.path}
+            </p>
+          ) : null}
           {prdLoading ? (
-            <p>{stageIndex === lastStage ? 'Loading release notes…' : 'Loading PRD…'}</p>
+            <p>Loading {stageDoc.title}…</p>
           ) : prdContent ? (
             <pre className="brief-text artifact-content">{prdContent}</pre>
           ) : (
-            <p className="brief-text">{project.text || 'Requirements provided in the attached documents.'}</p>
+            <p className="brief-text">
+              No {stageDoc.title.toLowerCase()} for this run yet. It will appear here when the
+              agent writes it.
+            </p>
           )}
           <h3>Attachments</h3>
           {project.files.length ? (

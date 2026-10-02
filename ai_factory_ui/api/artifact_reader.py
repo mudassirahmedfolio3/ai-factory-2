@@ -204,19 +204,30 @@ def _list_archived_artifacts(run_id: str) -> list[dict[str, str]]:
 
 
 def read_artifact(path: str, run_id: str | None = None) -> str | None:
+    """Read an artifact for a run.
+
+    When ``run_id`` is set, only that run's archived/fz files are considered —
+    never the shared live ``artifacts/`` folder (that caused stale PRDs from
+    earlier projects to leak into unrelated runs).
+    """
     if run_id:
         for root_name in ("fz_workspace", "artifacts"):
             archived = RUNS_DIR / run_id / root_name / path
             if archived.is_file():
                 return archived.read_text(encoding="utf-8")
 
-    resolved_run_id = run_id
-    if not resolved_run_id:
-        current = get_current_run_state()
-        if current:
-            resolved_run_id = current.get("run_id")
+        fz_live = FZ_RUNS_DIR / run_id / path
+        if fz_live.is_file():
+            return fz_live.read_text(encoding="utf-8")
+        return None
 
+    current = get_current_run_state()
+    resolved_run_id = current.get("run_id") if current else None
     if resolved_run_id:
+        for root_name in ("fz_workspace", "artifacts"):
+            archived = RUNS_DIR / resolved_run_id / root_name / path
+            if archived.is_file():
+                return archived.read_text(encoding="utf-8")
         fz_live = FZ_RUNS_DIR / resolved_run_id / path
         if fz_live.is_file():
             return fz_live.read_text(encoding="utf-8")
