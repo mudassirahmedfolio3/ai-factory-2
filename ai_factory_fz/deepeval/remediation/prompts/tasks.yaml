@@ -1,0 +1,104 @@
+analyze_eval_report:
+  agent: project_manager
+  description: |
+    You are the Project Manager acting as the SDLC remediation orchestrator. A DeepEval report judged the
+    output of the pipeline's agents. Validate each finding against the run's own artifacts before anyone fixes
+    anything. The report is evidence to investigate, not the truth.
+
+    Findings from the DeepEval report (JSON lines, keep their ids):
+    {findings}
+
+    Approved PRD:
+    {prd}
+
+    Product brief:
+    {product_brief}
+
+    Architecture:
+    {architecture}
+
+    OpenAPI contract:
+    {openapi}
+
+    Design system:
+    {design}
+
+    Files in the run:
+    {file_listing}
+
+    Source code excerpts:
+    {code}
+
+    QA and release reports:
+    {reports}
+
+    Known limitations (artifacts that are missing):
+    {limitations}
+
+    Rules:
+    - Return exactly one entry per finding id, no extras, none missing.
+    - Classify every finding as one of: verified_defect (reproducible behaviour or a code, test or contract
+      inconsistency you can point to in the files above), specification_gap (a requirement is missing,
+      ambiguous, contradictory or not approved), unverified (the evidence above is not enough to confirm or
+      reject it), false_positive_or_exception (the files above show the finding is wrong).
+    - A test marked failed is NOT proof of a defect. verified_defect needs at least one file in
+      evidence_checked that you actually read above. If you cannot show evidence, use unverified.
+    - evidence_checked lists real paths from the file list above. Never invent files, work item ids or
+      requirement ids.
+    - root_cause_status is confirmed only when the files show the cause; otherwise hypothesis.
+    - Findings that share a cause should state the same root_cause wording so they can be grouped.
+    - severity: critical (security, data loss, business behaviour broken), high, medium, low.
+    - verification_method says how to prove the fix (for example which DeepEval test to re-run or which
+      acceptance criterion to check).
+  expected_output: One validated entry for every finding id.
+
+plan_remediation:
+  agent: project_manager
+  description: |
+    You are the Project Manager. Turn the validated findings into a remediation backlog that the existing
+    specialist agents can execute later. Do not fix anything yourself.
+
+    Original findings (JSON lines):
+    {findings}
+
+    Validated findings (JSON):
+    {validated_findings}
+
+    Approved PRD:
+    {prd}
+
+    Architecture:
+    {architecture}
+
+    OpenAPI contract:
+    {openapi}
+
+    Files in the run:
+    {file_listing}
+
+    Known limitations (artifacts that are missing):
+    {limitations}
+
+    Existing agents you may assign (use these keys only):
+    {agents}
+
+    Rules:
+    - Group findings that share a root cause into one task; every task lists all its finding_ids.
+    - Every finding id must appear in a task OR in dispositions with a reason. Findings classified
+      false_positive_or_exception get a disposition (no_action_false_positive), never a task.
+    - unverified findings get an investigation task (steps say what evidence to collect) or a disposition
+      needs_evidence.
+    - Order work by dependency: business ambiguity goes to customer, then spec_writer, then architect
+      (contract), then backend_developer and frontend_developer, ui_ux_designer and deployment_engineer in
+      parallel where possible, then integration_pass, then qa_engineer and smoke_tester. Use depends_on with
+      task ids (R-001, R-002, ...). No cycles.
+    - Developers must not be asked to decide business questions; give those to the customer first.
+    - Priority: P0 critical blocker, P1 high impact, P2 normal functional or integration gap, P3 low-risk
+      improvement. Write a one-sentence priority_rationale. Do not use numeric scores and do not treat the
+      overall DeepEval confidence as a substitute for individual failed tests.
+    - needs_human_approval is true for ambiguous business requirements, material architecture changes,
+      security-sensitive behaviour, destructive data operations or scope expansion; then give approval_reason.
+    - acceptance_criteria and verification must be checkable (a test, an endpoint response, a file state).
+    - Use only ids, files and requirement names that appear above. If something needed is missing, say so in
+      limitations.
+  expected_output: A prioritised remediation backlog with dispositions.

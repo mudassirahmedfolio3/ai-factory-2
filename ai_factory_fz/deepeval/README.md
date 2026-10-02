@@ -124,6 +124,44 @@ The files in the table are in `agent_test_writeup/` except the last one, which i
 - `test_every_agent_left_output` in the flow file **fails** if any agent produced nothing.
 - A test **fails** when the judge scores below 0.6; the failure message contains the judge's reason.
 
+## Reports
+
+Every run writes its report into the run folder: `eval_report_agents.*` (agent tests only), `eval_report_flow.*`
+(end-to-end flow only), or `eval_report.*` (both), each as `.md`, `.json` and a self-contained `.html`. They hold the
+pass/fail result, a confidence per agent, the judge's reasons, and a written analysis (why the score, strengths,
+gaps, what to improve). Each report starts with a six-step remediation status block.
+
+## Remediation (Project Manager)
+
+When the report is written, a Project Manager process can validate the findings and plan the fixes. It is **opt-in**:
+
+```powershell
+$env:DEEPEVAL_REMEDIATE=1      # then run the tests as usual; the report triggers the process
+```
+
+or by hand, from `ai_factory_fz` (the Project Manager needs the pipeline environment, so use that project's `uv`):
+
+```powershell
+uv run python deepeval/remediate.py run     --run-dir runs/<id> --report runs/<id>/eval_report_flow.json
+uv run python deepeval/remediate.py status  --run-id <id>
+uv run python deepeval/remediate.py approve --run-id <id>
+```
+
+Stage 1 covers steps 1-2 of the six: **1** DeepEval report, **2** Project Manager triage and backlog. The Project
+Manager classifies every finding against the run's own files (a failed test is not proof of a defect), groups findings
+by root cause, and writes a prioritised backlog (P0-P3) with owners from the existing agents. It **always stops for
+your approval** (`awaiting approval`): read `runs/<id>/remediation/backlog.md`, edit `backlog.json` if you want
+(reject a task by setting its `status` to `rejected` and giving its findings a disposition), then run `approve`.
+Steps 3-6 (fixes, integration pass, QA and smoke tests, re-evaluation with a before/after comparison) are not built yet.
+
+Everything is saved under `runs/<id>/remediation/`: `status.json`, `baseline/eval_report.json` (the first report, never
+overwritten), `findings.json`, `triage.json`, `backlog.json` / `backlog.md`, and an append-only `history.jsonl`. A re-run
+resumes where it stopped and makes no model call for work that is already saved.
+
+All code is in `remediation/` (plus `remediate.py`, `remediation_trigger.py`, `eval_report_html.py`). The two prompts are
+`remediation/prompts/tasks.yaml` and are merged in memory, so the pipeline's own `config/tasks.yaml` is untouched.
+Tests: `uv run pytest remediation/tests unit_tests` (no model calls, no CrewAI needed).
+
 ## Adding tests
 
 Add test files and metrics in `agent_test_writeup/` or `flow_test_writeup/`. Each folder needs its own `conftest.py`
