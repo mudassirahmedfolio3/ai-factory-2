@@ -68,9 +68,12 @@ def test_agent_with_tools_needs_a_resolver():
         reg.build("backend_developer")
 
 
-def test_backend_switch_routes_anthropic_models():
+def test_backend_switch_routes_anthropic_models(monkeypatch):
     from agentic_sdlc.llms.backend import Backend
     from agentic_sdlc.llms.claude_code import ClaudeCodeLLM
+    from agentic_sdlc.llms.cursor_agent import CursorAgentLLM
+
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
 
     config = {
         "defaults": {"max_tokens": 100, "timeout": 30},
@@ -92,16 +95,22 @@ def test_backend_switch_routes_anthropic_models():
     assert not isinstance(api.build_llm("a"), ClaudeCodeLLM)
     assert api.spec_for("c").model == "claude-code/claude-haiku-4-5"  # explicit prefix always wins
 
+    monkeypatch.setenv("LLM_PROVIDER", "cursor_cli")
+    monkeypatch.setenv("CURSOR_PROXY_MODEL", "auto")
+    cursor_llm = api.build_llm("a")
+    assert isinstance(cursor_llm, CursorAgentLLM)
+    assert cursor_llm.model == "auto"
+
 
 def test_pipeline_model_overrides():
     from agentic_sdlc.llms.backend import Backend
 
     reg = ModelRegistry.from_config(load_config("pipeline.demo")["models"])
     reg.backend = Backend.API
-    assert reg.spec_for("architect").model == "anthropic/claude-sonnet-5-5"
-    assert reg.spec_for("backend_developer").model == "anthropic/claude-sonnet-5-5"
+    assert reg.spec_for("architect").model == "anthropic/claude-haiku-4-5-20251001"
+    assert reg.spec_for("backend_developer").model == "anthropic/claude-haiku-4-5-20251001"
     assert "effort" not in reg.spec_for("architect").params
-    assert ModelRegistry.from_config().spec_for("architect").model.endswith("claude-opus-5-5")  # full runs unchanged
+    assert ModelRegistry.from_config().spec_for("architect").model.endswith("claude-haiku-4-5-20251001")
     with pytest.raises(KeyError, match="unknown agents"):
         ModelRegistry.from_config({"nobody": "fast"})
 

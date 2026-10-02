@@ -19,12 +19,13 @@ import {
 } from './api.js';
 import {
   buildClientBrief,
-  deliveryStageCopy,
+  filterUsageForStage,
   flutterRunReadyFromState,
   runStateToDashboard,
   slugProjectName,
 } from './phaseMap.js';
 import { buildProjectJourney } from './journeyMap.js';
+import { buildStageIterations } from './stageIterations.js';
 import { connectRun } from './runSync.js';
 import History from './History.jsx';
 
@@ -522,13 +523,14 @@ function UsageDetailModal({ activity, onClose }) {
   );
 }
 
-function UsageBanner({ usage, live = false }) {
+function UsageBanner({ usage, live = false, stageLive = false }) {
   const [selected, setSelected] = useState(null);
   const budget = usage?.token_budget ?? 0;
   const provider = usage?.provider || 'llm';
   const activities = usage?.activities ?? [];
   const show =
     live ||
+    stageLive ||
     budget > 0 ||
     (usage?.total_tokens ?? 0) > 0 ||
     activities.length > 0 ||
@@ -540,21 +542,25 @@ function UsageBanner({ usage, live = false }) {
   const pct = Math.min(100, usage?.usage_percent ?? 0);
   const level = pct >= 90 ? 'critical' : pct >= 70 ? 'warn' : 'ok';
   const label =
-    formatUsage(usage, live) ||
+    formatUsage(usage, live || stageLive) ||
     `${providerLabel(provider)} · token usage tracking…`;
 
   return (
     <div
       className={`usage-banner usage-${level}`}
-      title={usage?.budget_warning || 'LLM token usage for this run'}
+      title={usage?.budget_warning || 'LLM token usage for this stage'}
     >
       <p className="usage-banner-text">{label}</p>
       {budget > 0 && (
         <div className="usage-meter-track" aria-hidden="true">
-          <div className="usage-meter-fill" style={{ width: `${Math.max(pct, live && !usage?.total_tokens ? 1 : 0)}%` }} />
+          <div className="usage-meter-fill" style={{ width: `${Math.max(pct, (live || stageLive) && !usage?.total_tokens ? 1 : 0)}%` }} />
         </div>
       )}
-      <UsageActivityFeed activities={activities} live={live} onSelect={setSelected} />
+      <UsageActivityFeed
+        activities={activities}
+        live={stageLive}
+        onSelect={setSelected}
+      />
       {usage?.budget_warning && <small className="usage-warning">{usage.budget_warning}</small>}
       {selected && <UsageDetailModal activity={selected} onClose={() => setSelected(null)} />}
     </div>
@@ -575,7 +581,9 @@ function Dashboard({ project, onReset, onOpenHistory }) {
   const [auditEvents, setAuditEvents] = useState([]);
   const [journeyLoading, setJourneyLoading] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const navRef = useRef();
+  const detailScrollRef = useRef(null);
 
   const lastStage = stages.length - 1;
   const run = runState
@@ -598,7 +606,12 @@ function Dashboard({ project, onReset, onOpenHistory }) {
   const viewing = view !== null && view !== run.active;
   const progress = viewing ? (stageIndex < run.active ? 100 : 0) : run.progress;
   const done = run.complete && stageIndex === lastStage;
-  const isDeliveryStage = stageIndex === lastStage;
+  const isFutureStage = viewing && stageIndex > run.active;
+
+  useEffect(() => {
+    if (detailScrollRef.current) detailScrollRef.current.scrollTop = 0;
+  }, [stageIndex]);
+
   const gateInfo = gates.find((g) => g.index === stageIndex);
   const isFzEngine = runState?.factory_engine === 'fz';
   const preview =
@@ -612,9 +625,15 @@ function Dashboard({ project, onReset, onOpenHistory }) {
     flutterRunReadyFromState(runState) ||
     (run.complete && isFzEngine) ||
     Boolean(runState?.flutter_ready);
-  const deliveryCopy =
-    isDeliveryStage ? deliveryStageCopy(runState, displayName) : null;
   const journey = buildProjectJourney(auditEvents, runState);
+  const stageIterations = buildStageIterations(auditEvents, stageIndex, {
+    isLiveStage: !viewing,
+    progress,
+    complete: done || (stageIndex < run.active && run.active > 0),
+    failed: run.failed && !viewing,
+    future: isFutureStage,
+  });
+  const stageUsage = filterUsageForStage(runState?.usage, stageIndex);
 
   useEffect(() => {
     stages.forEach((s) => {
@@ -831,6 +850,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
               key={s.key}
               className={`step ${i === stageIndex ? 'selected' : ''} ${completed ? 'completed' : ''} ${inProgress ? 'inprogress' : ''}`}
               aria-current={i === stageIndex ? 'step' : undefined}
+              aria-label={`${s.key}, ${completed ? 'done' : inProgress ? 'in progress' : 'not started'}`}
               onClick={() => review(i)}
             >
               <span className="step-circle">
@@ -839,6 +859,29 @@ function Dashboard({ project, onReset, onOpenHistory }) {
               <span className="step-label">
                 {String(i + 1).padStart(2, '0')} {s.key}
               </span>
+              {inProgress ? (
+                <span className="agent-dock">
+                  <i className="agent-arrow" aria-hidden="true" />
+                  <span className="agent-row">
+                    {(s.agents || [s.agent]).map((name, n) => (
+                      <b
+                        key={name}
+                        className="agent-token"
+                        style={{ animationDelay: `${n * 0.14}s` }}
+                        title={name}
+                      >
+                        <i>
+                          {String(name)
+                            .split(' ')
+                            .slice(0, 2)
+                            .map((part) => part[0])
+                            .join('')}
+                        </i>
+                      </b>
+                    ))}
+                  </span>
+                </span>
+              ) : null}
             </button>
             );
           })}
@@ -886,7 +929,66 @@ function Dashboard({ project, onReset, onOpenHistory }) {
               />
             ))}
           </div>
-          <div className="agent-context">
+          <div className={`agent-context${detailOpen ? ' open' : ''}`}>
+            <div className="context-detail full-detail">
+              <div className="context-detail-inner" ref={detailScrollRef}>
+                <div className="context-detail-body">
+                  <div className="detail-block detail-usage">
+                    <small>Token usage · {stage.key}</small>
+                    <UsageBanner
+                      usage={stageUsage}
+                      live={!run.complete && !run.failed}
+                      stageLive={!viewing && !run.complete && !run.failed}
+                    />
+                  </div>
+                  <div className="detail-block">
+                    <small>Artifacts</small>
+                    <button
+                      type="button"
+                      className="detail-document"
+                      onClick={() => setModal('brief')}
+                    >
+                      <img src="/assets/11e0d.svg" alt="" />
+                      <span>
+                        <b>
+                          {stageIndex === 0 && project.files.length
+                            ? project.files[0].name
+                            : `${displayName} · brief / PRD`}
+                        </b>
+                        <small>Open run documents</small>
+                      </span>
+                    </button>
+                  </div>
+                  <div className="detail-block">
+                    <small>Iterations</small>
+                    <div className="iteration-list">
+                      {stageIterations.map((it) => (
+                        <div
+                          key={it.n}
+                          className={`iteration-block${it.muted ? ' muted' : ''}${
+                            it.status === 'In progress' ? ' live' : ''
+                          }`}
+                        >
+                          <div className="iteration-head">
+                            <b>
+                              Iteration {it.n}
+                              {it.reason ? ` · ${it.reason}` : ''}
+                            </b>
+                            <span>{it.status}</span>
+                          </div>
+                          {(it.timeLabel || it.summary) && (
+                            <p>
+                              {it.timeLabel ? `${it.timeLabel} · ` : ''}
+                              {it.summary}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="agent-line">
               <b>{stage.agent}</b>
               <span className={done ? 'success' : run.failed ? 'error' : ''}>● {status}</span>
@@ -905,13 +1007,20 @@ function Dashboard({ project, onReset, onOpenHistory }) {
                 <p>{stage.output}</p>
               </div>
             </div>
+            <button
+              type="button"
+              className="detail-link"
+              aria-expanded={detailOpen}
+              onClick={() => setDetailOpen((open) => !open)}
+            >
+              {detailOpen ? 'Hide detail' : 'View detail'}
+            </button>
           </div>
         </section>
         <section className="application-studio">
           <div className="studio-heading">
             <div>
               <h2>{displayName}</h2>
-              <UsageBanner usage={runState?.usage} live={!run.complete && !run.failed} />
               <p>
                 {stage.key} ·{' '}
                 {stageIndex === lastStage && !done
@@ -1022,54 +1131,6 @@ function Dashboard({ project, onReset, onOpenHistory }) {
               <span>{Math.round(progress)}%</span>
             </div>
             <Progress value={progress} label={`${stage.key} progress`} />
-          </div>
-          <div className="info-cards">
-            <article>
-              <h3>{deliveryCopy?.card1Title || stage.card1[0]}</h3>
-              <button className="document-card" onClick={() => setModal('brief')}>
-                <img src="/assets/11e0d.svg" alt="" />
-                <span>
-                  <b>
-                    {stageIndex === 0 && project.files.length
-                      ? project.files[0].name
-                      : deliveryCopy?.card1Name || stage.card1[1]}
-                  </b>
-                  <small>{deliveryCopy?.card1Sub || stage.card1[2]}</small>
-                </span>
-              </button>
-              <p>
-                {deliveryCopy?.card1Foot ||
-                  (done
-                    ? 'Handover package ready'
-                    : stageIndex === lastStage
-                      ? 'Packaging source, build and documentation'
-                      : stage.card1[3])}
-              </p>
-            </article>
-            <article>
-              <h3>{stage.card2[0]}</h3>
-              {(deliveryCopy?.deployLines || stage.card2.slice(1)).map((x, i) => (
-                <p className="feature" key={x}>
-                  <span>
-                    {deliveryCopy
-                      ? run.complete || (i === 0 && run.browserReady) || (i === 1 && run.checks?.qa_passed) || (i === 2 && run.complete)
-                        ? '✓'
-                        : ''
-                      : progress >= (i + 1) * 30
-                        ? '✓'
-                        : ''}
-                  </span>
-                  {deliveryCopy
-                    ? x
-                    : stageIndex === lastStage && !done
-                      ? x
-                          .replace('Complete', 'Preparing')
-                          .replace('Passed', 'Checking')
-                          .replace('Ready', 'Preparing')
-                      : x}
-                </p>
-              ))}
-            </article>
           </div>
         </section>
       </main>

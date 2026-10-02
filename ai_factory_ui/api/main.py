@@ -110,10 +110,13 @@ def health() -> dict[str, Any]:
     if FACTORY_ENGINE == "fz":
         from fz_docker import docker_status
 
+        provider = os.getenv("LLM_PROVIDER", "cursor_cli").strip().lower() or "cursor_cli"
         claude_code = os.getenv("CLAUDE_CODE_ENABLE", "false").strip().lower() == "true"
+        payload["llm_provider"] = provider
         payload["claude_code_enabled"] = claude_code
         payload["anthropic_key_loaded"] = bool(os.getenv("ANTHROPIC_API_KEY", "").strip())
         payload["claude_oauth_loaded"] = bool(os.getenv("CLAUDE_CODE_OAUTH_TOKEN", "").strip())
+        payload["cursor_key_loaded"] = bool(os.getenv("CURSOR_API_KEY", "").strip())
         payload["docker"] = docker_status()
     else:
         provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()

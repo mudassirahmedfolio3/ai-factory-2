@@ -10,11 +10,17 @@
 """
 
 import getpass
-import grp
 import shlex
 import shutil
 import subprocess
+import sys
 from functools import lru_cache
+
+# Unix-only; missing on Windows — Docker Desktop does not use the `docker` group.
+try:
+    import grp
+except ImportError:  # pragma: no cover - Windows
+    grp = None  # type: ignore[assignment]
 
 
 def _ok(cmd: list[str]) -> bool:
@@ -25,6 +31,8 @@ def _ok(cmd: list[str]) -> bool:
 
 
 def in_docker_group(user: str | None = None) -> bool:
+    if grp is None or sys.platform == "win32":
+        return False
     user = user or getpass.getuser()
     try:
         return user in grp.getgrnam("docker").gr_mem

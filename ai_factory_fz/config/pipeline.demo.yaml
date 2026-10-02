@@ -22,7 +22,7 @@ scope:
   max_screens: 3
 
 # Model overrides for this pipeline (same format as config/models.yaml `agents:`).
-# Sonnet instead of Opus for the heaviest agents: about twice as fast, for a quick demo.
+# All agents already use Haiku in models.yaml; these keep heavy agents on the shared tier.
 models:
   architect: balanced
   backend_developer: balanced

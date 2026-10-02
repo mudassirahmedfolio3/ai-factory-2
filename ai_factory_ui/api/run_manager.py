@@ -145,6 +145,40 @@ def _write_failed_state(message: str) -> None:
     RUN_STATE_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 
+def stop_active_runs(reason: str = "Superseded by a new run") -> str | None:
+    """Kill any live factory workers and mark the previous UI run failed. Returns prior run_id."""
+    global _active_process, _active_thread
+
+    state = _read_run_state() or {}
+    prev_id = state.get("run_id")
+
+    if FACTORY_ENGINE == "fz":
+        from fz_run_manager import terminate_fz_workers
+
+        terminate_fz_workers(reason)
+    elif _active_process is not None and _active_process.poll() is None:
+        if sys.platform == "win32":
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(_active_process.pid)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        else:
+            _active_process.terminate()
+            try:
+                _active_process.wait(timeout=5)
+            except Exception:
+                _active_process.kill()
+        _active_process = None
+
+    if state.get("status") in ("running", "stale"):
+        _write_failed_state(reason)
+
+    _active_thread = None
+    return prev_id
+
+
 def _run_flow(inputs: dict[str, Any]) -> None:
     original_cwd = os.getcwd()
     try:
@@ -181,9 +215,8 @@ def start_run(
 
     with _lock:
         _reconcile_stale_run()
-        if is_running():
-            run_id = (_read_run_state() or {}).get("run_id", "")
-            raise RuntimeError(f"RUN_IN_PROGRESS:{run_id}")
+        # Starting a new run always replaces any live/stale workers.
+        stop_active_runs("Superseded by a new run")
 
         if FACTORY_ENGINE == "fz":
             from fz_run_manager import start_fz_run_unlocked

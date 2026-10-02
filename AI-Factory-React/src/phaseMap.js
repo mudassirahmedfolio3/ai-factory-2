@@ -15,6 +15,55 @@ export const UI_STAGE_BACKEND_IDS = [
 
 export const UI_STAGE_COUNT = UI_STAGE_BACKEND_IDS.length;
 
+/** Fz agent keys whose LLM usage belongs to each UI stage. */
+export const UI_STAGE_AGENTS = [
+  ['customer'],
+  ['spec_writer'],
+  ['architect'],
+  ['ui_ux_designer'],
+  ['project_manager'],
+  ['backend_developer'],
+  ['frontend_developer'],
+  ['deployment_engineer'],
+  ['qa_engineer'],
+  ['smoke_tester'],
+  ['integration_pass'],
+];
+
+export function agentsForUiStage(uiIndex) {
+  return UI_STAGE_AGENTS[uiIndex] || [];
+}
+
+export function filterUsageForStage(usage, uiIndex) {
+  if (!usage) return null;
+  const allowed = new Set(agentsForUiStage(uiIndex).map((a) => a.toLowerCase()));
+  const activities = (usage.activities || []).filter((item) =>
+    allowed.has(String(item.agent || '').toLowerCase()),
+  );
+  const llm_calls = activities.length;
+  const prompt_tokens = activities.reduce((n, a) => n + (a.prompt_tokens || 0), 0);
+  const completion_tokens = activities.reduce((n, a) => n + (a.completion_tokens || 0), 0);
+  const total_tokens = activities.reduce((n, a) => n + (a.total_tokens || 0), 0);
+  const uncached_tokens = activities.reduce(
+    (n, a) => n + (a.uncached_tokens ?? a.total_tokens ?? 0),
+    0,
+  );
+  const budget = usage.token_budget ?? 0;
+  const pct = budget > 0 ? Math.round((uncached_tokens / budget) * 1000) / 10 : 0;
+  return {
+    ...usage,
+    activities,
+    llm_calls,
+    actual_calls: llm_calls,
+    prompt_tokens,
+    completion_tokens,
+    total_tokens,
+    uncached_tokens,
+    usage_percent: pct,
+    budget_warning: null,
+  };
+}
+
 function stepStatusMap(pipelineSteps) {
   const map = new Map();
   for (const step of pipelineSteps || []) {

@@ -1,13 +1,23 @@
 """Model registry: maps each agent to an LLM (plus fallbacks) from config/models.yaml."""
 
+import os
 from typing import Any
 
 from crewai import LLM
 from crewai.llms.base_llm import BaseLLM
 from pydantic import BaseModel, Field
 
-from agentic_sdlc.llms.backend import CLAUDE_CODE_PREFIX, Backend, check_credentials, route_model, selected_backend
+from agentic_sdlc.llms.backend import (
+    CLAUDE_CODE_PREFIX,
+    Backend,
+    Provider,
+    check_credentials,
+    route_model,
+    selected_backend,
+    selected_provider,
+)
 from agentic_sdlc.llms.claude_code import ClaudeCodeLLM
+from agentic_sdlc.llms.cursor_agent import CursorAgentLLM
 from agentic_sdlc.settings import load_config
 
 
@@ -68,6 +78,25 @@ class ModelRegistry:
     def build_llm(self, agent_key: str, model: str | None = None) -> BaseLLM:
         """Build the LLM for an agent. `model` picks one of its candidates (default: primary)."""
         spec = self.spec_for(agent_key)
+        provider = selected_provider()
+        timeout = int(spec.params.get("timeout", 600))
+
+        if provider is Provider.CURSOR_CLI:
+            return CursorAgentLLM(
+                model=os.getenv("CURSOR_PROXY_MODEL", "auto"),
+                api_key=os.getenv("CURSOR_API_KEY", "").strip() or None,
+                working_dir=os.getenv("CURSOR_AGENT_CWD", os.getcwd()),
+                timeout_seconds=int(os.getenv("CURSOR_AGENT_TIMEOUT", str(timeout))),
+            )
+        if provider is Provider.CURSOR_PROXY:
+            return LLM(
+                model=os.getenv("CURSOR_PROXY_MODEL", "auto"),
+                custom_openai=True,
+                base_url=os.getenv("CURSOR_PROXY_BASE_URL", "http://localhost:4646/v1"),
+                api_key=os.getenv("CURSOR_API_KEY", "").strip(),
+                timeout=timeout,
+            )
+
         model = model or spec.model
         if model.startswith(CLAUDE_CODE_PREFIX):
             # Claude Code picks its own output limit; only timeout and effort apply.

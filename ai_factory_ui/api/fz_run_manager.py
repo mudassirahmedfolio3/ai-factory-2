@@ -26,6 +26,14 @@ def _ensure_fz_env() -> None:
     os.environ["SDLC_HOME"] = str(AI_FACTORY_FZ_ROOT)
     os.environ.setdefault("SDLC_GATE_MODE", "auto")
 
+    provider = os.getenv("LLM_PROVIDER", "cursor_cli").strip().lower() or "cursor_cli"
+    if provider in ("cursor_cli", "cursor_proxy"):
+        if provider == "cursor_proxy" and not os.getenv("CURSOR_API_KEY", "").strip():
+            raise RuntimeError(
+                "CURSOR_API_KEY is missing in ai_factory_fz/.env — required for LLM_PROVIDER=cursor_proxy."
+            )
+        return
+
     claude_code = os.getenv("CLAUDE_CODE_ENABLE", "false").strip().lower() == "true"
     if claude_code:
         if not os.getenv("CLAUDE_CODE_OAUTH_TOKEN", "").strip():
@@ -34,7 +42,8 @@ def _ensure_fz_env() -> None:
             )
     elif not os.getenv("ANTHROPIC_API_KEY", "").strip():
         raise RuntimeError(
-            "ANTHROPIC_API_KEY is missing in ai_factory_fz/.env — add your Claude API key."
+            "ANTHROPIC_API_KEY is missing in ai_factory_fz/.env — add your Claude API key, "
+            "or set LLM_PROVIDER=cursor_cli for development."
         )
 
 
@@ -108,6 +117,117 @@ def worker_process_alive() -> bool:
     return False
 
 
+def _terminate_pid_tree(pid: int) -> None:
+    if pid <= 0:
+        return
+    if sys.platform == "win32":
+        subprocess.run(
+            ["taskkill", "/F", "/T", "/PID", str(pid)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        return
+    try:
+        os.kill(pid, 15)
+    except OSError:
+        pass
+
+
+def _iter_fz_worker_pids() -> list[int]:
+    """Find live fz_worker.py process IDs (Windows + Unix)."""
+    pids: list[int] = []
+    if sys.platform == "win32":
+        try:
+            ps = subprocess.run(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-Command",
+                    "Get-CimInstance Win32_Process | "
+                    "Where-Object { $_.CommandLine -and ($_.CommandLine -match 'fz_worker\\.py') } | "
+                    "Select-Object -ExpandProperty ProcessId",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=15,
+            )
+            for line in (ps.stdout or "").splitlines():
+                line = line.strip()
+                if line.isdigit():
+                    pids.append(int(line))
+        except Exception:
+            pass
+    else:
+        try:
+            out = subprocess.run(
+                ["pgrep", "-f", "fz_worker.py"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            for line in (out.stdout or "").splitlines():
+                line = line.strip()
+                if line.isdigit():
+                    pids.append(int(line))
+        except Exception:
+            pass
+
+    info = read_worker_info()
+    if info:
+        try:
+            pid = int(info.get("pid", 0))
+            if pid > 0 and _pid_alive(pid):
+                pids.append(pid)
+        except (TypeError, ValueError):
+            pass
+    return sorted(set(pids), reverse=True)
+
+
+def terminate_fz_workers(reason: str = "Superseded by a new run") -> list[str]:
+    """Kill all fz worker process trees and mark their runs stopped. Returns stopped run ids."""
+    import run_manager as rm
+    from config import FZ_RUNS_DIR
+
+    stopped: list[str] = []
+    info = read_worker_info() or {}
+    known_run = str(info.get("run_id") or "")
+    state = rm._read_run_state() or {}
+    state_run = str(state.get("run_id") or "")
+
+    proc = rm._active_process
+    if proc is not None and proc.poll() is None:
+        _terminate_pid_tree(proc.pid)
+        try:
+            proc.wait(timeout=5)
+        except Exception:
+            pass
+        if rm._active_process is proc:
+            rm._active_process = None
+
+    for pid in _iter_fz_worker_pids():
+        _terminate_pid_tree(pid)
+
+    for run_id in {known_run, state_run} - {""}:
+        fz_state_path = FZ_RUNS_DIR / run_id / "state.json"
+        if not fz_state_path.is_file():
+            continue
+        try:
+            data = json.loads(fz_state_path.read_text(encoding="utf-8"))
+            if data.get("status") in ("completed", "failed", "stopped"):
+                continue
+            data["status"] = "stopped"
+            data["stop_reason"] = reason
+            fz_state_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            stopped.append(run_id)
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    _clear_worker_info()
+    return stopped
+
+
 def _worker_env() -> dict[str, str]:
     env = os.environ.copy()
     env["SDLC_HOME"] = str(AI_FACTORY_FZ_ROOT)
@@ -119,14 +239,38 @@ def _worker_env() -> dict[str, str]:
     env.setdefault("GIT_OPTIONAL_LOCKS", "0")
     env["AI_FACTORY_FZ_ROOT"] = str(AI_FACTORY_FZ_ROOT)
     load_dotenv(AI_FACTORY_FZ_ROOT / ".env", override=True)
-    for key in ("ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_ENABLE", "SDLC_SANDBOX"):
+    for key in (
+        "LLM_PROVIDER",
+        "CURSOR_API_KEY",
+        "CURSOR_PROXY_MODEL",
+        "CURSOR_PROXY_BASE_URL",
+        "CURSOR_AGENT_CWD",
+        "CURSOR_AGENT_TIMEOUT",
+        "ANTHROPIC_API_KEY",
+        "CLAUDE_CODE_OAUTH_TOKEN",
+        "CLAUDE_CODE_ENABLE",
+        "SDLC_SANDBOX",
+    ):
         val = os.getenv(key)
         if val is not None:
             env[key] = val
     repo_root = AI_FACTORY_FZ_ROOT.parent
+    path_prepend: list[str] = []
     flutter_bin = repo_root / ".tools" / "flutter" / "bin"
     if flutter_bin.is_dir():
-        env["PATH"] = str(flutter_bin) + os.pathsep + env.get("PATH", "")
+        path_prepend.append(str(flutter_bin))
+    # Hidden/API-started processes often miss the interactive user PATH (Node, Git, etc.).
+    for candidate in (
+        Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "nodejs",
+        Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "nodejs",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "node",
+        Path(r"C:\Program Files\Git\cmd"),
+        Path(r"C:\Program Files\Git\bin"),
+    ):
+        if candidate.is_dir():
+            path_prepend.append(str(candidate))
+    if path_prepend:
+        env["PATH"] = os.pathsep.join(path_prepend) + os.pathsep + env.get("PATH", "")
     return env
 
 

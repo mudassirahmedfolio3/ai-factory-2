@@ -4,6 +4,7 @@ import {
   activeUiStage,
   buildCompleteFromState,
   deliveryStageCopy,
+  filterUsageForStage,
   flutterRunReadyFromState,
   overallProgressFromState,
   previewReadyFromState,
@@ -140,4 +141,25 @@ test('deliveryStageCopy uses project name and release number', () => {
   assert.match(copy.card1Name, /womens-jewellery/);
   assert.match(copy.deployLines[0], /Flutter project/);
   assert.match(copy.deployLines[1], /HTML preview/);
+});
+
+test('filterUsageForStage keeps only that stage agents', () => {
+  const usage = {
+    provider: 'agentic_sdlc',
+    token_budget: 0,
+    activities: [
+      { id: '1', agent: 'customer', task: 'customer_brief', total_tokens: 10 },
+      { id: '2', agent: 'spec_writer', task: 'write_prd', total_tokens: 20 },
+      { id: '3', agent: 'architect', task: 'architecture', total_tokens: 30 },
+    ],
+  };
+  const spec = filterUsageForStage(usage, 1);
+  assert.equal(spec.activities.length, 1);
+  assert.equal(spec.activities[0].agent, 'spec_writer');
+  assert.equal(spec.llm_calls, 1);
+  assert.equal(spec.total_tokens, 20);
+
+  const arch = filterUsageForStage(usage, 2);
+  assert.equal(arch.activities.length, 1);
+  assert.equal(arch.activities[0].agent, 'architect');
 });
