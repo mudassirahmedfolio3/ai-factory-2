@@ -21,6 +21,11 @@ from datetime import datetime
 from pathlib import Path
 
 from common import PASS_THRESHOLD, RESULTS, ask_llm
+from eval_report_html import STATUS_END, STATUS_PLACEHOLDER_HTML, STATUS_START, to_html  # noqa: F401
+
+STATUS_PLACEHOLDER_MD = (
+    f"{STATUS_START}\nRemediation not started. Set DEEPEVAL_REMEDIATE=1 to start it after the report.\n{STATUS_END}"
+)
 
 AGENTS = [
     "customer", "spec_writer", "project_manager", "architect", "ui_ux_designer",
@@ -189,6 +194,7 @@ def to_markdown(r: dict) -> str:
         f"Generated {r['generated']}.", "",
         f"**Overall: {o['verdict']}** | confidence {fmt(o['confidence'])} ({o['confidence_level']}) | "
         f"{o['passed']} passed, {o['failed']} failed, {o['skipped']} skipped", "",
+        STATUS_PLACEHOLDER_MD, "",
         "## How to read this report", "",
         f"- Every test asks an LLM judge to score one agent's output against written criteria, from 0 to 1. "
         f"A test **passes at {r['pass_threshold']} or above**.",
@@ -267,7 +273,8 @@ def report_name(outcomes) -> str:
 
 
 def write(r: dict, folder: Path, name: str = "eval_report") -> list[Path]:
-    paths = [folder / f"{name}.json", folder / f"{name}.md"]
+    paths = [folder / f"{name}.json", folder / f"{name}.md", folder / f"{name}.html"]
     paths[0].write_text(json.dumps(r, indent=2), encoding="utf-8")
     paths[1].write_text(to_markdown(r), encoding="utf-8")
+    paths[2].write_text(to_html(r), encoding="utf-8")
     return paths
