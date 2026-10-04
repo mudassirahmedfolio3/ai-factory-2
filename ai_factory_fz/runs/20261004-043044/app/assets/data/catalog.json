@@ -1,0 +1,1153 @@
+{
+  "brands": [
+    {
+      "id": "b1111111-1111-4111-8111-111111111101",
+      "name": "Luminex",
+      "slug": "luminex"
+    },
+    {
+      "id": "b1111111-1111-4111-8111-111111111102",
+      "name": "BrightHive",
+      "slug": "brighthive"
+    },
+    {
+      "id": "b1111111-1111-4111-8111-111111111103",
+      "name": "NordLux",
+      "slug": "nordlux"
+    },
+    {
+      "id": "b1111111-1111-4111-8111-111111111104",
+      "name": "Voltara",
+      "slug": "voltara"
+    },
+    {
+      "id": "b1111111-1111-4111-8111-111111111105",
+      "name": "GlowCraft",
+      "slug": "glowcraft"
+    }
+  ],
+  "categories": [
+    {
+      "id": "c1111111-1111-4111-8111-111111111101",
+      "name": "Ceiling Lights",
+      "slug": "ceiling-lights",
+      "parentId": null,
+      "imageUrl": "assets/images/products/placeholder.png",
+      "description": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "c1111111-1111-4111-8111-111111111108",
+      "name": "Pendant Lights",
+      "slug": "pendant-lights",
+      "parentId": "c1111111-1111-4111-8111-111111111101",
+      "imageUrl": "assets/images/products/placeholder.png",
+      "description": null,
+      "sortOrder": 2
+    },
+    {
+      "id": "c1111111-1111-4111-8111-111111111102",
+      "name": "Wall Lights",
+      "slug": "wall-lights",
+      "parentId": null,
+      "imageUrl": "assets/images/products/placeholder.png",
+      "description": null,
+      "sortOrder": 3
+    },
+    {
+      "id": "c1111111-1111-4111-8111-111111111103",
+      "name": "Outdoor & Security",
+      "slug": "outdoor-security",
+      "parentId": null,
+      "imageUrl": "assets/images/products/placeholder.png",
+      "description": null,
+      "sortOrder": 4
+    },
+    {
+      "id": "c1111111-1111-4111-8111-111111111104",
+      "name": "Bulbs & Tubes",
+      "slug": "bulbs-tubes",
+      "parentId": null,
+      "imageUrl": "assets/images/products/placeholder.png",
+      "description": null,
+      "sortOrder": 5
+    },
+    {
+      "id": "c1111111-1111-4111-8111-111111111105",
+      "name": "LED Strips & Profiles",
+      "slug": "led-strips-profiles",
+      "parentId": null,
+      "imageUrl": "assets/images/products/placeholder.png",
+      "description": null,
+      "sortOrder": 6
+    },
+    {
+      "id": "c1111111-1111-4111-8111-111111111106",
+      "name": "Lamps & Portable",
+      "slug": "lamps-portable",
+      "parentId": null,
+      "imageUrl": "assets/images/products/placeholder.png",
+      "description": null,
+      "sortOrder": 7
+    },
+    {
+      "id": "c1111111-1111-4111-8111-111111111107",
+      "name": "Commercial & Trade",
+      "slug": "commercial-trade",
+      "parentId": null,
+      "imageUrl": "assets/images/products/placeholder.png",
+      "description": null,
+      "sortOrder": 8
+    }
+  ],
+  "products": [
+    {
+      "id": "p1111111-1111-4111-8111-111111111101",
+      "name": "Modern LED Ceiling Light",
+      "brand": "Luminex",
+      "brandSlug": "luminex",
+      "slug": "modern-led-ceiling-light",
+      "description": "Slim LED ceiling panel for kitchens and hallways with even 2400 lm output.",
+      "categoryId": "c1111111-1111-4111-8111-111111111101",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111101",
+          "sku": "CL-1001-WH",
+          "label": "Matte White / 3000K / 24W",
+          "price": {
+            "amountCents": 4999,
+            "currency": "GBP"
+          },
+          "compareAtPrice": {
+            "amountCents": 5999,
+            "currency": "GBP"
+          },
+          "stockQuantity": 32,
+          "availableQuantity": 32,
+          "finish": "Matte White",
+          "wattageW": 24,
+          "colorTemperatureK": 3000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        },
+        {
+          "id": "v1111111-1111-4111-8111-111111111102",
+          "sku": "CL-1001-BK",
+          "label": "Matte Black / 4000K / 24W",
+          "price": {
+            "amountCents": 5299,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 0,
+          "availableQuantity": 0,
+          "finish": "Matte Black",
+          "wattageW": 24,
+          "colorTemperatureK": 4000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": false
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Modern LED ceiling light"
+        }
+      ],
+      "specs": {
+        "wattageW": 24,
+        "lumens": 2400,
+        "colorTemperatureK": 3000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": true,
+        "material": "Aluminium",
+        "finish": "Matte White",
+        "dimensionsMm": "600x300 mm",
+        "ipRating": "IP44",
+        "bulbIncluded": true,
+        "installationType": "Ceiling mounted"
+      },
+      "reviews": [
+        {
+          "id": "r1111111-1111-4111-8111-111111111101",
+          "rating": 5,
+          "title": "Bright and easy fit",
+          "body": "Installed in our kitchen in under an hour. Warm light looks great.",
+          "authorDisplayName": "Verified Buyer",
+          "createdAt": "2025-10-02T00:00:00.000Z"
+        },
+        {
+          "id": "r1111111-1111-4111-8111-111111111102",
+          "rating": 4,
+          "title": "Good value",
+          "body": "Solid build quality for the price. Dimming works with our trailing edge dimmer.",
+          "authorDisplayName": "Sarah M.",
+          "createdAt": "2025-09-18T00:00:00.000Z"
+        }
+      ],
+      "popularityRank": 1,
+      "unitsSold90Days": 420,
+      "isFeatured": true,
+      "keywords": [
+        "panel",
+        "kitchen",
+        "hallway"
+      ],
+      "createdAt": "2025-06-15T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111102",
+      "name": "Crystal Pendant Light",
+      "brand": "BrightHive",
+      "brandSlug": "brighthive",
+      "slug": "crystal-pendant-light",
+      "description": "Three-ring crystal pendant for dining areas with adjustable drop.",
+      "categoryId": "c1111111-1111-4111-8111-111111111108",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111103",
+          "sku": "PD-2201-CH",
+          "label": "Chrome / 2700K / 18W",
+          "price": {
+            "amountCents": 8999,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 14,
+          "availableQuantity": 14,
+          "finish": "Chrome",
+          "wattageW": 18,
+          "colorTemperatureK": 2700,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Crystal pendant light"
+        }
+      ],
+      "specs": {
+        "wattageW": 18,
+        "lumens": 1600,
+        "colorTemperatureK": 2700,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": true,
+        "material": "Steel and crystal",
+        "finish": "Chrome",
+        "dimensionsMm": "400 mm diameter",
+        "ipRating": "IP20",
+        "bulbIncluded": true,
+        "installationType": "Pendant"
+      },
+      "reviews": [
+        {
+          "id": "r1111111-1111-4111-8111-111111111103",
+          "rating": 5,
+          "title": "Stunning over the table",
+          "body": "Looks premium and gives a lovely warm glow.",
+          "authorDisplayName": "James T.",
+          "createdAt": "2025-08-30T00:00:00.000Z"
+        }
+      ],
+      "popularityRank": 4,
+      "unitsSold90Days": 180,
+      "isFeatured": true,
+      "keywords": [
+        "dining",
+        "pendant",
+        "crystal"
+      ],
+      "createdAt": "2025-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111103",
+      "name": "Flush Mount Bathroom Light",
+      "brand": "NordLux",
+      "brandSlug": "nordlux",
+      "slug": "flush-mount-bathroom-light",
+      "description": "IP44 rated flush ceiling light for bathrooms and en-suites.",
+      "categoryId": "c1111111-1111-4111-8111-111111111101",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111104",
+          "sku": "CL-1002-WH",
+          "label": "White / 4000K / 15W",
+          "price": {
+            "amountCents": 3499,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 45,
+          "availableQuantity": 45,
+          "finish": "White",
+          "wattageW": 15,
+          "colorTemperatureK": 4000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Bathroom flush light"
+        }
+      ],
+      "specs": {
+        "wattageW": 15,
+        "lumens": 1200,
+        "colorTemperatureK": 4000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": false,
+        "material": "Polycarbonate",
+        "finish": "White",
+        "dimensionsMm": "280 mm",
+        "ipRating": "IP44",
+        "bulbIncluded": true,
+        "installationType": "Ceiling mounted"
+      },
+      "reviews": [],
+      "popularityRank": 6,
+      "unitsSold90Days": 95,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-06-15T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111104",
+      "name": "Wall Sconce Duo",
+      "brand": "Luminex",
+      "brandSlug": "luminex",
+      "slug": "wall-sconce-duo",
+      "description": "Pair of up/down wall lights for corridors and living rooms.",
+      "categoryId": "c1111111-1111-4111-8111-111111111102",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111105",
+          "sku": "WL-3001-GR",
+          "label": "Graphite / 3000K / 12W",
+          "price": {
+            "amountCents": 6499,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 22,
+          "availableQuantity": 22,
+          "finish": "Graphite",
+          "wattageW": 12,
+          "colorTemperatureK": 3000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        },
+        {
+          "id": "v1111111-1111-4111-8111-111111111106",
+          "sku": "WL-3001-BR",
+          "label": "Brass / 3000K / 12W",
+          "price": {
+            "amountCents": 6999,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 8,
+          "availableQuantity": 8,
+          "finish": "Brass",
+          "wattageW": 12,
+          "colorTemperatureK": 3000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": false
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Wall sconce duo"
+        }
+      ],
+      "specs": {
+        "wattageW": 12,
+        "lumens": 900,
+        "colorTemperatureK": 3000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": true,
+        "material": "Aluminium",
+        "finish": "Graphite",
+        "dimensionsMm": "120x80 mm",
+        "ipRating": "IP20",
+        "bulbIncluded": true,
+        "installationType": "Wall mounted"
+      },
+      "reviews": [
+        {
+          "id": "r1111111-1111-4111-8111-111111111104",
+          "rating": 4,
+          "title": "Smart look",
+          "body": "Brass finish matches our switches nicely.",
+          "authorDisplayName": "Verified Buyer",
+          "createdAt": "2025-07-12T00:00:00.000Z"
+        }
+      ],
+      "popularityRank": 3,
+      "unitsSold90Days": 210,
+      "isFeatured": true,
+      "keywords": [
+        "sconce",
+        "corridor"
+      ],
+      "createdAt": "2025-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111105",
+      "name": "Picture Light LED",
+      "brand": "GlowCraft",
+      "brandSlug": "glowcraft",
+      "slug": "picture-light-led",
+      "description": "Adjustable picture light for artwork with even beam spread.",
+      "categoryId": "c1111111-1111-4111-8111-111111111102",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111107",
+          "sku": "WL-3002-AB",
+          "label": "Antique Brass / 2700K / 8W",
+          "price": {
+            "amountCents": 4599,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 18,
+          "availableQuantity": 18,
+          "finish": "Antique Brass",
+          "wattageW": 8,
+          "colorTemperatureK": 2700,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Picture light"
+        }
+      ],
+      "specs": {
+        "wattageW": 8,
+        "lumens": 520,
+        "colorTemperatureK": 2700,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": true,
+        "material": "Steel",
+        "finish": "Antique Brass",
+        "dimensionsMm": "450 mm",
+        "ipRating": "IP20",
+        "bulbIncluded": true,
+        "installationType": "Wall mounted"
+      },
+      "reviews": [],
+      "popularityRank": 9,
+      "unitsSold90Days": 60,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-11-20T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111106",
+      "name": "PIR Security Floodlight",
+      "brand": "Voltara",
+      "brandSlug": "voltara",
+      "slug": "pir-security-floodlight",
+      "description": "Motion-activated LED flood for driveways with dusk-to-dawn sensor.",
+      "categoryId": "c1111111-1111-4111-8111-111111111103",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111108",
+          "sku": "OS-4001-BK",
+          "label": "Black / 4000K / 30W",
+          "price": {
+            "amountCents": 3899,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 50,
+          "availableQuantity": 50,
+          "finish": "Black",
+          "wattageW": 30,
+          "colorTemperatureK": 4000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        },
+        {
+          "id": "v1111111-1111-4111-8111-111111111109",
+          "sku": "OS-4001-WH",
+          "label": "White / 4000K / 30W",
+          "price": {
+            "amountCents": 3899,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 0,
+          "availableQuantity": 0,
+          "finish": "White",
+          "wattageW": 30,
+          "colorTemperatureK": 4000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": false
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "PIR floodlight"
+        }
+      ],
+      "specs": {
+        "wattageW": 30,
+        "lumens": 3000,
+        "colorTemperatureK": 4000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": false,
+        "material": "Die-cast aluminium",
+        "finish": "Black",
+        "dimensionsMm": "220x180 mm",
+        "ipRating": "IP65",
+        "bulbIncluded": true,
+        "installationType": "Wall mounted"
+      },
+      "reviews": [
+        {
+          "id": "r1111111-1111-4111-8111-111111111105",
+          "rating": 5,
+          "title": "Works a treat",
+          "body": "PIR range is generous and the light is very bright.",
+          "authorDisplayName": "Verified Buyer",
+          "createdAt": "2025-10-05T00:00:00.000Z"
+        }
+      ],
+      "popularityRank": 2,
+      "unitsSold90Days": 310,
+      "isFeatured": true,
+      "keywords": [
+        "security",
+        "motion",
+        "PIR"
+      ],
+      "createdAt": "2025-06-15T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111107",
+      "name": "Garden Bollard Light",
+      "brand": "NordLux",
+      "brandSlug": "nordlux",
+      "slug": "garden-bollard-light",
+      "description": "Low-level bollard for paths and flower beds.",
+      "categoryId": "c1111111-1111-4111-8111-111111111103",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111110",
+          "sku": "OS-4002-SS",
+          "label": "Brushed steel / 3000K / 6W",
+          "price": {
+            "amountCents": 5499,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 0,
+          "availableQuantity": 0,
+          "finish": "Brushed steel",
+          "wattageW": 6,
+          "colorTemperatureK": 3000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Garden bollard"
+        }
+      ],
+      "specs": {
+        "wattageW": 6,
+        "lumens": 450,
+        "colorTemperatureK": 3000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": false,
+        "material": "Stainless steel",
+        "finish": "Brushed steel",
+        "dimensionsMm": "600 mm height",
+        "ipRating": "IP54",
+        "bulbIncluded": true,
+        "installationType": "Ground spike"
+      },
+      "reviews": [],
+      "popularityRank": 11,
+      "unitsSold90Days": 44,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111108",
+      "name": "GU10 LED Bulb 5-Pack",
+      "brand": "Voltara",
+      "brandSlug": "voltara",
+      "slug": "gu10-led-bulb-5-pack",
+      "description": "Energy-saving GU10 spot lamps, 5-pack for downlight upgrades.",
+      "categoryId": "c1111111-1111-4111-8111-111111111104",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111111",
+          "sku": "BT-5001-WW",
+          "label": "Warm white 2700K / 5W (5 pack)",
+          "price": {
+            "amountCents": 1299,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 200,
+          "availableQuantity": 200,
+          "finish": "White",
+          "wattageW": 5,
+          "colorTemperatureK": 2700,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        },
+        {
+          "id": "v1111111-1111-4111-8111-111111111112",
+          "sku": "BT-5001-CW",
+          "label": "Cool white 4000K / 5W (5 pack)",
+          "price": {
+            "amountCents": 1299,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 150,
+          "availableQuantity": 150,
+          "finish": "White",
+          "wattageW": 5,
+          "colorTemperatureK": 4000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": false
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "GU10 LED bulbs"
+        }
+      ],
+      "specs": {
+        "wattageW": 5,
+        "lumens": 400,
+        "colorTemperatureK": 2700,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": true,
+        "material": "Plastic",
+        "finish": "White",
+        "dimensionsMm": "50 mm",
+        "ipRating": "IP20",
+        "bulbIncluded": true,
+        "installationType": "Retrofit"
+      },
+      "reviews": [
+        {
+          "id": "r1111111-1111-4111-8111-111111111106",
+          "rating": 4,
+          "title": "Easy swap",
+          "body": "Replaced halogens throughout the lounge.",
+          "authorDisplayName": "Verified Buyer",
+          "createdAt": "2025-09-02T00:00:00.000Z"
+        }
+      ],
+      "popularityRank": 5,
+      "unitsSold90Days": 520,
+      "isFeatured": false,
+      "keywords": [
+        "GU10",
+        "spot",
+        "downlight"
+      ],
+      "createdAt": "2025-06-15T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111109",
+      "name": "T8 LED Tube 1200mm",
+      "brand": "Voltara",
+      "brandSlug": "voltara",
+      "slug": "t8-led-tube-1200mm",
+      "description": "Direct replacement T8 tube for garages and utility rooms.",
+      "categoryId": "c1111111-1111-4111-8111-111111111104",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111113",
+          "sku": "BT-5002-T8",
+          "label": "Daylight 6500K / 18W",
+          "price": {
+            "amountCents": 899,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 80,
+          "availableQuantity": 80,
+          "finish": "Clear",
+          "wattageW": 18,
+          "colorTemperatureK": 6500,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "T8 LED tube"
+        }
+      ],
+      "specs": {
+        "wattageW": 18,
+        "lumens": 2000,
+        "colorTemperatureK": 6500,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": false,
+        "material": "Polycarbonate",
+        "finish": "Clear",
+        "dimensionsMm": "1200 mm",
+        "ipRating": "IP20",
+        "bulbIncluded": true,
+        "installationType": "Retrofit"
+      },
+      "reviews": [],
+      "popularityRank": 12,
+      "unitsSold90Days": 88,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-11-20T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111110",
+      "name": "RGB LED Strip 5m",
+      "brand": "BrightHive",
+      "brandSlug": "brighthive",
+      "slug": "rgb-led-strip-5m",
+      "description": "App-controlled RGB strip with adhesive backing for accent lighting.",
+      "categoryId": "c1111111-1111-4111-8111-111111111105",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111114",
+          "sku": "LS-6001-RGB",
+          "label": "RGB / 24W / 5m kit",
+          "price": {
+            "amountCents": 2499,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 65,
+          "availableQuantity": 65,
+          "finish": "White PCB",
+          "wattageW": 24,
+          "colorTemperatureK": null,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "RGB LED strip"
+        }
+      ],
+      "specs": {
+        "wattageW": 24,
+        "lumens": 1200,
+        "colorTemperatureK": 3000,
+        "lightType": "LED strip",
+        "voltage": "12V (driver included)",
+        "dimmable": true,
+        "material": "Flexible PCB",
+        "finish": "White PCB",
+        "dimensionsMm": "5000 mm",
+        "ipRating": "IP20",
+        "bulbIncluded": true,
+        "installationType": "Surface mount"
+      },
+      "reviews": [],
+      "popularityRank": 7,
+      "unitsSold90Days": 140,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111111",
+      "name": "Aluminium LED Profile 2m",
+      "brand": "GlowCraft",
+      "brandSlug": "glowcraft",
+      "slug": "aluminium-led-profile-2m",
+      "description": "Recessed aluminium channel with diffuser for strip installs.",
+      "categoryId": "c1111111-1111-4111-8111-111111111105",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111115",
+          "sku": "LS-6002-AL",
+          "label": "2m profile with diffuser",
+          "price": {
+            "amountCents": 1899,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 40,
+          "availableQuantity": 40,
+          "finish": "Anodised silver",
+          "wattageW": null,
+          "colorTemperatureK": null,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "LED profile"
+        }
+      ],
+      "specs": {
+        "wattageW": 0,
+        "lumens": 0,
+        "colorTemperatureK": null,
+        "lightType": "Profile",
+        "voltage": null,
+        "dimmable": null,
+        "material": "Aluminium",
+        "finish": "Anodised silver",
+        "dimensionsMm": "2000 mm",
+        "ipRating": "IP20",
+        "bulbIncluded": false,
+        "installationType": "Recessed"
+      },
+      "reviews": [],
+      "popularityRank": 14,
+      "unitsSold90Days": 52,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-11-20T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111112",
+      "name": "Bedside Touch Lamp",
+      "brand": "GlowCraft",
+      "brandSlug": "glowcraft",
+      "slug": "bedside-touch-lamp",
+      "description": "Touch-dim bedside lamp with fabric shade.",
+      "categoryId": "c1111111-1111-4111-8111-111111111106",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111116",
+          "sku": "LP-7001-GY",
+          "label": "Grey shade / 2700K / 10W",
+          "price": {
+            "amountCents": 3299,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 28,
+          "availableQuantity": 28,
+          "finish": "Grey fabric",
+          "wattageW": 10,
+          "colorTemperatureK": 2700,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Bedside touch lamp"
+        }
+      ],
+      "specs": {
+        "wattageW": 10,
+        "lumens": 600,
+        "colorTemperatureK": 2700,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": true,
+        "material": "Fabric and steel",
+        "finish": "Grey fabric",
+        "dimensionsMm": "350 mm height",
+        "ipRating": "IP20",
+        "bulbIncluded": true,
+        "installationType": "Portable"
+      },
+      "reviews": [],
+      "popularityRank": 8,
+      "unitsSold90Days": 130,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111113",
+      "name": "Architect Desk Lamp",
+      "brand": "Luminex",
+      "brandSlug": "luminex",
+      "slug": "architect-desk-lamp",
+      "description": "Adjustable arm desk lamp with memory dimmer.",
+      "categoryId": "c1111111-1111-4111-8111-111111111106",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111117",
+          "sku": "LP-7002-BK",
+          "label": "Matte Black / 4000K / 12W",
+          "price": {
+            "amountCents": 5799,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 16,
+          "availableQuantity": 16,
+          "finish": "Matte Black",
+          "wattageW": 12,
+          "colorTemperatureK": 4000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Architect desk lamp"
+        }
+      ],
+      "specs": {
+        "wattageW": 12,
+        "lumens": 800,
+        "colorTemperatureK": 4000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": true,
+        "material": "Metal",
+        "finish": "Matte Black",
+        "dimensionsMm": "450 mm reach",
+        "ipRating": "IP20",
+        "bulbIncluded": true,
+        "installationType": "Portable"
+      },
+      "reviews": [],
+      "popularityRank": 10,
+      "unitsSold90Days": 72,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-11-20T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111114",
+      "name": "High Bay UFO LED",
+      "brand": "Voltara",
+      "brandSlug": "voltara",
+      "slug": "high-bay-ufo-led",
+      "description": "150W UFO high bay for warehouses and trade counters.",
+      "categoryId": "c1111111-1111-4111-8111-111111111107",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111118",
+          "sku": "CT-8001-150",
+          "label": "5000K / 150W",
+          "price": {
+            "amountCents": 12999,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 10,
+          "availableQuantity": 10,
+          "finish": "White",
+          "wattageW": 150,
+          "colorTemperatureK": 5000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "High bay UFO LED"
+        }
+      ],
+      "specs": {
+        "wattageW": 150,
+        "lumens": 21000,
+        "colorTemperatureK": 5000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": false,
+        "material": "Aluminium",
+        "finish": "White",
+        "dimensionsMm": "400 mm diameter",
+        "ipRating": "IP65",
+        "bulbIncluded": true,
+        "installationType": "Ceiling mounted"
+      },
+      "reviews": [],
+      "popularityRank": 13,
+      "unitsSold90Days": 38,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-06-15T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111115",
+      "name": "Panel Light 600x600",
+      "brand": "BrightHive",
+      "brandSlug": "brighthive",
+      "slug": "panel-light-600x600",
+      "description": "600x600 LED panel for suspended ceilings in offices.",
+      "categoryId": "c1111111-1111-4111-8111-111111111107",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111119",
+          "sku": "CT-8002-6060",
+          "label": "4000K / 36W",
+          "price": {
+            "amountCents": 4599,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 35,
+          "availableQuantity": 35,
+          "finish": "White",
+          "wattageW": 36,
+          "colorTemperatureK": 4000,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "600x600 panel light"
+        }
+      ],
+      "specs": {
+        "wattageW": 36,
+        "lumens": 3600,
+        "colorTemperatureK": 4000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": true,
+        "material": "Aluminium",
+        "finish": "White",
+        "dimensionsMm": "600x600 mm",
+        "ipRating": "IP40",
+        "bulbIncluded": true,
+        "installationType": "Recessed grid"
+      },
+      "reviews": [],
+      "popularityRank": 15,
+      "unitsSold90Days": 65,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "p1111111-1111-4111-8111-111111111116",
+      "name": "Emergency Exit Sign",
+      "brand": "NordLux",
+      "brandSlug": "nordlux",
+      "slug": "emergency-exit-sign",
+      "description": "Maintained LED exit sign with backup battery for commercial installs.",
+      "categoryId": "c1111111-1111-4111-8111-111111111107",
+      "primaryImageUrl": "assets/images/products/placeholder.png",
+      "variants": [
+        {
+          "id": "v1111111-1111-4111-8111-111111111120",
+          "sku": "CT-8003-EX",
+          "label": "Maintained / 3W",
+          "price": {
+            "amountCents": 2199,
+            "currency": "GBP"
+          },
+          "compareAtPrice": null,
+          "stockQuantity": 55,
+          "availableQuantity": 55,
+          "finish": "White housing",
+          "wattageW": 3,
+          "colorTemperatureK": null,
+          "imageUrl": "assets/images/products/placeholder.png",
+          "isDefault": true
+        }
+      ],
+      "images": [
+        {
+          "url": "assets/images/products/placeholder.png",
+          "sortOrder": 0,
+          "altText": "Emergency exit sign"
+        }
+      ],
+      "specs": {
+        "wattageW": 3,
+        "lumens": 200,
+        "colorTemperatureK": 6000,
+        "lightType": "LED",
+        "voltage": "220-240V",
+        "dimmable": false,
+        "material": "Polycarbonate",
+        "finish": "White housing",
+        "dimensionsMm": "350x150 mm",
+        "ipRating": "IP40",
+        "bulbIncluded": true,
+        "installationType": "Surface mount"
+      },
+      "reviews": [
+        {
+          "id": "r1111111-1111-4111-8111-111111111107",
+          "rating": 5,
+          "title": "Compliant fit",
+          "body": "Electrician fitted six units in our shop unit.",
+          "authorDisplayName": "Trade Buyer",
+          "createdAt": "2025-08-01T00:00:00.000Z"
+        }
+      ],
+      "popularityRank": null,
+      "unitsSold90Days": 120,
+      "isFeatured": false,
+      "keywords": [],
+      "createdAt": "2025-11-20T00:00:00.000Z"
+    }
+  ]
+}

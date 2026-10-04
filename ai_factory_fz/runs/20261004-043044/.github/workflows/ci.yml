@@ -27,9 +27,17 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql://lighting:lighting@localhost:5432/lighting_retail?schema=public
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
     steps:
       - uses: actions/checkout@v4
+      - name: Set DATABASE_URL
+        env:
+          POSTGRES_USER: lighting
+          POSTGRES_PASSWORD: lighting
+          POSTGRES_DB: lighting_retail
+        run: |
+          echo "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -46,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/mobile
+        working-directory: app
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2

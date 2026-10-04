@@ -17,6 +17,7 @@ from git import Repo
 from agentic_sdlc.guardrails import secrets
 from agentic_sdlc.registry.profiles import Component, Profile
 from agentic_sdlc.workspace import Workspace
+from agentic_sdlc.workspace_layout import component_scope_prefixes, component_workdir
 
 CODE_RULES = ["DV1", "DV2", "DV3"]
 
@@ -75,8 +76,9 @@ def dv1_tests(ws: Workspace, comp: Component, profile: Profile, files: list[str]
     if not repo.head.is_valid():
         return []
     case, skip = re.compile(cfg["case"]), re.compile(cfg["skip"])
-    prefix = "" if comp.workdir in (".", "") else comp.workdir.rstrip("/") + "/"
-    head_tests = [p for p in repo.git.ls_files("--", comp.workdir).splitlines() if _is_test(p, cfg)] \
+    eff = component_workdir(ws, comp)
+    prefix = "" if eff in (".", "") else eff.rstrip("/") + "/"
+    head_tests = [p for p in repo.git.ls_files("--", eff).splitlines() if _is_test(p, cfg)] \
         if prefix else [p for p in repo.git.ls_files().splitlines() if _is_test(p, cfg)]
     errors = []
     before_cases = after_cases = before_skips = after_skips = 0
@@ -123,14 +125,15 @@ def dv2_secrets(ws: Workspace, profile: Profile, files: list[str]) -> list[str]:
 def dv3_scope(ws: Workspace, comp: Component, profile: Profile, files: list[str]) -> list[str]:
     errors = []
     if comp.workdir not in (".", ""):
-        prefix = comp.workdir.rstrip("/") + "/"
-        allowed = [prefix, *(profile.guardrails.get("scope_also_allowed") or [])]
+        allowed = component_scope_prefixes(ws, comp, profile)
         outside = [
             f for f in files
             if not any(f.startswith(a) for a in allowed)
             and not any(f.startswith(p) for p in SCOPE_INFRA_PREFIXES)
         ]
-        errors += [f"DV3: {f} is outside this work item's component ({comp.workdir}/); undo that change" for f in outside]
+        eff = component_workdir(ws, comp)
+        label = eff if eff == comp.workdir else f"{comp.workdir}/ or {eff}/"
+        errors += [f"DV3: {f} is outside this work item's component ({label}); undo that change" for f in outside]
     for source, copies in (profile.guardrails.get("contract_copies") or {}).items():
         src = ws.root / source
         for copy in copies:

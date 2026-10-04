@@ -29,6 +29,7 @@ from agentic_sdlc.registry.profiles import Component, Profile
 from agentic_sdlc.state import ProjectState
 from agentic_sdlc.tools.sandbox_exec import SandboxRunner
 from agentic_sdlc.workspace import Workspace
+from agentic_sdlc.workspace_layout import component_workdir
 
 log = logging.getLogger(__name__)
 PHASE = "build"
@@ -168,6 +169,13 @@ class Builder:
             raise ValueError(f"Profile has no component '{item.component}' (needed by {item.id})")
         return comp
 
+    def effective_component(self, item: WorkItem) -> Component:
+        comp = self.component(item)
+        wd = component_workdir(self.ws, comp)
+        if wd == comp.workdir:
+            return comp
+        return comp.model_copy(update={"workdir": wd})
+
     def block_reason(self, item: WorkItem) -> str | None:
         for dep in item.depends_on:
             dp = self.s.build.items.get(dep)
@@ -247,8 +255,8 @@ class Builder:
         p = self.s.build.item(item.id)
         if p.status == "done":
             return
-        comp = self.component(item)
-        reason = self.block_reason(item) or self.ensure_scaffold(item.component, comp)
+        comp = self.effective_component(item)
+        reason = self.block_reason(item) or self.ensure_scaffold(item.component, self.component(item))
         if reason:
             p.status, p.reason = "blocked", reason
             self.checkpoint(f"Build: {item.id} blocked")
@@ -290,7 +298,10 @@ class Builder:
                 else:
                     return "blocked", result, result.blocked_reason or "agent reported blocked"
             task_key = "fix_work_item"
-            violations = code_guardrails.check_changes(self.ws, comp, self.profile, code_rules) if code_rules else []
+            profile_comp = self.component(item)
+            violations = (
+                code_guardrails.check_changes(self.ws, profile_comp, self.profile, code_rules) if code_rules else []
+            )
             if violations:
                 output = "\n".join(violations)
                 problems = f"Guardrails rejected your change. Fix all of these:\n{output}"

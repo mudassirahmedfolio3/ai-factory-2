@@ -1,7 +1,5 @@
 state.json
 .env
-.env.*
-!.env.example
 node_modules/
 dist/
 coverage/
@@ -14,5 +12,3 @@ build/
 .sdlc/
 .gradle/
 .android/
-apps/mobile/.idea/
-apps/api/.env
