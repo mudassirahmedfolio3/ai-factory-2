@@ -16,7 +16,9 @@ import {
   startEmulatorRun,
   stopEmulatorRun,
   startRun,
+  downloadRunDossier,
 } from './api.js';
+import { displayAgentName } from './agentLabels.js';
 import {
   buildClientBrief,
   deliveryStageCopy,
@@ -69,6 +71,45 @@ function projectFromRunState(state, fallbackText = '') {
   };
 }
 
+const UI_SESSION_KEY = 'ai_factory_ui_session';
+
+function loadUiSession() {
+  try {
+    const raw = sessionStorage.getItem(UI_SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data?.view === 'dashboard' && data?.project?.runId) return data;
+  } catch {
+    /* ignore corrupt session */
+  }
+  return null;
+}
+
+function saveUiSession(view, project) {
+  try {
+    if (view === 'dashboard' && project?.runId) {
+      sessionStorage.setItem(
+        UI_SESSION_KEY,
+        JSON.stringify({
+          view: 'dashboard',
+          project: {
+            runId: project.runId,
+            text: project.text || '',
+            files: [],
+            complexity: project.complexity || 'standard',
+            estimatedMinutes: project.estimatedMinutes,
+            projectName: project.projectName || 'Project',
+          },
+        }),
+      );
+    } else if (view === 'intake') {
+      sessionStorage.removeItem(UI_SESSION_KEY);
+    }
+  } catch {
+    /* storage disabled */
+  }
+}
+
 function Intake({ onStart, onOpenHistory }) {
   const [text, setText] = useState('');
   const [files, setFiles] = useState([]);
@@ -85,7 +126,9 @@ function Intake({ onStart, onOpenHistory }) {
     getCurrentRun()
       .then((state) => {
         if (!state?.run_id) return;
-        if (state.status === 'running' && state.is_live) setLiveRun(state);
+        if (state.status === 'running' || state.status === 'stale') {
+          setLiveRun({ ...state, is_live: Boolean(state.is_live) });
+        }
         if (state.status === 'completed') setLiveRun({ ...state, completed: true });
       })
       .catch(() => {});
@@ -431,7 +474,7 @@ function UsageActivityFeed({ activities = [], live = false, onSelect }) {
                     <div className="usage-activity-main">
                       <span className="usage-activity-dot" aria-hidden="true" />
                       <div className="usage-activity-copy">
-                        <span className="usage-activity-who">{item.agent || 'Agent'}</span>
+                        <span className="usage-activity-who">{displayAgentName(item.agent)}</span>
                         <span className="usage-activity-model">{item.model || 'model'}</span>
                       </div>
                       <span className="usage-activity-tokens">{formatActivityTokens(item)}</span>
@@ -459,7 +502,7 @@ function UsageActivityFeed({ activities = [], live = false, onSelect }) {
             <div className="usage-activity-main">
               <span className={`usage-activity-dot ${item.status === 'running' ? 'pulse' : ''}`} aria-hidden="true" />
               <div className="usage-activity-copy">
-                <span className="usage-activity-who">{item.agent || 'Agent'}</span>
+                <span className="usage-activity-who">{displayAgentName(item.agent)}</span>
                 <span className="usage-activity-model">{item.model || 'model'}</span>
               </div>
               <span className="usage-activity-tokens">{formatActivityTokens(item)}</span>
@@ -492,7 +535,7 @@ function UsageDetailModal({ activity, onClose }) {
     <Modal title={title} onClose={onClose}>
       <div className="usage-detail">
         <p className="usage-detail-meta">
-          {[activity.agent, activity.model, activity.phase || activity.task, formatActivityTokens(activity)]
+          {[displayAgentName(activity.agent), activity.model, activity.phase || activity.task, formatActivityTokens(activity)]
             .filter(Boolean)
             .join(' · ')}
         </p>
@@ -585,6 +628,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
   const [journeyLoading, setJourneyLoading] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [dossierBusy, setDossierBusy] = useState(false);
   const navRef = useRef();
   const detailScrollRef = useRef(null);
 
@@ -620,7 +664,8 @@ function Dashboard({ project, onReset, onOpenHistory }) {
   const preview =
     !isFzEngine && run.browserReady && project.runId ? buildPreviewUrl(project.runId) : null;
   const showPreview = Boolean(preview && (run.browserReady || run.complete));
-  const displayName = runState?.project_name || project.projectName || 'Project';
+  const displayName =
+    runState?.product_name || runState?.project_name || project.projectName || 'Project';
   const flutterDir =
     runState?.flutter_project_dir ||
     (project.runId ? `apps/${project.runId}/flutter` : null);
@@ -890,7 +935,9 @@ function Dashboard({ project, onReset, onOpenHistory }) {
     <>
       {run.failed && (
         <div className="error-banner" role="alert">
-          Run failed: {run.error || 'Unknown error'}. Start a new project to retry.
+          {runState?.status === 'stale'
+            ? `Run interrupted: ${run.error || 'The factory worker is no longer running.'} You can resume from History (Generate another release) — no need to start over.`
+            : `Run failed: ${run.error || 'The worker exited unexpectedly (see fz_worker log in artifacts/logs).'}. Try History → Generate another release, or start a new project.`}
         </div>
       )}
       <header className="header dashboard-header">
@@ -1087,14 +1134,38 @@ function Dashboard({ project, onReset, onOpenHistory }) {
                 <p>{stage.output}</p>
               </div>
             </div>
-            <button
-              type="button"
-              className="detail-link"
-              aria-expanded={detailOpen}
-              onClick={() => setDetailOpen((open) => !open)}
-            >
-              {detailOpen ? 'Hide detail' : 'View detail'}
-            </button>
+            <div className="detail-actions">
+              {isFzEngine && project.runId ? (
+                <button
+                  type="button"
+                  className="icon-btn secondary"
+                  title="Download SDLC dossier (PDF)"
+                  aria-label="Download SDLC dossier PDF"
+                  disabled={dossierBusy}
+                  onClick={async () => {
+                    if (!project.runId || dossierBusy) return;
+                    setDossierBusy(true);
+                    try {
+                      await downloadRunDossier(project.runId);
+                    } catch {
+                      /* user can retry from History */
+                    } finally {
+                      setDossierBusy(false);
+                    }
+                  }}
+                >
+                  {dossierBusy ? '…' : '↓ PDF'}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="detail-link"
+                aria-expanded={detailOpen}
+                onClick={() => setDetailOpen((open) => !open)}
+              >
+                {detailOpen ? 'Hide detail' : 'View detail'}
+              </button>
+            </div>
           </div>
         </section>
         <section className="application-studio">
@@ -1414,8 +1485,13 @@ flutter run`}</pre>
 }
 
 export default function App() {
-  const [view, setView] = useState('intake');
-  const [project, setProject] = useState(null);
+  const initialSession = typeof sessionStorage !== 'undefined' ? loadUiSession() : null;
+  const [view, setView] = useState(initialSession ? 'dashboard' : 'intake');
+  const [project, setProject] = useState(initialSession?.project ?? null);
+
+  useEffect(() => {
+    saveUiSession(view, project);
+  }, [view, project]);
 
   function openHistory() {
     setView('history');
@@ -1444,7 +1520,13 @@ export default function App() {
   }
 
   if (view === 'history') {
-    return <History onOpenRun={openRun} onNewProject={openIntake} />;
+    return (
+      <History
+        onOpenRun={openRun}
+        onNewProject={openIntake}
+        onGenerateRelease={openRun}
+      />
+    );
   }
 
   if (view === 'dashboard' && project) {

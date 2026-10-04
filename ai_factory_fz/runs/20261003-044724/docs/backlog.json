@@ -1,0 +1,667 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Release 2 API foundation & identity",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-012"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Release 2 discovery, cart & wishlist API",
+      "story_ids": [
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Release 2 checkout, orders & support API",
+      "story_ids": [
+        "US-007",
+        "US-008",
+        "US-009",
+        "US-010",
+        "US-011",
+        "US-012"
+      ]
+    },
+    {
+      "id": "E-04",
+      "title": "Release 2 Flutter shopper experience",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006",
+        "US-007",
+        "US-008",
+        "US-009",
+        "US-010",
+        "US-011",
+        "US-012"
+      ]
+    },
+    {
+      "id": "E-05",
+      "title": "M3 integration, QA & release gate",
+      "story_ids": [
+        "US-001",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-007",
+        "US-008",
+        "US-009",
+        "US-010",
+        "US-011"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-010",
+      "title": "M3 platform bootstrap, health probe & Prisma Release 2 schema",
+      "description": "Extend docker-compose staging, GitHub Actions, and NestJS app wiring for M3. Implement HealthModule with database connectivity probe. Add Prisma models and migrations for User, RefreshToken, PasswordResetToken, Address, StoreConfig, HomeBanner, Cart, CartItem, Wishlist, WishlistItem, Coupon, CouponExclusion, Order, OrderItem, Payment, SupportMessage; extend Category, Product, ProductVariant for brand, availability, and merchandising flags. Seed StoreConfig (free shipping 7500 cents, flat rate 599 cents, tax 8%), coupons with exclusions, home banners, and fulfillment demo fields on orders.",
+      "epic_id": "E-01",
+      "feature": "Platform & data foundation",
+      "component": "backend",
+      "story_ids": [],
+      "depends_on": [],
+      "modules": [
+        "HealthModule"
+      ],
+      "api_operations": [
+        "getHealth"
+      ],
+      "data_models": [
+        "User",
+        "RefreshToken",
+        "PasswordResetToken",
+        "Address",
+        "StoreConfig",
+        "Category",
+        "HomeBanner",
+        "Product",
+        "ProductVariant",
+        "Cart",
+        "CartItem",
+        "Wishlist",
+        "WishlistItem",
+        "Coupon",
+        "CouponExclusion",
+        "Order",
+        "OrderItem",
+        "Payment",
+        "SupportMessage"
+      ],
+      "screens": [],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Broad Prisma migration surface + seed data + health/CI wiring without business endpoint logic. | backend_developer: Broad Prisma model/migration surface, idempotent seed for StoreConfig/coupons/banners/orders, plus docker-compose, GHA, and HealthModule DB probe—not much API logic but many moving parts and test wiring.; concerns: Extend-vs-replace on Category/Product/Variant may conflict with existing M2 migrations; seed fulfillment demo fields must match OpenAPI property names exactly; CI Postgres service container timing flakes.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-011",
+      "title": "Auth & account self-service API",
+      "description": "Implement AuthModule (register, login, logout, refresh with hashed refresh tokens, mock forgot/reset password) and UsersModule (DELETE /users/me soft-delete, token revocation, minimal anonymization). Passwords hashed with bcrypt or argon2; JWT access tokens. Jest/Supertest coverage for all auth and delete-account paths.",
+      "epic_id": "E-01",
+      "feature": "Auth API",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-010"
+      ],
+      "modules": [
+        "AuthModule",
+        "UsersModule"
+      ],
+      "api_operations": [
+        "register",
+        "login",
+        "logout",
+        "refreshTokens",
+        "forgotPassword",
+        "resetPassword",
+        "deleteAccount"
+      ],
+      "data_models": [
+        "User",
+        "RefreshToken",
+        "PasswordResetToken"
+      ],
+      "screens": [],
+      "estimate_points": 7,
+      "complexity": "high",
+      "risk": "high",
+      "confidence": "medium",
+      "estimate_rationale": "Seven auth/account operations + token hashing, JWT lifecycle, and security-sensitive tests. | backend_developer: Seven auth/account operations with bcrypt/argon2, hashed refresh token storage, JWT lifecycle, logout revocation, mock reset flow, and soft-delete with anonymization—all need focused Jest/Supertest coverage.; concerns: Refresh token rotation vs reuse detection not spelled out; re-register after soft-delete and unique email constraints; forgot-password mock must not leak user enumeration if contract requires uniform responses.",
+      "status": "todo",
+      "pm_points": 8,
+      "dev_points": 7,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-012",
+      "title": "Merchandised home & catalog discovery API",
+      "description": "Extend CatalogModule for keyword search, sort (price asc/desc, newest), filters (price range, category, brand, availability), and listCategories. Implement HomeModule GET /home with banners, featured products, new arrivals, and category entry points aligned to seeded categories. Preserve integer minor-unit USD pricing on all product payloads.",
+      "epic_id": "E-02",
+      "feature": "Home & catalog API",
+      "component": "backend",
+      "story_ids": [
+        "US-004",
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-010"
+      ],
+      "modules": [
+        "CatalogModule",
+        "HomeModule"
+      ],
+      "api_operations": [
+        "listCategories",
+        "listProducts",
+        "getProductById",
+        "getHome"
+      ],
+      "data_models": [
+        "Category",
+        "HomeBanner",
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Four read operations with query composition, filters, and home aggregation over seeded catalog. | backend_developer: Four read endpoints: Prisma query composition for search/sort/filters/pagination, listCategories, and home aggregation over seeded data with minor-unit pricing on payloads.; concerns: Filter semantics (brand/availability on product vs variant); featured/new-arrival selection rules if not fully defined in seed; N+1 queries on home unless include strategy is planned.",
+      "status": "todo",
+      "pm_points": 6,
+      "dev_points": 5,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-013",
+      "title": "Cart & wishlist API with guest merge semantics",
+      "description": "Implement CartModule (GET cart, PUT replace, POST merge combining quantities per variant with documented fallback replace account cart with guest cart) and WishlistModule (GET, PUT replace, POST import without duplicate variants). Cart lines snapshot variant price in integer cents. Authenticated-only server cart; merge endpoint supports login flow.",
+      "epic_id": "E-02",
+      "feature": "Cart & wishlist API",
+      "component": "backend",
+      "story_ids": [
+        "US-003",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-011",
+        "WI-012"
+      ],
+      "modules": [
+        "CartModule",
+        "WishlistModule"
+      ],
+      "api_operations": [
+        "getCart",
+        "replaceCart",
+        "mergeCart",
+        "getWishlist",
+        "replaceWishlist",
+        "importWishlist"
+      ],
+      "data_models": [
+        "Cart",
+        "CartItem",
+        "Wishlist",
+        "WishlistItem",
+        "ProductVariant"
+      ],
+      "screens": [],
+      "estimate_points": 7,
+      "complexity": "high",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Six endpoints including merge/import edge cases and price snapshot on cart lines. | backend_developer: Six endpoints with replace semantics, merge combining quantities per variant, import dedupe, authenticated-only server cart, and cent price snapshots on lines—edge cases dominate test time.; concerns: Merge fallback (replace account cart with guest cart) error conditions must match spec; stale snapshot vs live variant price on GET cart; no mention of cart line max quantity or OOS variants at cart time.",
+      "status": "todo",
+      "pm_points": 7,
+      "dev_points": 7,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-014",
+      "title": "Checkout quote, orders, mock payment & support API",
+      "description": "CheckoutModule: POST /checkout/quote validates US address fields, applies single coupon (no stacking) with specific rejection reasons, computes subtotal/discount/shipping/tax/total in integer cents from StoreConfig. OrdersModule: create pending_payment order with line snapshots and stock reservation; list/detail for signed-in user with shopper status labels and shipment fields; cancel releases reservation. PaymentsModule: internal mock payment via complete-mock-payment (no external processor). SupportModule: persist support messages and return simulated-send confirmation.",
+      "epic_id": "E-03",
+      "feature": "Checkout & orders API",
+      "component": "backend",
+      "story_ids": [
+        "US-007",
+        "US-008",
+        "US-009",
+        "US-010",
+        "US-011",
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-011",
+        "WI-013"
+      ],
+      "modules": [
+        "CheckoutModule",
+        "OrdersModule",
+        "PaymentsModule",
+        "SupportModule"
+      ],
+      "api_operations": [
+        "createCheckoutQuote",
+        "createOrder",
+        "listOrders",
+        "getOrderById",
+        "completeMockPayment",
+        "cancelOrder",
+        "submitSupportMessage"
+      ],
+      "data_models": [
+        "StoreConfig",
+        "Coupon",
+        "CouponExclusion",
+        "Order",
+        "OrderItem",
+        "Payment",
+        "ProductVariant",
+        "Address",
+        "SupportMessage"
+      ],
+      "screens": [],
+      "estimate_points": 8,
+      "complexity": "high",
+      "risk": "high",
+      "confidence": "medium",
+      "estimate_rationale": "Seven operations spanning coupon math, stock reservation concurrency, mock pay state machine, and order history. | backend_developer: Checkout quote math (coupon exclusions, rejection reasons, shipping threshold, tax on post-discount subtotal), order create with line snapshots and stock reservation, mock payment state machine, cancel release, and support persist—largest cohesive business slice.; concerns: Stock reservation concurrency/races without explicit transaction isolation; coupon single-use vs per-user limits; address validation rules only as in OpenAPI; order list shopper status labels mapping may need shared enum used by WI-020.",
+      "status": "todo",
+      "pm_points": 8,
+      "dev_points": 8,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-015",
+      "title": "OpenAPI client regen, auth UI & secure session",
+      "description": "Regenerate Dart OpenAPI client for all 24 counted operations plus getHealth. Implement AuthNotifier, TokenStorage (flutter_secure_storage), AuthInterceptor on Dio, go_router guards for protected routes (orders). Build SCR-01 AuthScreen (login/register tabs, legal links) and SCR-02 PasswordResetScreen (mock forgot + reset). Wire delete account API hook for later Account hub.",
+      "epic_id": "E-04",
+      "feature": "Auth screens",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-011"
+      ],
+      "modules": [],
+      "api_operations": [
+        "register",
+        "login",
+        "logout",
+        "refreshTokens",
+        "forgotPassword",
+        "resetPassword",
+        "deleteAccount"
+      ],
+      "data_models": [],
+      "screens": [
+        "SCR-01",
+        "SCR-02"
+      ],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Client regen plus two auth screens, secure token storage, and router integration. | frontend_developer: OpenAPI regen plus AuthNotifier, secure TokenStorage, Dio refresh interceptor, go_router guards, two auth screens with widget tests, and delete-account wiring dominate; most patterns are well-established once WI-011 client package exists.; concerns: Parallel 401 refresh races and interceptor ordering with generated client; debug cleartext/network-security for 10.0.2.2 if not fully delivered in WI-011; generator or spec drift can force hand-fixes in packages/api_client.",
+      "status": "todo",
+      "pm_points": 6,
+      "dev_points": 6,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-016",
+      "title": "Home, search, sort, filters & product detail UI",
+      "description": "HomeNotifier and SCR-03 HomeScreen (banners, featured, new arrivals, categories). Extend SCR-04 SearchResultsScreen and SCR-05 ProductDetailScreen with search, sort, filters (price, category, brand, availability), availability UX, wishlist toggle, and add-to-cart respecting stock. ProductListNotifier query params against listProducts/getProductById/getHome/listCategories.",
+      "epic_id": "E-04",
+      "feature": "Discovery screens",
+      "component": "frontend",
+      "story_ids": [
+        "US-004",
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-012",
+        "WI-015"
+      ],
+      "modules": [],
+      "api_operations": [
+        "getHome",
+        "listCategories",
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [],
+      "screens": [
+        "SCR-03",
+        "SCR-04",
+        "SCR-05"
+      ],
+      "estimate_points": 7,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Three screens with filter/sort state, home sections, and M1 detail deltas. | frontend_developer: Home sections plus SearchResults query/sort/filter state, ProductDetail availability and wishlist/add-to-cart hooks, and ProductListNotifier API param mapping with loading/empty/error on three screens and tests drive the size.; concerns: Pagination or cursor behavior for listProducts may be unspecified; deep-linking filter state to routes; banner/category asset semantics and performance on long product grids.",
+      "status": "todo",
+      "pm_points": 7,
+      "dev_points": 7,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-017",
+      "title": "Guest & signed-in cart and wishlist UI",
+      "description": "CartNotifier with GuestCartLocalRepository vs ApiCartRepository; SCR-06 CartScreen with money display from integer cents, quantity adjustments, OOS handling. On login call mergeCart then clear local; session restore from API when signed in. WishlistNotifier local store for guests and API sync when authenticated; SCR-07 WishlistScreen; one-time import dialog on login/register calling importWishlist.",
+      "epic_id": "E-04",
+      "feature": "Cart & wishlist screens",
+      "component": "frontend",
+      "story_ids": [
+        "US-003",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-013",
+        "WI-015"
+      ],
+      "modules": [],
+      "api_operations": [
+        "getCart",
+        "replaceCart",
+        "mergeCart",
+        "getWishlist",
+        "replaceWishlist",
+        "importWishlist"
+      ],
+      "data_models": [],
+      "screens": [
+        "SCR-06",
+        "SCR-07"
+      ],
+      "estimate_points": 8,
+      "complexity": "high",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Dual persistence models, merge on login, and import UX across two screens. | frontend_developer: Guest vs signed-in dual repositories, mergeCart on login with local clear, cents-based cart UI with OOS rules, wishlist local/API sync, import dialog, and Cart/Wishlist screen tests plus login edge paths exceed a single medium slice.; concerns: Merge failure fallback semantics and user-visible errors; cart edit during login; choice and schema stability of local guest store from WI-013; stock changes between detail and cart adjust.",
+      "status": "todo",
+      "pm_points": 7,
+      "dev_points": 8,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-018",
+      "title": "Checkout, coupon, mock payment & confirmation UI",
+      "description": "CheckoutNotifier calling createCheckoutQuote on address/coupon changes; SCR-08 CheckoutScreen (US address, review lines, single coupon, shipping/tax/totals, legal links). SCR-09 MockPaymentScreen: createOrder then completeMockPayment without card collection; cancel path calls cancelOrder. SCR-10 OrderConfirmationScreen with order number. Integer minor units only in UI.",
+      "epic_id": "E-04",
+      "feature": "Checkout & payment screens",
+      "component": "frontend",
+      "story_ids": [
+        "US-007",
+        "US-008",
+        "US-009",
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-014",
+        "WI-017"
+      ],
+      "modules": [],
+      "api_operations": [
+        "createCheckoutQuote",
+        "createOrder",
+        "completeMockPayment",
+        "cancelOrder"
+      ],
+      "data_models": [],
+      "screens": [
+        "SCR-08",
+        "SCR-09",
+        "SCR-10"
+      ],
+      "estimate_points": 8,
+      "complexity": "high",
+      "risk": "high",
+      "confidence": "medium",
+      "estimate_rationale": "Three-step checkout flow, coupon error mapping, and order create/pay/cancel sequencing. | frontend_developer: Debounced createCheckoutQuote on address/coupon changes, US validation, coupon error mapping, three-step createOrder/completeMockPayment/cancelOrder flow across three screens with minor-unit money display and widget tests is the largest cohesive checkout unit.; concerns: Reservation/stock timing between quote and createOrder; quote API churn without debounce; cancel vs back navigation leaving pending orders; consistent error surfaces for invalid coupons and address fields.",
+      "status": "todo",
+      "pm_points": 8,
+      "dev_points": 8,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-019",
+      "title": "Account hub, order history, detail tracking, support & legal placeholders",
+      "description": "SCR-11 AccountScreen (orders, wishlist, support, legal, logout, delete account via DELETE /users/me). SCR-12 OrderHistoryScreen with guest redirect to auth; paginated listOrders; embedded order detail route with line snapshots, address summary, shopper status stepper (paid/fulfilled→processing, shipped, delivered) and carrier/tracking when seeded. Support form UI calling submitSupportMessage with simulated success. Static LegalDocumentScreen content (Privacy, Terms) reachable from account, checkout, and registration flows without extra SCR ids.",
+      "epic_id": "E-04",
+      "feature": "Account & orders screens",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-010",
+        "US-011",
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-014",
+        "WI-015"
+      ],
+      "modules": [],
+      "api_operations": [
+        "listOrders",
+        "getOrderById",
+        "submitSupportMessage",
+        "deleteAccount",
+        "logout"
+      ],
+      "data_models": [],
+      "screens": [
+        "SCR-11",
+        "SCR-12"
+      ],
+      "estimate_points": 7,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Account hub plus order list/detail/status mapping, support submit, and shared legal placeholders. | frontend_developer: Account hub navigation, paginated listOrders with guest redirect, embedded order detail with shopper status stepper and tracking fields, support submit UX, shared LegalDocumentScreen entry points, logout/delete account, and screen tests account for most effort.; concerns: Pagination contract for listOrders (page size, total); nested go_router for list vs detail; deleteAccount session teardown and redirect; mapping backend status labels to stepper when data is partially seeded.",
+      "status": "todo",
+      "pm_points": 7,
+      "dev_points": 7,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-020",
+      "title": "Backend test suite green & OpenAPI contract verification",
+      "description": "Jest/Supertest coverage for all new M3 endpoints; verify OpenAPI documents exactly 24 counted operations plus getHealth. Document shopper-facing status label mapping for QA. Fix integration gaps between modules before mobile E2E.",
+      "epic_id": "E-05",
+      "feature": "API quality gate",
+      "component": "backend",
+      "story_ids": [
+        "US-009",
+        "US-010",
+        "US-011"
+      ],
+      "depends_on": [
+        "WI-014"
+      ],
+      "modules": [
+        "HealthModule",
+        "AuthModule",
+        "UsersModule",
+        "CatalogModule",
+        "HomeModule",
+        "CartModule",
+        "WishlistModule",
+        "CheckoutModule",
+        "OrdersModule",
+        "PaymentsModule",
+        "SupportModule"
+      ],
+      "api_operations": [
+        "register",
+        "login",
+        "logout",
+        "refreshTokens",
+        "forgotPassword",
+        "resetPassword",
+        "deleteAccount",
+        "listCategories",
+        "listProducts",
+        "getProductById",
+        "getHome",
+        "getCart",
+        "replaceCart",
+        "mergeCart",
+        "getWishlist",
+        "replaceWishlist",
+        "importWishlist",
+        "createCheckoutQuote",
+        "createOrder",
+        "listOrders",
+        "getOrderById",
+        "completeMockPayment",
+        "cancelOrder",
+        "submitSupportMessage"
+      ],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Cross-endpoint test pass and contract audit across full 24-operation business surface. | backend_developer: Full Supertest pass across 25 operations, OpenAPI operationId/path/method audit, integration gap fixes between modules, and QA status-label documentation—mostly consolidation work that often exposes contract mismatches.; concerns: Hidden fix-up work in WI-010–014 if decorators/DTOs drift from OpenAPI; shared test DB cleanup and parallel Jest flakiness; mobile E2E blockers may require backend changes outside pure test scope.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-021",
+      "title": "M3 QA round, flutter analyze/test & emulator demo script",
+      "description": "flutter analyze and flutter test green for Release 2 changes; one documented QA round covering guest browse→cart→checkout→mock pay, login merge cart, coupon errors, order history/tracking, password reset stub, and support submit. Verify docker-compose staging smoke via getHealth. Update docs/PRD backlog with M3 scope sign-off.",
+      "epic_id": "E-05",
+      "feature": "Release verification",
+      "component": "infra",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006",
+        "US-007",
+        "US-008",
+        "US-009",
+        "US-010",
+        "US-011",
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-016",
+        "WI-017",
+        "WI-018",
+        "WI-019",
+        "WI-020",
+        "WI-010"
+      ],
+      "modules": [
+        "HealthModule"
+      ],
+      "api_operations": [
+        "getHealth"
+      ],
+      "data_models": [],
+      "screens": [
+        "SCR-01",
+        "SCR-02",
+        "SCR-03",
+        "SCR-04",
+        "SCR-05",
+        "SCR-06",
+        "SCR-07",
+        "SCR-08",
+        "SCR-09",
+        "SCR-10",
+        "SCR-11",
+        "SCR-12"
+      ],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Full-journey QA matrix plus CI/analyze gates across twelve shopper screens. | deployment_engineer: Closing the M3 gate means green flutter analyze/test on Release 2 deltas, a scripted emulator demo, one written end-to-end QA pass across twelve shopper screens (guest checkout, login cart merge, coupons, orders, reset stub, support), docker-compose staging smoke on GET /health, and PRD backlog sign-off—mostly integration fix-up and documentation rather than new features.; concerns: Hard dependency on WI-010 and WI-016–WI-020 being feature-complete; analyze/test failures often trace to upstream API/client drift not owned by infra. Emulator and CI environments diverge (secure storage, network base URL). Full-journey QA is manual-heavy and easy to underestimate if integration_test coverage is thin. Compose smoke assumes seeded DB, JWT secrets, and health including DB probe—env parity with local dev is a common hidden cost. Password reset and support are stubs; QA scope must explicitly exclude real email/processor behavior.",
+      "status": "done",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "deployment_engineer",
+      "estimate_notes": "builder's estimate adopted"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M3",
+      "name": "Release 2 — shopper depth",
+      "goal": "Deliver a testable Android demo: guest and signed-in shoppers browse merchandised home and filtered catalog, manage guest/API cart and wishlist with merge on login, complete US checkout with coupon and mock payment, view order history with status and tracking, use mock password reset and in-app support/legal placeholders—all backed by the 24-operation NestJS API with flutter analyze/test and backend tests green after one QA round.",
+      "work_item_ids": [
+        "WI-010",
+        "WI-011",
+        "WI-012",
+        "WI-013",
+        "WI-014",
+        "WI-015",
+        "WI-016",
+        "WI-017",
+        "WI-018",
+        "WI-019",
+        "WI-020",
+        "WI-021"
+      ],
+      "sign_off": {
+        "date": "2026-10-04",
+        "qa_report": "reports/qa_M3_round1.md",
+        "staging_smoke": "scripts/staging-smoke.sh",
+        "emulator_demo": "scripts/run-android-emulator-demo.sh"
+      }
+    }
+  ],
+  "estimation_reviewed": true
+}

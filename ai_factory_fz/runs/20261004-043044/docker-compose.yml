@@ -1,0 +1,35 @@
+# Local development: API + PostgreSQL 16
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lighting
+      POSTGRES_PASSWORD: lighting
+      POSTGRES_DB: lighting_retail
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lighting -d lighting_retail"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://lighting:lighting@postgres:5432/lighting_retail?schema=public
+      PORT: "3000"
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

@@ -1,0 +1,33 @@
+# Staging profile: same stack with production-like NODE_ENV (no secrets in repo).
+# Set DATABASE_URL and other secrets via shell env or a local .env.staging file (gitignored).
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lighting}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD for staging}
+      POSTGRES_DB: ${POSTGRES_DB:-lighting_retail}
+    volumes:
+      - staging_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lighting} -d ${POSTGRES_DB:-lighting_retail}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for staging}
+      PORT: "3000"
+      NODE_ENV: staging
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  staging_postgres_data:

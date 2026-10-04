@@ -1,0 +1,281 @@
+{
+  "title": "beauty-mvp: Flutter Mobile Shopping App (Browse, Product Detail, Cart) - First Release PRD",
+  "summary": "beauty-mvp is a simple, fast, brand-aligned Flutter app for iOS and Android. It lets US shoppers browse a catalogue of roughly 50-150 beauty products (Skincare, Makeup, Haircare, Fragrance, Body), search by name or brand, view product details with variants (shade or size/volume), and keep an on-device cart that survives app restarts. The cart ends in a clearly labelled 'Send order request' action that opens a pre-filled WhatsApp message (email fallback) so staff can follow up manually. No payments, checkout, accounts, stock reservation or order tracking exist in this release. Product data is maintained by non-technical staff in a spreadsheet-style or form-based admin, with no app release needed. The app reads it through a read-only catalogue API. Prices are stored as integer minor units (cents) with currency code USD. The goals are to validate mobile demand (1,000 installs and 100 users adding to cart in 3 months, cart-add rate of at least 15% of product detail views) and to collect anonymous usage insights. This run is limited to at most 6 user stories and 5 app screens (Catalogue/Home, Search, Product Detail, Cart, Privacy & About). The target launch is 10 weeks from kickoff, with a hard stop at 12 weeks, inside a budget ceiling of about $25,000.",
+  "personas": [
+    {
+      "name": "Mobile Beauty Shopper",
+      "description": "Beauty shopper aged 18-40 who mainly uses a smartphone and wants to discover and compare skincare, makeup, haircare and fragrance products quickly.",
+      "goals": [
+        "Browse the catalogue by category and scroll quickly through product images, names, brands and prices",
+        "Find a specific product by name or brand",
+        "Pick the right shade or size and see its price and availability",
+        "Collect items in a cart and come back to them later"
+      ]
+    },
+    {
+      "name": "Returning Customer",
+      "description": "Existing customer of the store and social channels who wants an easier way to see the full catalogue and buy favorites again. There are no accounts or favorites in this release, so they search for items and add them to the cart again.",
+      "goals": [
+        "See the full catalogue in one place",
+        "Quickly find previously bought products through search",
+        "Send the order to the store without creating an account"
+      ]
+    },
+    {
+      "name": "Gift Buyer",
+      "description": "Shopper buying beauty products for someone else who needs clear photos, prices and descriptions to decide fast.",
+      "goals": [
+        "See multiple clear photos, descriptions and ingredients",
+        "Compare prices and variants at a glance",
+        "Know immediately whether a variant is available"
+      ]
+    },
+    {
+      "name": "Store Staff (non-technical)",
+      "description": "One or two staff members who update product information and stock status through a spreadsheet-style or simple form-based admin, with no code and no app release. They use the order request messages to follow up with customers manually.",
+      "goals": [
+        "Update name, brand, price, description, ingredients, images, stock status and category without a developer",
+        "See changes appear in the app without a new release",
+        "Receive a clear, readable order request message with items, variants, quantities and subtotal"
+      ]
+    }
+  ],
+  "user_stories": [
+    {
+      "id": "US-001",
+      "title": "Browse the catalogue by category",
+      "as_a": "Mobile Beauty Shopper",
+      "i_want": "to scroll a list or grid of products and filter by category (Skincare, Makeup, Haircare, Fragrance, Body)",
+      "so_that": "I can discover and compare products quickly",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the device is online and the catalogue has loaded",
+          "when": "I open the Catalogue screen",
+          "then": "I see a scrollable grid of products, each showing a product image, name, brand and a USD price formatted from integer cents (for example 1850 shows as $18.50), and the brand logo and colors are applied"
+        },
+        {
+          "given": "the Catalogue screen is showing all products",
+          "when": "I select the 'Skincare' category",
+          "then": "only products in the Skincare category are listed, the selected category is visibly highlighted, and selecting 'All' restores the full list"
+        },
+        {
+          "given": "the catalogue request is in progress",
+          "when": "the Catalogue screen is displayed",
+          "then": "a loading state (skeleton or spinner) is shown until products appear, and product images load in optimized sizes with a placeholder while loading"
+        },
+        {
+          "given": "the device has no internet connection and no catalogue data has been loaded",
+          "when": "I open the Catalogue screen",
+          "then": "an error state with a 'No internet connection' message and a 'Retry' button is shown, and tapping Retry once the connection is back loads the products"
+        },
+        {
+          "given": "a category currently contains no products",
+          "when": "I select that category",
+          "then": "an empty state with the message 'No products in this category' is shown instead of a blank screen"
+        }
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Search products by name or brand",
+      "as_a": "Returning Customer",
+      "i_want": "to search the catalogue by product name or brand and combine it with a category filter",
+      "so_that": "I can find a specific product or reorder an item by adding it again",
+      "priority": "should",
+      "acceptance_criteria": [
+        {
+          "given": "I am on the Search screen",
+          "when": "I type a product name or brand (case-insensitive, for example 'serum' or a brand name)",
+          "then": "the results list shows only products whose name or brand contains the text, each with image, name, brand and price"
+        },
+        {
+          "given": "I have entered a search term that returns results",
+          "when": "I select a category filter",
+          "then": "the results are limited to products that match both the search term and the selected category"
+        },
+        {
+          "given": "I am on the Search screen",
+          "when": "I search for a term that matches no product",
+          "then": "a 'No results found' empty state is shown with a suggestion to try another search or clear the filters, and the search event is still recorded in analytics as anonymous usage"
+        },
+        {
+          "given": "I am on the Search screen",
+          "when": "I clear the search field",
+          "then": "the search results are cleared and the catalogue list (or recent state) is shown again without an error"
+        }
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "View product details and choose a variant",
+      "as_a": "Gift Buyer",
+      "i_want": "to see a product's multiple images, description, ingredients, variants, price and stock status",
+      "so_that": "I can decide quickly which product and variant to buy",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I tap a product in the catalogue or search results",
+          "when": "the Product Detail screen opens",
+          "then": "I see the product's images (swipeable when there is more than one), name, brand, description, ingredients, the list of variants (shade or size/volume), and the price and stock status of the selected variant, and a product view analytics event is recorded"
+        },
+        {
+          "given": "a product has several variants with different prices",
+          "when": "I select a different variant",
+          "then": "the displayed price (integer cents in USD) and stock status (In stock, Low stock or Out of stock) update to that variant, and the variant's own image is shown if it has one, otherwise the shared product images remain"
+        },
+        {
+          "given": "a variant has the status 'Out of stock'",
+          "when": "I view the variant selector",
+          "then": "that variant is shown but greyed out, and the 'Add to cart' button is disabled whenever it is the selected variant"
+        },
+        {
+          "given": "the product data cannot be loaded because the device is offline",
+          "when": "I open the Product Detail screen",
+          "then": "an error state with a Retry button is shown instead of a blank or broken screen"
+        }
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Add a product variant to the cart",
+      "as_a": "Mobile Beauty Shopper",
+      "i_want": "to add my chosen variant to the cart from the product detail page",
+      "so_that": "I can collect the items I am interested in",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am viewing a variant that is In stock or Low stock",
+          "when": "I tap 'Add to cart'",
+          "then": "the variant is added to the cart with quantity 1, I receive visible confirmation (for example a snackbar or updated cart badge count), and an add-to-cart analytics event is recorded for that product"
+        },
+        {
+          "given": "a variant is already in my cart",
+          "when": "I tap 'Add to cart' for the same variant again",
+          "then": "the existing cart line's quantity increases by 1 instead of creating a duplicate line"
+        },
+        {
+          "given": "I add two different variants (shades) of the same product",
+          "when": "I open the cart",
+          "then": "they appear as two separate lines, each recording its own chosen variant"
+        },
+        {
+          "given": "the selected variant is Out of stock",
+          "when": "I view the Product Detail screen",
+          "then": "the 'Add to cart' button is disabled and nothing can be added to the cart, and no stock is reserved for any item added to the cart"
+        }
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Review and edit the cart with persistence",
+      "as_a": "Returning Customer",
+      "i_want": "to see my cart lines, change quantities, remove items and have the cart saved on my device",
+      "so_that": "I can review my selection and return to it after closing the app",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "my cart contains items",
+          "when": "I open the Cart screen",
+          "then": "each line shows product name, brand, chosen variant, unit price, quantity controls and a line total (unit price multiplied by quantity), and the screen shows the item subtotal in USD and the note 'Taxes and shipping calculated when your order is confirmed.', with no tax or shipping estimate"
+        },
+        {
+          "given": "a cart line has a quantity of 2",
+          "when": "I increase the quantity or decrease it",
+          "then": "the line total and subtotal recalculate immediately using integer cent arithmetic (no rounding errors), the minimum quantity is 1 and decreasing below 1 is prevented or asks to remove the line, and a sensible maximum per line (for example 10) is enforced with a clear message"
+        },
+        {
+          "given": "my cart contains items",
+          "when": "I remove a line",
+          "then": "the line disappears, the subtotal and the cart badge count update, and removing the last line shows the empty cart state"
+        },
+        {
+          "given": "my cart is empty",
+          "when": "I open the Cart screen",
+          "then": "an empty state with the message 'Your cart is empty' and a button to browse products is shown"
+        },
+        {
+          "given": "my cart contains items",
+          "when": "I fully close the app and reopen it (with or without internet)",
+          "then": "the same lines, variants and quantities are still in my cart, loaded from on-device storage, without requiring sign-in"
+        },
+        {
+          "given": "a product or variant in my saved cart has since been changed by staff (for example price changed or variant now Out of stock)",
+          "when": "I open the Cart screen while online",
+          "then": "the lines show the current catalogue price and stock status, and any Out of stock line is flagged and excluded from the order request until removed"
+        }
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "Send the cart as an order request",
+      "as_a": "Returning Customer",
+      "i_want": "to send my cart contents to the store as a pre-filled WhatsApp message (or email if WhatsApp is unavailable)",
+      "so_that": "a staff member can follow up with me manually and complete the order",
+      "priority": "should",
+      "acceptance_criteria": [
+        {
+          "given": "my cart has at least one available item and WhatsApp is installed or reachable on the device",
+          "when": "I tap the clearly labelled 'Send order request' button",
+          "then": "WhatsApp opens with a pre-filled message to the store's number listing each line (product name, variant, quantity, line total) and the item subtotal, nothing is charged, and no order is stored or tracked in the app"
+        },
+        {
+          "given": "my cart has at least one available item and WhatsApp cannot be opened",
+          "when": "I tap 'Send order request'",
+          "then": "the device's email composer opens with the same pre-filled content addressed to the store's email address"
+        },
+        {
+          "given": "neither WhatsApp nor an email app can be opened",
+          "when": "I tap 'Send order request'",
+          "then": "a clear error message is shown that explains the request could not be sent and gives the store's contact details, and my cart is left unchanged"
+        },
+        {
+          "given": "my cart is empty",
+          "when": "I view the Cart screen",
+          "then": "the 'Send order request' button is disabled or hidden"
+        }
+      ]
+    }
+  ],
+  "non_functional_requirements": [
+    "Performance: Catalogue first content appears within 2 seconds on an average 4G connection with a warm backend, and screen transitions feel smooth (target 60 fps on mid-range phones). Product images must be served optimized (resized and compressed, WebP or JPEG), cached on device, and shown with placeholders while loading. The recommended export to the business is a maximum 1200 px long edge (list thumbnails around 400 px) in JPEG or WebP at about 80% quality.",
+    "Data freshness: Product data comes from a managed backend or headless CMS (for example Firestore, Airtable or Google Sheets behind a read-only API). Staff edits appear in the app without an app release. The app's data layer is abstracted behind a repository interface so the source can later be switched to Shopify without a rebuild.",
+    "Data model: Prices are stored and transferred as integer minor units (cents) with ISO 4217 currency code USD, never floats. Stock is a manually set status per variant (In stock, Low stock, Out of stock), not a count. Catalogue size is 50-150 products.",
+    "Offline and resilience: Loading, empty and error states (including no internet connection with Retry) exist on every data-driven screen. The cart works fully offline and is persisted on device storage.",
+    "Security: All network traffic over HTTPS. The catalogue API is read-only for the app. No secrets are embedded in the app. No card or payment data is handled. Admin/write access to the product data source is restricted to authorized staff accounts.",
+    "Privacy: No user accounts and no personal data collected or stored by the app. Analytics (Firebase Analytics) are anonymous, with no ad tracking, no advertising ID collection and no user identifiers beyond the default app instance ID. The privacy policy (text supplied by the client) is linked from the Privacy & About screen and from both store listings, and the in-app disclosure states that analytics is used. The analytics integration is wrapped so a consent screen can be added later for the EU/UK. Store privacy declarations (Apple privacy labels, Google Play Data safety) must match actual data use.",
+    "Analytics events: Screen views, product views, search usage and add-to-cart events (with product and variant identifiers only) are tracked to show most viewed and most carted products and to measure the cart-add rate per product detail view.",
+    "Accessibility: Text scales with system font size without breaking layouts, interactive targets are at least 44x44 pt, text contrast meets WCAG AA, images have semantic labels (product name), and screen reader (VoiceOver/TalkBack) can operate browse, detail and cart. Stock status is communicated with text as well as color.",
+    "Supported platforms: Phones only, portrait orientation, from a single Flutter codebase. iOS: current and previous two major versions. Android: 8.0 (API 26) or higher, or the minimum of the current stable Flutter release if higher, provided it covers the large majority of customers' devices. The app must run on tablets without breaking, but no tablet layout is designed. Android is built and tested first.",
+    "Localization: English only, United States market, USD currency formatting.",
+    "Brand and design: Clean, modern, uncluttered design using the client-supplied logo, color palette and fonts (free or commercially licensed for app use).",
+    "Quality and testability: Every acceptance criterion is testable by a QA engineer. Core flows (browse, detail, add to cart, cart edit and persistence, order request) are covered by automated widget/integration tests. Infrastructure health check endpoint (/health) is included for monitoring.",
+    "Cost and operations: Build budget ceiling about $25,000 USD and running costs under $100 per month. Target launch is 10 weeks from kickoff including store review, with a hard stop at 12 weeks. Scope is reduced rather than exceeding budget."
+  ],
+  "out_of_scope": [
+    "Real checkout, Stripe or any payment processing, and any in-app charging of customers",
+    "Stock reservation, exact stock counts, orders, order statuses (pending_payment, paid, fulfilled, delivered, cancelled, refunded) and order history or tracking in the app",
+    "User accounts, login, social login, JWT authentication and account deletion (no accounts exist in this release)",
+    "Guest or server-side carts (the cart is stored only on the device)",
+    "Favorites, saved list or wishlist, reviews and ratings, promo codes and promotions",
+    "Push notifications and abandoned cart reminders",
+    "Tax or shipping estimates, multiple currencies, multiple markets and multiple languages",
+    "Tablet-specific layouts and landscape orientation",
+    "A blocking analytics consent prompt at first launch (designed to be addable later for EU/UK)",
+    "A custom-built admin application (staff use a spreadsheet-style or simple form-based admin on the managed data source)",
+    "A dedicated order request confirmation or follow-up workflow inside the app; staff follow up manually through WhatsApp or email",
+    "Screens beyond the five defined for this release (Catalogue/Home, Search, Product Detail, Cart, Privacy & About)"
+  ],
+  "assumptions": [
+    "The five app screens for this release are: Catalogue/Home (with category navigation), Search, Product Detail, Cart and Privacy & About (link to the privacy policy and analytics disclosure).",
+    "The API surface is small and read-only for the app (for example list categories, list products with category filter and search, get product detail with variants) plus an infrastructure health check. It stays within the limit of 10 API operations, and the product data source will be chosen as the cheapest and easiest to maintain for non-technical staff.",
+    "Payment, Stripe, order status and stock reservation rules in the project conventions do not apply to this release, because the client confirmed checkout and payments are excluded. Price-as-integer-cents with ISO 4217 code is still followed.",
+    "Cart lines store the chosen variant and quantity on the device. Product name and unit price are refreshed from the current catalogue when the cart is opened online, and the order request message captures name and price at the time it is sent.",
+    "The store's WhatsApp number and fallback email address are supplied by the client before development of US-006.",
+    "The client supplies the logo, color palette, fonts and a one-page brand sheet before design starts, the top 30 product photos in the first two weeks and the remaining photos before the content freeze (at least 1 image per product and 2-4 for bestsellers).",
+    "The client supplies the privacy policy text and product content (name, brand, category, variants, price, description, ingredients, stock status) in the agreed spreadsheet or form format.",
+    "One or two non-technical staff maintain products; stock status is set manually per variant.",
+    "The 15% cart-add rate and 1,000 installs / 100 cart users within 3 months are success targets measured from anonymous Firebase Analytics, not acceptance criteria for release.",
+    "Priority note: because real checkout is out of scope, 'must' covers the browse, detail and cart journey. Search and the order request are 'should' and can be cut first if schedule or budget is at risk."
+  ]
+}

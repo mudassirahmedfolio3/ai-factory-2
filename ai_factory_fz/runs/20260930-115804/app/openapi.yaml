@@ -1,0 +1,223 @@
+openapi: 3.1.0
+info:
+  title: beauty-mini API
+  version: 0.1.0
+  summary: Forward-looking contract for beauty-mini. M1 is a Flutter-only demo; no server implements this document yet.
+  description: |
+    Contract-first API definition for beauty-mini.
+    Milestone M1 (speed demo) requires no API operations: the catalog is bundled in the Flutter app.
+    This document fixes the infrastructure health check and the shared schemas (Error, Money, Product,
+    pagination envelope, bearer auth) so the first backend milestone and the generated dart-dio client
+    (packages/api_client) start from an agreed shape. Prices are integer minor units with an ISO 4217 code.
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: http://10.0.2.2:3000
+    description: Local staging reached from the Android emulator (debug builds only; future milestone)
+  - url: http://localhost:3000
+    description: Local development (future milestone)
+security:
+  - bearerAuth: []
+tags:
+  - name: health
+    description: Infrastructure health check
+paths:
+  /api/v1/health:
+    get:
+      tags:
+        - health
+      operationId: getHealth
+      summary: Health check
+      description: Returns 200 when the service and its database are reachable, 503 otherwise. Public endpoint.
+      security: []
+      responses:
+        '200':
+          description: Service healthy and database reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              example:
+                status: ok
+                database: up
+                timestamp: '2026-09-30T12:00:00Z'
+        '503':
+          description: Database unreachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                statusCode: 503
+                error: Service Unavailable
+                message: Database is not reachable
+        default:
+          $ref: '#/components/responses/UnexpectedError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token (15 min lifetime) obtained from the future auth module. Not used in M1.
+  parameters:
+    PaginationPage:
+      name: page
+      in: query
+      required: false
+      description: 1-based page number
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PaginationPageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  responses:
+    UnexpectedError:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Error:
+      type: object
+      description: Shared error body returned by every non-2xx response.
+      additionalProperties: false
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+          examples:
+            - 404
+        error:
+          type: string
+          description: HTTP reason phrase
+          examples:
+            - Not Found
+        message:
+          description: Human-readable message or list of validation messages
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+        database:
+          type: string
+          enum:
+            - up
+        timestamp:
+          type: string
+          format: date-time
+    Money:
+      type: object
+      description: Monetary amount in integer minor units (cents) with ISO 4217 currency code. Never a float.
+      additionalProperties: false
+      required:
+        - amountMinor
+        - currency
+      properties:
+        amountMinor:
+          type: integer
+          format: int64
+          minimum: 0
+          examples:
+            - 1999
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          examples:
+            - USD
+    PlaceholderColor:
+      type: string
+      description: Design-token key for the placeholder color block shown instead of a product image.
+      enum:
+        - rose
+        - sand
+        - charcoal
+        - amber
+        - mint
+        - lavender
+        - coral
+        - taupe
+    Product:
+      type: object
+      description: Catalog product. Mirrors the bundled M1 Dart model.
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - price
+        - placeholderColor
+      properties:
+        id:
+          type: string
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          maxLength: 64
+          examples:
+            - lipstick
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          examples:
+            - Velvet Matte Lipstick
+        description:
+          type: string
+          maxLength: 500
+          examples:
+            - Long-wearing matte lipstick with a soft, comfortable finish.
+        price:
+          $ref: '#/components/schemas/Money'
+        placeholderColor:
+          $ref: '#/components/schemas/PlaceholderColor'
+    ProductPage:
+      type: object
+      description: Pagination envelope for product lists (reserved for a future listProducts operation).
+      additionalProperties: false
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100

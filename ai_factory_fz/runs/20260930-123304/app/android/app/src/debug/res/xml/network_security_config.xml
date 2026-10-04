@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only: allow cleartext HTTP to local staging on the Android
+     emulator host (http://10.0.2.2:<port>). Everything else, and all release
+     builds, stay https-only. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

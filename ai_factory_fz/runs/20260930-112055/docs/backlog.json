@@ -1,0 +1,211 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Product Browsing",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Product Details and Cart Management",
+      "story_ids": [
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Set up Flutter project, routing and navigation structure",
+      "description": "Initialize Flutter 3.x project with go_router for navigation between Product List, Product Detail and Cart screens. Configure project structure, dependencies (Riverpod, freezed, json_serializable) and create placeholder screens and route definitions.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Build mock product catalog with 24 products in four categories",
+      "description": "Create local mock data source containing sample catalog of 24 products (~6 per category: skincare, makeup, haircare, fragrance) with product image, name, brand, price in integer cents (USD), description and variant metadata (sizes for skincare/haircare, shades for makeup). Store in dart constants or local JSON bundled with app.",
+      "epic_id": "E-01",
+      "component": "shared",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Design and approve UI theme and style guide",
+      "description": "Propose simple palette and typography matching client logo and brand. Create style proposal document with colors, typefaces, spacing and component appearance. Obtain client approval before implementing full UI. Document decisions for consistent application across all screens.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Build Product List screen with scrollable grid, product cards and placeholder images",
+      "description": "Implement Product List screen displaying all 24 products in scrollable grid or list format. Each product card shows image (or neutral placeholder if missing), name, brand and price formatted in USD. Ensure scroll position is maintained when navigating back from Product Detail. Handle placeholder images gracefully without breaking layout.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002",
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Implement category filter controls and filtering logic",
+      "description": "Add category filter UI (skincare, makeup, haircare, fragrance plus All option) to Product List. Implement filtering logic in Riverpod state management to show/hide products based on selected category. Display selected filter with visual highlight. Allow clearing filter by tapping All or active filter again.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-006",
+      "title": "Build Product Detail screen with variant selectors and Add to Cart button",
+      "description": "Implement Product Detail screen showing larger image(s), name, brand, price in USD and description. Add conditional variant selector: shade selector for makeup (single selection), size selector for skincare/haircare (single selection), or no selector if product has no variants. Show Add to Cart button. Validate that a variant is selected (or preselect default) before adding. Display confirmation snackbar on successful add.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-003",
+        "US-004"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002",
+        "WI-004"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-007",
+      "title": "Implement cart state management with Riverpod",
+      "description": "Build Riverpod state provider for cart holding list of cart items (product, variant, quantity). Implement add-to-cart logic that increases quantity if same product+variant exists, creates new line for different variant of same product. Maintain cart in memory only (no persistence). Implement remove and quantity change operations (increase, decrease with min quantity 1). Calculate subtotal in integer cents.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-004",
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-008",
+      "title": "Build Cart screen with item list, quantity controls and subtotal display",
+      "description": "Implement Cart screen displaying each cart item with product image, name, brand, selected size/shade, unit price, quantity, line total. Show quantity increase/decrease controls (decrease disabled at qty 1). Show Remove button per line. Display subtotal in US dollars calculated from integer cent amounts. Show empty-state message if cart empty with action to return to Product List. Include Checkout button when cart has items.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-006",
+        "WI-007"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-009",
+      "title": "Implement Checkout placeholder button with 'coming soon' message",
+      "description": "Add Checkout button to Cart screen (visible when cart has items, hidden/disabled when empty). On tap, show modal or dialog with message 'Checkout is coming soon. This is a demo.' without navigating away or making any network calls. Verify no payment screen, account screen, order creation or API call is triggered. User remains on Cart screen with contents unchanged.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-008"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-010",
+      "title": "Write widget and integration tests covering core flows",
+      "description": "Write flutter_test widget tests for Product List filtering, Product Detail variant selection, Add to Cart, cart quantity changes, remove item and subtotal calculation. Write integration_test covering main user journey: launch app, browse catalog, filter by category, open product detail, add item to cart, view cart, change quantity, remove item. Verify app does not crash on any core flow. Target coverage of must-have stories (US-001 through US-006).",
+      "epic_id": "E-02",
+      "component": "shared",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-004",
+        "WI-005",
+        "WI-006",
+        "WI-008"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Foundation and Browsing",
+      "goal": "Flutter project setup, mock catalog ready, Product List and filter working and tested. Testable slice: user can launch app, view all 24 products, filter by category and navigate to detail screen.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Cart and Demo Ready",
+      "goal": "Product Detail, cart state management and Cart screen complete with all controls and subtotal. Checkout placeholder in place. Full widget and integration tests passing. Testable slice: user can browse, filter, select product variant, add to cart, modify quantities, remove items, and see correct subtotal. Checkout shows placeholder message. Demo-ready build for stakeholder review on iOS and Android.",
+      "work_item_ids": [
+        "WI-006",
+        "WI-007",
+        "WI-008",
+        "WI-009",
+        "WI-010"
+      ]
+    }
+  ]
+}

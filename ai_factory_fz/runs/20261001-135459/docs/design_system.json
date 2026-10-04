@@ -1,0 +1,406 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#0B6E4F",
+      "dark": "#3DDBA5"
+    },
+    {
+      "name": "on_primary",
+      "light": "#FFFFFF",
+      "dark": "#003828"
+    },
+    {
+      "name": "primary_container",
+      "light": "#D0F5E6",
+      "dark": "#08553C"
+    },
+    {
+      "name": "on_primary_container",
+      "light": "#002117",
+      "dark": "#D0F5E6"
+    },
+    {
+      "name": "secondary",
+      "light": "#2C5F7C",
+      "dark": "#8EC8E8"
+    },
+    {
+      "name": "on_secondary",
+      "light": "#FFFFFF",
+      "dark": "#00344A"
+    },
+    {
+      "name": "background",
+      "light": "#F7F9F8",
+      "dark": "#101413"
+    },
+    {
+      "name": "on_background",
+      "light": "#1A1F1D",
+      "dark": "#E2E8E5"
+    },
+    {
+      "name": "surface",
+      "light": "#FFFFFF",
+      "dark": "#1A1F1D"
+    },
+    {
+      "name": "on_surface",
+      "light": "#1A1F1D",
+      "dark": "#E2E8E5"
+    },
+    {
+      "name": "surface_variant",
+      "light": "#E8EEEB",
+      "dark": "#2A302D"
+    },
+    {
+      "name": "on_surface_variant",
+      "light": "#3F4944",
+      "dark": "#BFC9C3"
+    },
+    {
+      "name": "outline",
+      "light": "#6F7974",
+      "dark": "#89938D"
+    },
+    {
+      "name": "error",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "on_error",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    },
+    {
+      "name": "success",
+      "light": "#1B7A3E",
+      "dark": "#6FDB8C"
+    },
+    {
+      "name": "on_success",
+      "light": "#FFFFFF",
+      "dark": "#003916"
+    },
+    {
+      "name": "warning",
+      "light": "#9A6700",
+      "dark": "#F5C84C"
+    },
+    {
+      "name": "on_warning",
+      "light": "#FFFFFF",
+      "dark": "#3D2800"
+    },
+    {
+      "name": "out_of_stock",
+      "light": "#8A3B32",
+      "dark": "#E8A39A"
+    },
+    {
+      "name": "price",
+      "light": "#0B6E4F",
+      "dark": "#3DDBA5"
+    },
+    {
+      "name": "scrim",
+      "light": "#00000099",
+      "dark": "#000000B3"
+    },
+    {
+      "name": "cart_badge",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "on_cart_badge",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    },
+    {
+      "name": "image_placeholder",
+      "light": "#D5DDD8",
+      "dark": "#3A413D"
+    },
+    {
+      "name": "divider",
+      "light": "#D5DDD8",
+      "dark": "#3A413D"
+    }
+  ],
+  "typography": [
+    {
+      "name": "display_large",
+      "size": 32.0,
+      "weight": 700,
+      "line_height": 40.0
+    },
+    {
+      "name": "headline_medium",
+      "size": 24.0,
+      "weight": 600,
+      "line_height": 32.0
+    },
+    {
+      "name": "title_large",
+      "size": 20.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "title_medium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "body_large",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "body_medium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "label_large",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "label_medium",
+      "size": 12.0,
+      "weight": 500,
+      "line_height": 16.0
+    },
+    {
+      "name": "price_large",
+      "size": 22.0,
+      "weight": 700,
+      "line_height": 28.0
+    },
+    {
+      "name": "price_medium",
+      "size": 16.0,
+      "weight": 700,
+      "line_height": 24.0
+    }
+  ],
+  "spacing": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64
+  ],
+  "corner_radii": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    24
+  ],
+  "shared_widgets": [
+    {
+      "name": "AppTopBar",
+      "description": "App bar with title, optional back affordance (48dp), and CartBadgeButton. Uses surface/on_surface tokens. Preserves list filter/search in ProductListNotifier when navigating back from detail."
+    },
+    {
+      "name": "CartBadgeButton",
+      "description": "Icon button (min 48×48dp) showing shopping cart with numeric badge from CartNotifier item count. Semantic label includes count, e.g. Cart, 3 items. Navigates to /cart."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Catalog list tile: product image or ImagePlaceholder (semantic label = product name), name (title_medium), tax-inclusive price from integer minor units + ISO 4217 via PriceText, OutOfStockChip when stock <= 0. Entire card is one 48dp-min tap target navigating to /products/:id."
+    },
+    {
+      "name": "PriceText",
+      "description": "Formats integer minor units (cents) with currency code (e.g. USD) as tax-inclusive display string. Never uses floating-point money. Uses price/price_large or price_medium tokens."
+    },
+    {
+      "name": "OutOfStockChip",
+      "description": "Compact availability chip using out_of_stock/on_surface colors; text Out of stock; exposed to screen readers as product unavailable."
+    },
+    {
+      "name": "CategoryFilterBar",
+      "description": "Horizontal chip row for Apparel, Accessories, Home, Essentials (plus All). Selected chip uses primary_container. Each chip min height 48dp. Updates ProductListNotifier.categorySlug."
+    },
+    {
+      "name": "SearchField",
+      "description": "Text field filtering product names; clear button restores full list. Hint Search products; semantics announce result count changes. Min touch target 48dp for clear icon."
+    },
+    {
+      "name": "ImagePlaceholder",
+      "description": "Surface-variant block with product icon when image URL missing/fails; always paired with semantic label describing the product."
+    },
+    {
+      "name": "PrimaryButton",
+      "description": "Filled CTA using primary/on_primary; min height 48dp; disabled state for out-of-stock or stock-limit (reduced opacity, not focusable as enabled). Used for Add to cart."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Minus / quantity label / plus controls; each control ≥48dp. Quantity never below 1 unless line removed; plus disabled at mock stock limit with clear semantics."
+    },
+    {
+      "name": "EmptyStateView",
+      "description": "Centered illustration/icon, title, body message, optional retry for empty catalog or empty cart. Uses body_large and on_surface_variant."
+    },
+    {
+      "name": "ErrorStateView",
+      "description": "Error icon, message, Retry button (48dp) that reloads LocalCatalogDataSource / notifier. Meets WCAG AA contrast on background."
+    },
+    {
+      "name": "LoadingStateView",
+      "description": "Centered CircularProgressIndicator with semantic label Loading products or Loading product details; blocks interaction until AsyncValue resolves."
+    },
+    {
+      "name": "CartLineItem",
+      "description": "Cart row: name, PriceText unit snapshot (cents + currency), QuantityStepper, remove (48dp). Reflects CartNotifier; remove deletes line."
+    },
+    {
+      "name": "StockAvailabilityLabel",
+      "description": "Shows In stock (N available) or Out of stock using success/out_of_stock colors; used on detail for default variant."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "ProductListScreen",
+      "route": "/products",
+      "purpose": "Browse mock catalog with product cards (name, tax-inclusive price from cents + USD, image/placeholder, out-of-stock), category filter, name search, and cart badge. Initial route for M1; serves discovery without auth or backend.",
+      "components": [
+        "AppTopBar",
+        "CartBadgeButton",
+        "SearchField",
+        "CategoryFilterBar",
+        "ProductCard",
+        "PriceText",
+        "OutOfStockChip",
+        "ImagePlaceholder",
+        "LoadingStateView",
+        "EmptyStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "success"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "ProductDetailScreen",
+      "route": "/products/:id",
+      "purpose": "Show single product name, tax-inclusive price (cents + currency), image, description, category, and stock for default variant; Add to cart for in-stock items; back returns to list with filter/search preserved.",
+      "components": [
+        "AppTopBar",
+        "CartBadgeButton",
+        "ImagePlaceholder",
+        "PriceText",
+        "StockAvailabilityLabel",
+        "OutOfStockChip",
+        "PrimaryButton",
+        "QuantityStepper",
+        "LoadingStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "success",
+        "out_of_stock"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Session-only in-memory cart: line items with name, unit price snapshot (cents + currency), quantity controls, remove; enforce min qty 1 unless removed and max qty = mock stock; empty on process restart.",
+      "components": [
+        "AppTopBar",
+        "CartLineItem",
+        "PriceText",
+        "QuantityStepper",
+        "EmptyStateView",
+        "PrimaryButton"
+      ],
+      "states": [
+        "empty",
+        "success"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap ProductCard with product id → go_router push /products/:id"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "Back / AppTopBar leading → pop; ProductListNotifier keeps categorySlug and search query"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Tap CartBadgeButton → go_router push /cart"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Tap CartBadgeButton → go_router push /cart"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-01",
+      "trigger": "Back from cart or Continue shopping when empty → pop or go /products"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Successful Add to cart (optional snackbar action View cart) → push /cart"
+    }
+  ],
+  "accessibility": [
+    "Minimum touch target 48×48dp for all interactive controls (cards, chips, icons, steppers, buttons, clear search).",
+    "Text and icon contrast meet WCAG AA: on_background/on_surface on background/surface ≥ 4.5:1; primary on on_primary and error/on_error pairs verified for light and dark.",
+    "All product images and ImagePlaceholders expose Semantics label with product name; decorative icons excludeSemantics or labeled.",
+    "CartBadgeButton announces Cart, N items; OutOfStockChip and StockAvailabilityLabel announce availability to TalkBack.",
+    "PrimaryButton Add to cart disabled when out of stock or at stock limit; Semantics hint explains why (Out of stock or Maximum stock reached).",
+    "LoadingStateView uses live region / Semantics label so screen readers hear Loading… then content.",
+    "EmptyStateView and ErrorStateView provide readable titles/body; Retry is focusable and labeled Retry loading products.",
+    "QuantityStepper minus/plus have labels Decrease quantity and Increase quantity; quantity value is a Semantics value.",
+    "Focus order: search → category chips → product list → cart badge; on detail: back → cart → image → content → quantity → add.",
+    "Do not rely on color alone for out-of-stock: chip text plus optional strike or badge pattern.",
+    "Support system text scaling; price and titles reflow without clipping on common phone widths (≥320dp).",
+    "No personal data, passwords, or payment fields in M1; nothing to announce as secure entry."
+  ]
+}

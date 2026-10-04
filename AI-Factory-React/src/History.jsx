@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { listRuns, startEmulatorRun } from './api.js';
+import {
+  ApiError,
+  downloadRunDossier,
+  getEmulatorStatus,
+  listRuns,
+  resumeRun,
+  startEmulatorRun,
+} from './api.js';
 
 function Brand() {
   return (
@@ -46,12 +53,29 @@ function statusClass(run) {
   return 'unknown';
 }
 
-export default function History({ onOpenRun, onNewProject }) {
+function canGenerateRelease(run, runs) {
+  if (!run?.run_id) return false;
+  // Only block when a worker is actually running this run (not orphaned "running" UI state).
+  if (run.is_live && (run.status || '').toLowerCase() === 'running') return false;
+  const liveOther = runs.find(
+    (r) => r.is_live && (r.status || '').toLowerCase() === 'running' && r.run_id !== run.run_id,
+  );
+  if (liveOther) return false;
+  const s = (run.status || '').toLowerCase();
+  if (s === 'completed' || s === 'failed' || s === 'stopped' || s === 'stale') return true;
+  // Worker gone but checkpoint still says running — resume is allowed.
+  if (s === 'running' && !run.is_live) return true;
+  return false;
+}
+
+export default function History({ onOpenRun, onNewProject, onGenerateRelease }) {
   const [runs, setRuns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [emulatorBusyId, setEmulatorBusyId] = useState(null);
+  const [releaseBusyId, setReleaseBusyId] = useState(null);
   const [emulatorMsg, setEmulatorMsg] = useState('');
+  const [dossierBusyId, setDossierBusyId] = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -75,18 +99,84 @@ export default function History({ onOpenRun, onNewProject }) {
     return () => window.removeEventListener('focus', onFocus);
   }, [load]);
 
-  async function handleRunEmulator(run) {
-    if (!run?.run_id || emulatorBusyId) return;
-    setEmulatorBusyId(run.run_id);
+  async function handleGenerateRelease(run) {
+    if (!run?.run_id || releaseBusyId) return;
+    setReleaseBusyId(run.run_id);
     setEmulatorMsg('');
     try {
-      const status = await startEmulatorRun(run.run_id);
+      await resumeRun(run.run_id);
       setEmulatorMsg(
-        status.message ||
-          `Emulator ${status.status || 'starting'} for ${run.project_name || run.run_id}` +
-            (status.device_id ? ` · ${status.device_id}` : '') +
-            (status.note ? ` · ${status.note}` : ''),
+        `Generating another release for ${run.project_name || run.run_id}… opening live view.`,
       );
+      if (onGenerateRelease) {
+        onGenerateRelease(run);
+      } else {
+        onOpenRun(run);
+      }
+      load();
+    } catch (err) {
+      if (err instanceof ApiError && err.code === 'RUN_IN_PROGRESS' && err.runId) {
+        setEmulatorMsg(
+          `Cannot start while run ${err.runId} is in progress. Wait for it to finish or open that run.`,
+        );
+      } else {
+        setEmulatorMsg(err.message || 'Could not start another release');
+      }
+    } finally {
+      setReleaseBusyId(null);
+    }
+  }
+
+  async function handleDownloadDossier(run) {
+    if (!run?.run_id || dossierBusyId) return;
+    setDossierBusyId(run.run_id);
+    setEmulatorMsg('');
+    try {
+      await downloadRunDossier(run.run_id);
+      setEmulatorMsg(`Downloaded SDLC dossier for ${run.run_id}.`);
+    } catch (err) {
+      setEmulatorMsg(err.message || 'Could not download dossier.');
+    } finally {
+      setDossierBusyId(null);
+    }
+  }
+
+  async function handleRunEmulator(run) {
+    if (!run?.run_id || emulatorBusyId) return;
+    const runId = run.run_id;
+    setEmulatorBusyId(runId);
+    setEmulatorMsg(
+      `Starting emulator for ${run.project_name || runId}… (first launch can take several minutes; your live factory run is not stopped.)`,
+    );
+    try {
+      const status = await startEmulatorRun(runId);
+      const formatStatus = (s) => {
+        const tail = (s.log_tail || '').split('\n').filter(Boolean).pop();
+        return (
+          (s.message ? `${s.message} · ` : '') +
+          `Emulator ${s.status || 'starting'} for ${run.project_name || runId}` +
+          (s.device_id ? ` · ${s.device_id}` : '') +
+          (s.note ? ` · ${s.note}` : '') +
+          (s.error ? ` · ${s.error}` : '') +
+          (tail ? ` · ${tail.slice(0, 120)}` : '')
+        );
+      };
+      setEmulatorMsg(formatStatus(status));
+
+      for (let i = 0; i < 120; i += 1) {
+        await new Promise((r) => window.setTimeout(r, 3000));
+        const latest = await getEmulatorStatus(runId);
+        setEmulatorMsg(formatStatus(latest));
+        if (latest.status === 'failed' || latest.status === 'stopped' || latest.status === 'idle') {
+          break;
+        }
+        if (latest.status === 'running' && (latest.log_tail || '').includes('Flutter run key commands')) {
+          setEmulatorMsg(
+            `${formatStatus(latest)} · Check your Android emulator window — the app should be open.`,
+          );
+          break;
+        }
+      }
     } catch (err) {
       setEmulatorMsg(err.message || 'Failed to start emulator');
     } finally {
@@ -109,8 +199,9 @@ export default function History({ onOpenRun, onNewProject }) {
           <h1>Run history</h1>
           <p>
             Recent factory runs and their status. Open any run for full details, or launch a
-            Flutter app on your local emulator when sources are available under{' '}
-            <code>ai_factory/apps</code>.
+            Flutter app on the local emulator when sources exist, or{' '}
+            <strong>Generate another release</strong> to continue the same project (blocked while a
+            different run is live).
           </p>
         </div>
 
@@ -150,7 +241,7 @@ export default function History({ onOpenRun, onNewProject }) {
               <li key={run.run_id} className="history-row">
                 <div className="history-row-main">
                   <div className="history-row-title">
-                    <b>{run.project_name || 'Untitled project'}</b>
+                    <b>{run.product_name || run.project_name || 'Untitled project'}</b>
                     <span className={`run-status run-status-${statusClass(run)}`}>
                       {statusLabel(run)}
                     </span>
@@ -172,6 +263,16 @@ export default function History({ onOpenRun, onNewProject }) {
                   </div>
                 </div>
                 <div className="history-row-actions">
+                  {canGenerateRelease(run, runs) ? (
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => handleGenerateRelease(run)}
+                      disabled={Boolean(releaseBusyId)}
+                    >
+                      {releaseBusyId === run.run_id ? 'Starting…' : 'Generate another release'}
+                    </button>
+                  ) : null}
                   {run.flutter_ready ? (
                     <button
                       type="button"
@@ -182,6 +283,16 @@ export default function History({ onOpenRun, onNewProject }) {
                       {emulatorBusyId === run.run_id ? 'Starting…' : 'Run on emulator'}
                     </button>
                   ) : null}
+                  <button
+                    type="button"
+                    className="icon-btn secondary"
+                    title="Download SDLC dossier (PDF)"
+                    aria-label="Download SDLC dossier PDF"
+                    onClick={() => handleDownloadDossier(run)}
+                    disabled={!run.run_id || dossierBusyId === run.run_id}
+                  >
+                    {dossierBusyId === run.run_id ? '…' : '↓ PDF'}
+                  </button>
                   <button
                     type="button"
                     className="primary"

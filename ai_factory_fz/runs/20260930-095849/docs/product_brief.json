@@ -1,0 +1,54 @@
+{
+  "product_name": "beauty-mvp",
+  "vision": "A simple, fast, and attractive Flutter mobile shopping app that lets customers browse our beauty products and add them to a cart, giving us a low-cost first version to validate that customers will shop with us on mobile before we invest in a fuller ecommerce platform.",
+  "target_users": [
+    "Beauty shoppers aged 18-40 who mainly shop on their smartphones and want to discover and compare skincare, makeup, haircare and fragrance products quickly",
+    "Existing customers of our store and social channels who want an easier way to see the full catalogue and reorder favorites",
+    "Gift buyers looking for beauty products who need clear photos, prices and descriptions to decide fast",
+    "Internal store staff (non-technical) who will update product information and monitor the app through a simple admin process"
+  ],
+  "business_goals": [
+    "Launch a working MVP on iOS and Android from a single Flutter codebase within roughly 8-12 weeks",
+    "Validate mobile demand: get at least 1,000 app installs and 100 users adding items to the cart within the first 3 months",
+    "Achieve a cart-add rate of at least 15% of product detail views",
+    "Create a foundation that can later support checkout, payments, accounts and promotions without a rebuild",
+    "Keep initial build and running costs low by limiting scope to product browsing and cart",
+    "Collect basic usage insights (most viewed products, most carted products) to guide merchandising and the next release"
+  ],
+  "key_features": [
+    "Product catalogue browse: scrollable product list/grid with product image, name, brand, and price",
+    "Product categories (e.g., Skincare, Makeup, Haircare, Fragrance, Body) for easy navigation",
+    "Product search by name or brand, with simple category filtering",
+    "Product detail page: multiple images, description, ingredients, size/variant (e.g., shade or volume), price, and stock status",
+    "Shopping cart: add to cart, remove items, change quantity, see line totals and cart subtotal",
+    "Cart persistence so items remain after the app is closed and reopened",
+    "Product data loaded from a backend/API or managed data source so the team can update products without releasing a new app version",
+    "Basic loading, empty, and error states (e.g., empty cart, no search results, no internet connection)",
+    "Basic analytics tracking of screen views, product views, and add-to-cart events",
+    "Clean, brand-aligned visual design with our logo, colors, and mobile-friendly layout"
+  ],
+  "constraints": [
+    "Scope limited to product browse and cart for the MVP; real checkout and payment processing are out of scope for this release",
+    "Must be built with Flutter and run on both iOS and Android",
+    "Budget and timeline are limited: MVP must be delivered in about 8-12 weeks with a small team",
+    "No user accounts or login required in the MVP; cart is stored on the device",
+    "Initial catalogue of roughly 50-150 products, with product images and descriptions supplied by the business",
+    "Single currency and single market at launch, English language only",
+    "Must comply with basic app store policies and privacy requirements, including a privacy policy and disclosure of analytics use",
+    "Product images must be optimized so browsing feels fast on average mobile connections",
+    "We are not technical, so the solution should be simple to maintain and the admin/product update process easy to use"
+  ],
+  "open_questions": [
+    "Where will the product data come from: an existing ecommerce platform (e.g., Shopify) or a new simple backend?",
+    "Will the cart end in a 'checkout' button that redirects to our website, collects an order by email/WhatsApp, or is it just a placeholder in the MVP?",
+    "Which market and currency will we launch in first, and do we need tax or shipping estimates displayed in the cart?",
+    "Do we need product variants such as shades and sizes with separate stock levels and prices in the MVP?",
+    "Do we want wishlists, reviews and ratings, or promo codes in a later phase, and how should they be prioritized?",
+    "Should we add user accounts and order history in the next release, and is social login desired?",
+    "What is the final brand identity (logo, color palette, fonts) and who will supply product photography?",
+    "Will we need push notifications for promotions or abandoned carts after the MVP?",
+    "Which analytics tool should we use, and what consent approach do we need for our customers' regions?",
+    "Who on our team will manage product updates day to day, and what tools are they comfortable with?",
+    "What is the exact launch date and final budget ceiling for the MVP?"
+  ]
+}

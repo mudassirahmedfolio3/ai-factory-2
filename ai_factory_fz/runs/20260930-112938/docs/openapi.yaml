@@ -1,0 +1,378 @@
+openapi: 3.1.0
+info:
+  title: beauty-mvp API
+  version: 0.1.0
+  description: |
+    Contract for beauty-mvp. Release 1 (mobile shopping demo) has no business API operations:
+    the app loads its catalog from a bundled JSON file that MUST validate against the Catalog schema below.
+    Only the infrastructure health check is exposed by the optional NestJS stub service.
+    Shared schemas (Money, Category, Product, ProductPage, Error) are defined here so future endpoints
+    (for example GET /products and GET /products/{productId}) reuse them without changing the app data model.
+    Money is always integer minor units (cents) plus an ISO 4217 currency code; never floating point.
+  license:
+    name: Proprietary
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+  - url: http://10.0.2.2:3000/api/v1
+    description: Local staging from the Android emulator (debug builds only)
+  - url: https://staging.beauty-mvp.example.com/api/v1
+    description: Staging
+tags:
+  - name: health
+    description: Infrastructure health check
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      tags:
+        - health
+      summary: Health check
+      description: Returns 200 when the service is running and the database is reachable, 503 otherwise. No authentication required.
+      security: []
+      responses:
+        '200':
+          description: Service and database are healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              examples:
+                ok:
+                  value:
+                    status: ok
+                    database: up
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token (15 min lifetime) with refresh tokens. Not used by any release 1 operation; declared as the global default so future endpoints are authenticated unless they opt out.
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      description: 1-based page number for list endpoints.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Number of items per page for list endpoints.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            badRequest:
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: pageSize must not be greater than 100
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            notFound:
+              value:
+                statusCode: 404
+                error: Not Found
+                message: Product not found
+    ServiceUnavailable:
+      description: Database unreachable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            dbDown:
+              value:
+                statusCode: 503
+                error: Service Unavailable
+                message: Database is not reachable
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            internal:
+              value:
+                statusCode: 500
+                error: Internal Server Error
+                message: An unexpected error occurred
+  schemas:
+    Error:
+      type: object
+      description: Shared error body for every non-2xx response.
+      additionalProperties: false
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          format: int32
+          minimum: 400
+          maximum: 599
+          examples:
+            - 404
+        error:
+          type: string
+          description: HTTP reason phrase.
+          examples:
+            - Not Found
+        message:
+          description: Human-readable message, or a list of validation messages.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - database
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+        database:
+          type: string
+          enum:
+            - up
+    Money:
+      type: object
+      description: Amount in integer minor units (cents) with an ISO 4217 currency code. Never a float.
+      additionalProperties: false
+      required:
+        - amountMinor
+        - currency
+      properties:
+        amountMinor:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Amount in minor units, e.g. 2450 means $24.50.
+          examples:
+            - 2450
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          description: ISO 4217 code. Release 1 supports USD only.
+          enum:
+            - USD
+          examples:
+            - USD
+    Category:
+      type: object
+      description: Product category. Every product belongs to exactly one category. 'All' is a UI view, not a category.
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - sortOrder
+      properties:
+        id:
+          type: string
+          enum:
+            - skincare
+            - makeup
+            - haircare
+            - fragrance
+          examples:
+            - makeup
+        name:
+          type: string
+          minLength: 1
+          maxLength: 40
+          examples:
+            - Makeup
+        sortOrder:
+          type: integer
+          format: int32
+          minimum: 0
+          examples:
+            - 1
+    ProductImage:
+      type: object
+      additionalProperties: false
+      required:
+        - src
+        - alt
+      properties:
+        src:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Release 1 - file name relative to assets/images/products/ in the app bundle. Later phases - absolute https URL.
+          examples:
+            - hydra-glow-serum.webp
+        alt:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Accessibility label read by screen readers.
+          examples:
+            - Glass dropper bottle of Hydra Glow Serum
+    Product:
+      type: object
+      description: A single, always-available purchasable item (no variants or stock in release 1). At least one of keyIngredients or usageNotes must be non-null.
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - brand
+        - categoryId
+        - price
+        - shortDescription
+        - keyIngredients
+        - usageNotes
+        - image
+      properties:
+        id:
+          type: string
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          minLength: 1
+          maxLength: 64
+          description: Stable slug identifier, unique within the catalog.
+          examples:
+            - hydra-glow-serum
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          examples:
+            - Hydra Glow Serum
+        brand:
+          type: string
+          minLength: 1
+          maxLength: 80
+          examples:
+            - Lumiere Lab
+        categoryId:
+          type: string
+          enum:
+            - skincare
+            - makeup
+            - haircare
+            - fragrance
+          examples:
+            - skincare
+        price:
+          $ref: '#/components/schemas/Money'
+        shortDescription:
+          type: string
+          minLength: 1
+          maxLength: 600
+          examples:
+            - A lightweight daily serum that hydrates and brightens for a dewy finish.
+        keyIngredients:
+          type:
+            - string
+            - 'null'
+          maxLength: 1000
+          examples:
+            - Hyaluronic acid, niacinamide, vitamin C
+        usageNotes:
+          type:
+            - string
+            - 'null'
+          maxLength: 1000
+          examples:
+            - Apply 2-3 drops to clean skin morning and evening before moisturizer.
+        image:
+          $ref: '#/components/schemas/ProductImage'
+      anyOf:
+        - properties:
+            keyIngredients:
+              type: string
+        - properties:
+            usageNotes:
+              type: string
+    Catalog:
+      type: object
+      description: Shape of the bundled assets/catalog/catalog.json file in release 1.
+      additionalProperties: false
+      required:
+        - schemaVersion
+        - currency
+        - categories
+        - products
+      properties:
+        schemaVersion:
+          type: integer
+          format: int32
+          const: 1
+        currency:
+          type: string
+          enum:
+            - USD
+        categories:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items:
+            $ref: '#/components/schemas/Category'
+        products:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Product'
+    ProductPage:
+      type: object
+      description: Pagination envelope for future product list endpoints (not used in release 1).
+      additionalProperties: false
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+        pageSize:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100

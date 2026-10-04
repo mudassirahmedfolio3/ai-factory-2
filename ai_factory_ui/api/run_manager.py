@@ -119,6 +119,10 @@ def _reconcile_stale_run() -> None:
 def reconcile_run_state() -> None:
     """Recover completed or stale runs before serving API state."""
     _recover_orphaned_complete_run()
+    if FACTORY_ENGINE == "fz":
+        from fz_run_manager import reconcile_fz_run_state
+
+        reconcile_fz_run_state()
     _reconcile_stale_run()
 
 
@@ -265,3 +269,19 @@ def start_run(
             "complexity": profile.id,
             "estimated_minutes": profile.estimated_minutes,
         }
+
+
+def resume_run(run_id: str) -> dict[str, Any]:
+    global _active_thread
+
+    run_id = run_id.strip()
+    if not run_id:
+        raise RuntimeError("run_id is required")
+
+    with _lock:
+        _reconcile_stale_run()
+        if FACTORY_ENGINE == "fz":
+            from fz_run_manager import resume_fz_run_unlocked
+
+            return resume_fz_run_unlocked(run_id)
+        raise RuntimeError("Resume is only supported when FACTORY_ENGINE=fz")

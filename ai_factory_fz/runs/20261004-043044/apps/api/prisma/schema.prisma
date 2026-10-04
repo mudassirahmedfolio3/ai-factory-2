@@ -1,0 +1,17 @@
+// Bootstrap schema (WI-001). Full domain models land in WI-007.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Placeholder so migrations can run before catalog entities are added.
+model BootstrapMeta {
+  id        String   @id @default("bootstrap")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("bootstrap_meta")
+}

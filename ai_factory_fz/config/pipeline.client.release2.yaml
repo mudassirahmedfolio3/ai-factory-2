@@ -1,0 +1,61 @@
+# Release 2 expansion on an existing ShopEase run (same run id, Pass 2).
+# Set in state.json pipeline field when merging the Release 2 brief (merge_release2_brief.py).
+# Pass 1 used pipeline.client (M1 + M2). This profile plans and builds M3 only.
+
+phases:
+  discovery: true
+  planning: true
+  design: true
+  build: true
+  release: false
+
+scope:
+  guidance: >
+    RELEASE 2 EXPANSION on the existing ShopEase codebase in this run workspace. Pass 1 already
+    delivered M1 (Flutter guest catalog demo) and M2 (NestJS catalog API + optional Dart client).
+    Do NOT replan or duplicate M1/M2 baseline work items. Treat catalog list/detail/cart/API client
+    as already shipped unless a Release 2 feature requires a small delta fix.
+    Plan exactly ONE milestone M3 named "Release 2 — shopper depth" with NEW work items only
+    (continue IDs from WI-010 upward). Implement the Release 2 section of the run brief:
+    accounts (register, login, logout, secure token storage, password-reset stub), guest plus
+    signed-in (cart merge on login per clarifications), home route (banners, featured, new arrivals,
+    categories), search/sort/filters (brand, availability), wishlist (API sync when signed in),
+    checkout (US shipping, USD, tax line, mock payment), order history and tracking statuses,
+    coupon at checkout, in-app support, and NestJS/Prisma/OpenAPI extensions for auth, orders,
+    coupons as needed. Quality: flutter analyze/test green, server tests for new endpoints, one QA
+    round on M3. Out of scope: full admin panel, production push, real payment keys.
+  max_user_stories: 12
+  max_work_items: 12
+  max_milestones: 1
+  max_api_operations: 24
+  max_screens: 12
+
+planning:
+  estimation_review: true
+  big_gap_points: 3
+  big_gap_ratio: 2.0
+
+guardrails:
+  architect: [A1, A2, B1, B2, B3, B4, B5, B6, C1, C2, C3, D1, D2, D3]
+  agents: [DV1, DV2, DV3, QA1, QA2, DE1, ST1, CU1, UX1]
+
+build:
+  milestones: []
+  sandbox: local
+  check_fix_attempts: 2
+  agent_timeout_s: 3600
+
+gates:
+  prd: true
+  architecture: true
+  release: false
+
+gate_mode: auto
+
+limits:
+  clarification_rounds: 2
+  gate_rejections: 3
+  qa_fix_rounds: 2
+
+budget:
+  max_total_tokens: null

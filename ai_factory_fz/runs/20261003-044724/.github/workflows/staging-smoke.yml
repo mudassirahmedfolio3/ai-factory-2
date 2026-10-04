@@ -1,0 +1,54 @@
+name: staging-smoke
+
+on:
+  push:
+    paths:
+      - "docker-compose.yml"
+      - "server/**"
+      - "scripts/health-smoke.mjs"
+      - "scripts/run-gethealth-smoke.mjs"
+      - "scripts/staging-smoke.*"
+      - ".github/workflows/staging-smoke.yml"
+  pull_request:
+    paths:
+      - "docker-compose.yml"
+      - "server/**"
+      - "scripts/health-smoke.mjs"
+      - "scripts/run-gethealth-smoke.mjs"
+      - "scripts/staging-smoke.*"
+      - ".github/workflows/staging-smoke.yml"
+  workflow_dispatch:
+
+jobs:
+  health-smoke-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: health-smoke.mjs unit checks
+        run: node --test scripts/health-smoke.test.mjs
+
+  compose-getHealth:
+    runs-on: ubuntu-latest
+    needs: health-smoke-unit
+    env:
+      JWT_SECRET: ci-staging-smoke-secret-not-for-production
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: retail
+      PORT: 3000
+      HEALTH_SMOKE_URL: http://127.0.0.1:3000/health
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start stack
+        run: docker compose up -d --build --wait
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: getHealth smoke (OpenAPI operationId getHealth)
+        run: node scripts/run-gethealth-smoke.mjs
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

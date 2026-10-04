@@ -11,7 +11,7 @@ const ISSUES = [
     atProgress: 42,
     reopen: [0],
     paces: { 0: 1.75, 1: 0.55 },
-    note: 'Customer clarification · Customer and Spec Writer are both working',
+    note: 'Customer clarification · Customer and Business Developer are both working',
   },
   {
     id: 'backend-block',

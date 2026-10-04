@@ -154,6 +154,10 @@ class CursorAgentLLM(BaseLLM):
         else:
             cmd = [node_exe, "-p", "--trust"]
 
+        model = (self.model or os.getenv("CURSOR_PROXY_MODEL", "auto")).strip()
+        if model.lower() not in ("", "auto", "default"):
+            cmd.extend(["--model", model])
+
         result = subprocess.run(
             cmd,
             input=prompt,

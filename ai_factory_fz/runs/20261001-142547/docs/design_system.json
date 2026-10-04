@@ -1,0 +1,376 @@
+{
+  "colors": [
+    {
+      "name": "brandPrimary",
+      "light": "#0B6E4F",
+      "dark": "#3DDC97"
+    },
+    {
+      "name": "brandPrimaryVariant",
+      "light": "#085A41",
+      "dark": "#2BB87A"
+    },
+    {
+      "name": "brandSecondary",
+      "light": "#1B4965",
+      "dark": "#7EB8D8"
+    },
+    {
+      "name": "background",
+      "light": "#F7FAF8",
+      "dark": "#0F1412"
+    },
+    {
+      "name": "surface",
+      "light": "#FFFFFF",
+      "dark": "#1A211E"
+    },
+    {
+      "name": "surfaceVariant",
+      "light": "#E8F0EC",
+      "dark": "#24302B"
+    },
+    {
+      "name": "onBackground",
+      "light": "#122018",
+      "dark": "#E8F0EC"
+    },
+    {
+      "name": "onSurface",
+      "light": "#122018",
+      "dark": "#E8F0EC"
+    },
+    {
+      "name": "onPrimary",
+      "light": "#FFFFFF",
+      "dark": "#0A1F16"
+    },
+    {
+      "name": "textPrimary",
+      "light": "#122018",
+      "dark": "#E8F0EC"
+    },
+    {
+      "name": "textSecondary",
+      "light": "#4A5C54",
+      "dark": "#A8B8B0"
+    },
+    {
+      "name": "textDisabled",
+      "light": "#8A9A92",
+      "dark": "#6A7A72"
+    },
+    {
+      "name": "price",
+      "light": "#0B6E4F",
+      "dark": "#3DDC97"
+    },
+    {
+      "name": "ratingStar",
+      "light": "#E6A817",
+      "dark": "#F0C040"
+    },
+    {
+      "name": "ratingStarEmpty",
+      "light": "#C5D0CA",
+      "dark": "#3A4540"
+    },
+    {
+      "name": "divider",
+      "light": "#D4E0DA",
+      "dark": "#2E3A35"
+    },
+    {
+      "name": "error",
+      "light": "#C62828",
+      "dark": "#EF9A9A"
+    },
+    {
+      "name": "onError",
+      "light": "#FFFFFF",
+      "dark": "#1A0000"
+    },
+    {
+      "name": "success",
+      "light": "#2E7D32",
+      "dark": "#81C784"
+    },
+    {
+      "name": "imagePlaceholder",
+      "light": "#DCE8E2",
+      "dark": "#2A3530"
+    },
+    {
+      "name": "cartBadge",
+      "light": "#C62828",
+      "dark": "#EF5350"
+    },
+    {
+      "name": "appBar",
+      "light": "#0B6E4F",
+      "dark": "#1A211E"
+    },
+    {
+      "name": "onAppBar",
+      "light": "#FFFFFF",
+      "dark": "#E8F0EC"
+    },
+    {
+      "name": "outline",
+      "light": "#A8B8B0",
+      "dark": "#4A5C54"
+    },
+    {
+      "name": "scrim",
+      "light": "#80000000",
+      "dark": "#CC000000"
+    }
+  ],
+  "typography": [
+    {
+      "name": "displayLarge",
+      "size": 32.0,
+      "weight": 700,
+      "line_height": 40.0
+    },
+    {
+      "name": "headlineMedium",
+      "size": 24.0,
+      "weight": 700,
+      "line_height": 32.0
+    },
+    {
+      "name": "titleLarge",
+      "size": 20.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "titleMedium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "bodyLarge",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "bodyMedium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "labelLarge",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "labelMedium",
+      "size": 12.0,
+      "weight": 500,
+      "line_height": 16.0
+    },
+    {
+      "name": "priceLarge",
+      "size": 28.0,
+      "weight": 700,
+      "line_height": 36.0
+    },
+    {
+      "name": "priceMedium",
+      "size": 16.0,
+      "weight": 700,
+      "line_height": 24.0
+    },
+    {
+      "name": "caption",
+      "size": 12.0,
+      "weight": 400,
+      "line_height": 16.0
+    }
+  ],
+  "spacing": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64
+  ],
+  "corner_radii": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    24
+  ],
+  "shared_widgets": [
+    {
+      "name": "PulseAppBar",
+      "description": "Branded AppBar showing PulsePhones wordmark/title, optional cart IconButton with quantity badge (min 48dp touch target), semantic label PulsePhones storefront. Uses brandPrimary/appBar tokens; back chevron on detail/cart."
+    },
+    {
+      "name": "ProductListTile",
+      "description": "List row for a smartphone: 72dp image/placeholder, product name (titleMedium), USD price from integer cents via PriceText (priceMedium), StarRatingSummary. Min height 72dp; entire tile Semantics button with label including name, price, and rating. Tap navigates to /products/:id."
+    },
+    {
+      "name": "ProductImagePlaceholder",
+      "description": "Aspect-ratio box (1:1 list, 4:3 detail) with imagePlaceholder fill, optional phone silhouette Icon, Semantics image label Product image for {name} or Placeholder image for {name}."
+    },
+    {
+      "name": "PriceText",
+      "description": "Formats integer USD minor units (cents) plus ISO 4217 USD to locale display e.g. $899.99 for 89999. Never accepts float storage; uses price color token and priceMedium/priceLarge styles."
+    },
+    {
+      "name": "StarRatingSummary",
+      "description": "Row of 5 stars (filled/half/empty via ratingStar tokens) plus numeric average (e.g. 4.5) in labelMedium/textSecondary. Semantics label Rated {n} out of 5 stars. Touch targets not required when display-only."
+    },
+    {
+      "name": "PrimaryButton",
+      "description": "Filled button min height 48dp, brandPrimary fill, onPrimary label (labelLarge). Used for Add to cart. Semantics button with explicit action label."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Row of decrease IconButton, quantity Text (titleMedium), increase IconButton; each control min 48dp. Decrease at qty 1 becomes remove or disables per cart rules. Semantics labels Decrease quantity, Increase quantity, Quantity {n}."
+    },
+    {
+      "name": "AsyncStateView",
+      "description": "Reusable loading (CircularProgressIndicator + Loading catalog), empty (illustration + message + optional retry), error (error color message + Retry PrimaryButton). Used by list/detail/cart AsyncValue branches."
+    },
+    {
+      "name": "CartLineItem",
+      "description": "Cart row: product name, PriceText unit snapshot (cents+USD), QuantityStepper, remove IconButton (48dp). Semantics summarize name, unit price, quantity."
+    },
+    {
+      "name": "SectionHeader",
+      "description": "titleLarge section title for Key details on detail screen; textPrimary; padding from spacing scale."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "ProductListScreen",
+      "route": "/products",
+      "purpose": "PulsePhones-branded scrollable browse of 12–20 seeded smartphones showing name, USD price from integer cents, star rating summary, and image/placeholder so shoppers can compare models and open a product. Initial route and demo home; no network or auth.",
+      "components": [
+        "PulseAppBar",
+        "ProductListTile",
+        "ProductImagePlaceholder",
+        "PriceText",
+        "StarRatingSummary",
+        "AsyncStateView"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "success"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "ProductDetailScreen",
+      "route": "/products/:id",
+      "purpose": "Shows one seeded smartphone: name, USD price from integer cents (e.g. $899.99 for 89999), key details/specs, star rating, image/placeholder; optional Add to cart for in-memory cart. Back returns to list without losing local catalog state.",
+      "components": [
+        "PulseAppBar",
+        "ProductImagePlaceholder",
+        "PriceText",
+        "StarRatingSummary",
+        "SectionHeader",
+        "PrimaryButton",
+        "AsyncStateView"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "success"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Optional M1 in-memory cart: line items with product name, unit price snapshot (cents + USD), quantity increase/decrease/remove. Session-only; empty after process kill. No persistence, auth, or payments.",
+      "components": [
+        "PulseAppBar",
+        "CartLineItem",
+        "PriceText",
+        "QuantityStepper",
+        "AsyncStateView",
+        "PrimaryButton"
+      ],
+      "states": [
+        "empty",
+        "success"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap ProductListTile for product id → go_router push /products/:id"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "AppBar back / system back → pop to /products; CatalogRepository state retained"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "After Add to cart (or AppBar cart icon) → go /cart showing new line qty 1"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "AppBar cart IconButton when badge > 0 → go /cart"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-01",
+      "trigger": "AppBar back / Continue browsing → pop or go /products"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-02",
+      "trigger": "Optional tap CartLineItem name → push /products/:id for that product"
+    }
+  ],
+  "accessibility": [
+    "Minimum touch target 48dp for ProductListTile actions, AppBar icons, PrimaryButton, QuantityStepper, Retry, Remove.",
+    "WCAG AA contrast: textPrimary on background/surface ≥ 4.5:1; onPrimary on brandPrimary ≥ 4.5:1; price and body text meet AA in light and dark.",
+    "Semantics labels on all images/icons: product images, star icons, cart badge, back, add/remove/stepper.",
+    "ProductListTile Semantics button: {name}, {formatted price}, rated {n} out of 5.",
+    "PrimaryButton Semantics: Add {name} to cart.",
+    "Announce AsyncStateView loading/empty/error via Semantics liveRegion or AnnounceSemantics where practical.",
+    "Do not rely on color alone for rating or error; pair with text/icons.",
+    "Support system text scaling; avoid clipping primary prices and titles at 1.3x scale.",
+    "Focus order: AppBar → list/content → primary CTA (Add to cart / Retry).",
+    "English USD-only M1 copy; prices always formatted from integer cents, never spoken as raw float storage values."
+  ]
+}

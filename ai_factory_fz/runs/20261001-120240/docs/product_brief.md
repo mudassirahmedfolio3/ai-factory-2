@@ -1,0 +1,65 @@
+# Product brief: ShirtStack — Men's Shirts Mobile Shop
+
+Launch a mobile-first Flutter e-commerce MVP focused exclusively on men's shirts so we can validate demand, prove repeat purchase behavior, and demo a credible shopping experience to investors and wholesale partners within one sprint. Shoppers should browse curated shirts, read reviews, apply promo codes, and complete purchases quickly on their phone—starting with simple listings like Men Check Shirt ($27.99).
+
+## Target users
+- Men aged 25–45 who buy casual and smart-casual shirts online at mid-range price points (roughly $20–$45 per shirt)
+- Gift buyers (partners, family) shopping for men's shirts by size and style
+- Repeat customers who want easy reordering and order history without calling support
+- Mobile-first shoppers who prefer browsing and buying on phone over desktop
+
+## Business goals
+- Ship a demo-ready MVP in one sprint as a small releasable increment we can show to stakeholders
+- Validate product-market fit in the men's shirts vertical before expanding categories
+- Drive first purchases and repeat orders through a smooth mobile checkout with promo code support
+- Build trust with product reviews and star ratings to reduce hesitation on fit and quality
+- Establish baseline metrics: browse-to-cart rate, checkout completion, promo code redemption, and review submission rate
+- Keep operational overhead low at launch: manual fulfillment, simple catalog, no complex integrations until traction is proven
+
+## Key features
+- Product catalog for men's shirts only, with listing style such as Men Check Shirt ($27.99) showing title, price, primary image, and key attributes (size, color, fit type)
+- Product detail screen with description, available sizes/colors, price, and add-to-cart
+- Shopping cart with quantity updates (increase/decrease/remove) and running subtotal
+- Checkout flow with shipping address capture, order summary, and promo code entry at checkout with applied discount shown before payment
+- Order placement confirmation with order number and summary
+- Order history showing past orders with date, items, quantities, prices, promo discount applied, and order status (e.g., Placed, Shipped, Delivered)
+- Product reviews and star ratings (1–5 stars) on product detail pages, with average rating displayed on listings
+- Basic account/profile: sign up, sign in, saved shipping address for faster checkout
+- Mobile-first UX: thumb-friendly navigation, large tap targets, fast product browsing, sticky add-to-cart on detail pages
+- Search and filter by size, color, price range, and shirt type (e.g., check, plain, formal) for MVP catalog discovery
+- Guest browse; account required at checkout to support order history
+
+## Constraints
+- Platform: Flutter mobile app (iOS and Android) — mobile-first UX, not a web storefront for MVP
+- Scope: men's shirts category only for MVP — no pants, accessories, or women's lines
+- Timeline: demo-ready in one sprint; prioritize core browse → cart → checkout → order history path over polish features
+- Small releasable increment: avoid scope creep (no loyalty program, no AI sizing, no live chat in v1)
+- MVP must include: shopping cart with quantity updates, order history, promo codes at checkout, product reviews and star ratings
+- Initial catalog size: approximately 20–40 SKUs seeded for demo and early sales
+- Payment: integrate one payment provider for card payments; exact provider TBD
+- Fulfillment: ship domestically only at launch unless we decide otherwise
+- Content: product images and descriptions provided by business; no professional photoshoot budget in sprint one
+- Reviews: customer-submitted only after verified purchase (decision pending confirmation in open questions)
+- Admin/back-office for catalog and orders can be minimal (spreadsheet or simple admin) — not customer-facing for sprint one unless team capacity allows
+
+## Open questions
+- Brand name and visual identity: is ShirtStack acceptable as working title or do we have an existing brand?
+- Markets and currency: single country launch (which country?) or multi-currency from day one?
+- Shipping: flat-rate vs. free shipping threshold vs. calculated by weight/zone?
+- Returns and refunds policy: 14-day, 30-day, or exchange-only for MVP?
+- Inventory: real-time stock sync with warehouse/ERP or manual stock counts updated daily?
+- Promo codes: percentage off, fixed amount, free shipping, or all three? Single-use vs. multi-use codes? Minimum order value?
+- Reviews moderation: auto-publish all reviews or manual approval before display?
+- Verified purchase only for reviews, or allow any logged-in user to review?
+- Authentication: email/password only, or also Google/Apple sign-in for faster onboarding?
+- Payment provider preference: Stripe, PayPal, Square, or regional provider?
+- Tax calculation: built into checkout by region or handled manually/offline for MVP?
+- Order notifications: email only, push notifications, or both?
+- Size guide: do we need a fit guide with measurements on product pages for launch?
+- Product variants: single-select size and color per SKU, or more complex variant matrix?
+- Analytics: which tools must be integrated in sprint one (Firebase, Mixpanel, etc.)?
+- Legal pages required at launch: privacy policy, terms of service — who provides copy?
+- Launch channel: TestFlight/internal demo only, or public app store release in sprint one?
+- Customer support contact: in-app email/form, phone number, or FAQ-only for MVP?
+- Wishlist/favorites: in or out of scope for this sprint?
+- Social sharing or referral codes: needed for MVP or deferred?

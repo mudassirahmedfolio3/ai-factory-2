@@ -1,0 +1,43 @@
+# Product brief: beauty-mvp
+
+A simple, attractive Flutter mobile shopping app where beauty shoppers can browse our products, view clear product details, and add items to a cart. The first release is a small demo that proves the core shopping experience and gives us something real to show stakeholders before we invest in a full ecommerce platform.
+
+## Target users
+- Beauty shoppers aged 18-40 who buy skincare, makeup and haircare products and are comfortable shopping on their phones
+- Existing customers of our online and in-store beauty business who want a faster, more convenient way to browse our catalog
+- Internal stakeholders and potential investors or partners who will see the first demo and judge the quality of the experience
+
+## Business goals
+- Deliver a working, polished demo of browse, product detail and cart for the first showcase
+- Validate that customers respond well to a mobile-first shopping experience before committing to full checkout, payments and accounts
+- Build a Flutter codebase that can grow into a full ecommerce app later without a rewrite
+- Keep the first-phase scope small so it can be delivered quickly and at low cost
+- Showcase our brand and a representative selection of about 20-30 products to gather early feedback
+
+## Key features
+- Product browse: scrollable grid or list of products showing image, name, brand, and price, with basic category filtering such as Skincare, Makeup, Haircare and Fragrance
+- Product detail: large product image, name, brand, price, short description, key ingredients or usage notes, and an Add to Cart button with quantity selection
+- Cart: view added items, change quantities, remove items, see item subtotals and an overall total, and keep the cart while the app is open
+- Sample product catalog: a small set of about 20-30 products loaded from a local file or simple mock data source, since no live backend is needed for the demo
+- Clean, branded look and feel: consistent colors, typography and imagery that feel premium and beauty-oriented, on both iOS and Android via Flutter
+
+## Constraints
+- Scope is limited to browse, product detail and cart only; no real checkout, payments, user accounts, order history, reviews or wishlists in this first version
+- Built with Flutter so the same app runs on iOS and Android
+- Uses mock or static product data, with no dependency on a live inventory or order system
+- Must be demo-ready in a short timeframe, targeting roughly 4-6 weeks
+- Prices are shown in a single currency (USD) and one language (English)
+- Must have reasonable performance and load product images quickly on typical mobile connections
+- Basic accessibility such as readable text sizes and sufficient color contrast
+- Product images and descriptions will be supplied by the business; the team should not need to source them
+
+## Open questions
+- Should the cart persist after the app is closed, or is in-session only acceptable for the demo?
+- Do we want search and sorting (by price, popularity) in the first demo, or push them to the next phase?
+- Which phase comes next: checkout and payments, user accounts, or a real backend and catalog integration?
+- What payment providers and shipping rules will we need later, and in which regions will we sell?
+- Should we show stock availability, variants such as shades and sizes, or promotions and discounts in the future?
+- Is the demo for iOS, Android, or both at the showcase, and which devices will be used?
+- Do we have final brand guidelines (logo, colors, fonts) ready, or should the team propose a simple style?
+- What analytics, if any, do we want from the demo to measure customer interest?
+- Will we later need tax calculation and legal and privacy requirements (for example cosmetics labeling or data privacy)?

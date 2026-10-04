@@ -1,0 +1,224 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Catalogue API and Product Data",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Mobile App Browse, Search and Product Detail",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Mobile App Cart and Order Request",
+      "story_ids": [
+        "US-004",
+        "US-005",
+        "US-006"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Backend: Set up NestJS, Prisma, PostgreSQL and Docker",
+      "description": "Scaffold NestJS project with Prisma ORM and PostgreSQL 16, configure TypeScript, establish dev and test databases, set up Docker and docker-compose for local development and staging, add ESLint and prettier, configure GitHub Actions CI pipeline. Foundation for all backend work.",
+      "epic_id": "E-01",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Backend: Implement health check and product catalogue API",
+      "description": "Add GET /health infrastructure endpoint returning 200 OK. Build NestJS endpoints: GET /api/categories (list all categories), GET /api/products?category=X&search=Y (list products with optional category and search filters), GET /api/products/:id (product detail with all variants). All prices as integer cents with currency code USD. Include OpenAPI documentation via @nestjs/swagger. Total API operations: 3 (plus /health and /api/docs-json which do not count toward limit).",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Backend: Define data model, seed catalogue and enable staff updates",
+      "description": "Define Prisma schema for Product, Category, ProductVariant with fields: product (id, name, brand, description, ingredients, images, category_id), category (id, name), variant (id, product_id, name/shade/size, price_cents, currency_code, stock_status). Create database migrations. Build seed script to populate PostgreSQL with 50-150 sample products across categories (Skincare, Makeup, Haircare, Fragrance, Body) with variants, prices in cents, images, descriptions, ingredients and stock statuses. Ensure structure is ready for non-technical staff to update via admin form/spreadsheet after release.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Mobile: Project setup, architecture, dependencies and API client",
+      "description": "Create Flutter project with Riverpod state management, go_router navigation, dio HTTP client, freezed for immutable models, json_serializable for serialization, connectivity_plus for offline detection. Establish project structure (lib/data, lib/domain, lib/presentation, lib/shared). Generate or write dio-based HTTP client from backend OpenAPI spec. Create Freezed data models for Category, Product, ProductVariant with price as int (cents) and currency code. Implement repository pattern abstracting API calls. Add error handling for offline and network failures.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Mobile: Build Catalogue screen with category filter and loading states",
+      "description": "Create Catalogue/Home screen with scrollable grid of products. Each card shows product image (placeholder while loading), name, brand and price formatted from integer cents (e.g. 1850 → $18.50). Implement category filter tabs (All, Skincare, Makeup, Haircare, Fragrance, Body) with visual highlight of selected. Show loading skeleton until products load. Display error state with 'No internet connection' message and Retry button on offline. Show empty state 'No products in this category' when category has zero products. Use Riverpod to manage product list state and selected category. Include product_view analytics event.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-006",
+      "title": "Mobile: Build Search screen and Product Detail with variant selection",
+      "description": "Create Search screen with text input for product name or brand (case-insensitive). Display results in scrollable list with image, name, brand and price. Allow combining search with category filter. Show 'No results found' empty state with suggestion. Clear search to restore catalogue. Create Product Detail screen showing: swipeable images, name, brand, description, ingredients, list of variant buttons (shade, size, volume). Dynamically update price (integer cents → USD formatted) and stock status (In stock, Low stock, Out of stock) when variant selected. Grey out Out of stock variants. Disable 'Add to cart' button when Out of stock selected. Show error state with Retry on offline. Record product_view and search analytics events.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-005"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-007",
+      "title": "Mobile: Implement local cart storage, add to cart and cart persistence",
+      "description": "Set up on-device persistent storage (Hive or SharedPreferences) for cart lines: product id, variant id, quantity. Implement CartLine model with product name, brand, variant, unit price (cents), quantity and line total calculation. Create cart repository to load, save, update and remove lines. Cart survives app closure and reopen without internet. On Product Detail screen, add 'Add to cart' button (enabled only when In stock or Low stock). Tapping adds variant with quantity 1; if same variant already in cart, increment quantity instead of duplicating. Show visible confirmation (snackbar) with updated cart badge count. Record add_to_cart analytics event. Enforce maximum 10 per line.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-004",
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-006"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-008",
+      "title": "Mobile: Build Cart screen, refresh prices online and order request feature",
+      "description": "Create Cart screen showing: list of cart lines with product name, brand, variant, unit price, quantity controls (+/−), line total. Show subtotal in USD (integer cent arithmetic, no rounding errors). Display 'Taxes and shipping calculated when your order is confirmed.' with no tax/shipping estimate. Quantity increment/decrement updates line total and subtotal instantly. Minimum quantity 1 (prevent below 1). Maximum 10 per line. Remove line button removes it and updates subtotal and cart badge. Empty cart shows 'Your cart is empty' with 'Browse products' button. Persist changes immediately. When Cart screen opens while online, fetch current product and variant data and update stale prices and stock statuses. Flag Out of stock lines and exclude from order request. Add 'Send order request' button (disabled if cart empty or all lines Out of stock). Tapping formats pre-filled WhatsApp message: product name, variant, quantity, line total, and subtotal. Try WhatsApp with store's number; fall back to email if unavailable. If neither available, show error with store contact details. Record order_request analytics event. Cart remains unchanged, no payment, no order stored.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-007"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-009",
+      "title": "Mobile: Analytics, image caching, accessibility and Privacy screen",
+      "description": "Integrate Firebase Analytics with wrapper abstraction for future consent screen. Track: screen_view (all screens), product_view (Product Detail with product_id, variant_id), search (Search with search_term), add_to_cart (with product_id, variant_id, category). Use anonymous app instance ID, no user identifiers. Configure dio cache interceptor for product images; images served from backend must be optimized (max 1200 px long edge for detail, ~400 px for list thumbnails) in JPEG or WebP at 80% quality. Show placeholder or skeleton while loading. Ensure smooth scrolling (target 60 fps). Ensure text scales with system font size. All interactive targets ≥ 44×44 pt. Text contrast meets WCAG AA. Product images have semantic alt labels. Stock status communicated with text and color. VoiceOver/TalkBack can navigate browse, detail and cart. Create Privacy & About screen with app version, store contact, link to privacy policy, and disclosure: 'This app uses Firebase Analytics to understand how you use it. No personal data is collected. Analytics is anonymous.' Link from this screen and app store listings.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-008"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-010",
+      "title": "Mobile and Backend: End-to-end testing and launch readiness",
+      "description": "Build automated integration tests covering full journey: (1) Launch app, load catalogue, filter by category (2) Tap product, view detail, select variant (3) Add to cart, confirm (4) Navigate to cart, verify line, adjust quantity (5) Review subtotal (6) Format order request message. Widget tests for individual screens. Load test backend with 100+ concurrent catalogue requests. Verify integer cent arithmetic with no rounding errors. Test offline resilience: close app, reopen without internet, cart persists; open online, prices and stock refresh. Configure GitHub Actions for automated testing. Prepare Android and iOS builds for beta release. Generate API documentation and privacy declarations. Verify all acceptance criteria are testable by QA.",
+      "epic_id": "E-03",
+      "component": "shared",
+      "story_ids": [
+        "US-001",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-008",
+        "WI-009"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Backend Catalogue API",
+      "goal": "Deliver a working NestJS backend with PostgreSQL, health check, full product catalogue API (categories, products with search and category filters, product detail with variants), seeded product data, and OpenAPI documentation. Enable mobile teams to build screens and integration tests against stable contract.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Mobile App: Browse, Search, Detail, Cart and Order Request",
+      "goal": "Ship a fully functional Flutter app with product browsing (catalogue and search screens), product detail with variant selection, on-device cart with persistence, cart line editing, price and stock refresh when online, order request feature (WhatsApp/email fallback), analytics, image caching, accessibility and end-to-end tests. Ready for iOS and Android beta release to validate mobile demand and cart-add rate metrics.",
+      "work_item_ids": [
+        "WI-004",
+        "WI-005",
+        "WI-006",
+        "WI-007",
+        "WI-008",
+        "WI-009",
+        "WI-010"
+      ]
+    }
+  ]
+}

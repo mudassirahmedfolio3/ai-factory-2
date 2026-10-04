@@ -1,0 +1,194 @@
+// Prisma schema — PostgreSQL 16
+// M1 Flutter uses local/mock data mirroring Category/Product/ProductVariant.
+// NestJS implements this schema in a later milestone.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  pending_payment
+  paid
+  fulfilled
+  delivered
+  cancelled
+  refunded
+}
+
+enum PaymentStatus {
+  requires_payment_method
+  requires_confirmation
+  processing
+  succeeded
+  canceled
+  failed
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  addresses    Address[]
+  cart         Cart?
+  orders       Order[]
+
+  @@map("users")
+}
+
+model Address {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  line1      String
+  line2      String?
+  city       String
+  region     String
+  postalCode String
+  country    String   @db.Char(2)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id              String           @id @default(uuid()) @db.Uuid
+  categoryId      String           @db.Uuid
+  name            String
+  description     String           @db.Text
+  /// Display/list price in integer minor units (cents). Never floats.
+  unitPriceCents  Int
+  currencyCode    String           @db.Char(3) @default("USD")
+  primaryImageUrl String
+  imageUrls       String[]
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  category        Category         @relation(fields: [categoryId], references: [id])
+  variants        ProductVariant[]
+
+  @@index([categoryId])
+  @@index([isActive])
+  @@map("products")
+}
+
+model ProductVariant {
+  id             String     @id @default(uuid()) @db.Uuid
+  productId      String     @db.Uuid
+  sku            String     @unique
+  label          String
+  unitPriceCents Int
+  currencyCode   String     @db.Char(3) @default("USD")
+  /// Stock tracked per variant.
+  stockQuantity  Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  product        Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model Cart {
+  id        String     @id @default(uuid()) @db.Uuid
+  userId    String     @unique @db.Uuid
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id               String         @id @default(uuid()) @db.Uuid
+  cartId           String         @db.Uuid
+  productVariantId String         @db.Uuid
+  quantity         Int
+  /// Copied at add time (integer cents).
+  unitPriceCents   Int
+  currencyCode     String         @db.Char(3) @default("USD")
+  productName      String
+  variantLabel     String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  cart             Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+
+  @@unique([cartId, productVariantId])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model Order {
+  id              String      @id @default(uuid()) @db.Uuid
+  userId          String      @db.Uuid
+  status          OrderStatus @default(pending_payment)
+  currencyCode    String      @db.Char(3) @default("USD")
+  /// Sum of line totals in integer cents.
+  totalCents      Int
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  payment         Payment?
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id               String         @id @default(uuid()) @db.Uuid
+  orderId          String         @db.Uuid
+  productVariantId String?        @db.Uuid
+  /// Snapshots at purchase time — catalog changes must not alter past orders.
+  productName      String
+  variantLabel     String
+  unitPriceCents   Int
+  currencyCode     String         @db.Char(3) @default("USD")
+  quantity         Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariant   ProductVariant? @relation(fields: [productVariantId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Payment {
+  id                    String        @id @default(uuid()) @db.Uuid
+  orderId               String        @unique @db.Uuid
+  stripePaymentIntentId String        @unique
+  status                PaymentStatus @default(requires_payment_method)
+  amountCents           Int
+  currencyCode          String        @db.Char(3) @default("USD")
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  order                 Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}

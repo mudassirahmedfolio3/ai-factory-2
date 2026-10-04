@@ -1,0 +1,136 @@
+// Prisma schema for PostgreSQL 16. Catalog bounded area only (M1 defines the model; the app uses a bundled mock catalog).
+// User, Address, Cart, CartItem, Order, OrderItem and Payment are added in later releases.
+// Raw SQL migration additions (not expressible in Prisma):
+//   CHECK (price_minor >= 0)
+//   CHECK (sale_price_minor IS NULL OR (sale_price_minor >= 0 AND sale_price_minor < price_minor))
+//   CHECK (stock_quantity >= 0)
+//   CHECK (currency = 'USD')
+//   CHECK (rating_average IS NULL OR (rating_average >= 0 AND rating_average <= 5))
+//   CREATE UNIQUE INDEX product_variants_one_default ON product_variants(product_id) WHERE is_default;
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductType {
+  bulb
+  ceiling_light
+  pendant
+  lamp
+  smart_light
+
+  @@map("product_type")
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  slug      String    @unique
+  name      String
+  products  Product[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model Product {
+  id              String                 @id @default(uuid()) @db.Uuid
+  slug            String                 @unique
+  name            String
+  brand           String
+  description     String
+  productType     ProductType            @map("product_type")
+  categoryId      String                 @map("category_id") @db.Uuid
+  category        Category               @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  ratingAverage   Decimal?               @map("rating_average") @db.Decimal(2, 1)
+  ratingCount     Int                    @default(0) @map("rating_count")
+  specificationId String?                @unique @map("specification_id") @db.Uuid
+  specification   LightingSpecification? @relation("ProductSpecification", fields: [specificationId], references: [id], onDelete: SetNull)
+  isActive        Boolean                @default(true) @map("is_active")
+  images          ProductImage[]
+  variants        ProductVariant[]
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @updatedAt @map("updated_at")
+
+  @@index([categoryId])
+  @@index([isActive, createdAt])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  altText   String   @map("alt_text")
+  position  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([productId, position])
+  @@map("product_images")
+}
+
+model ProductVariant {
+  id                      String                 @id @default(uuid()) @db.Uuid
+  productId               String                 @map("product_id") @db.Uuid
+  product                 Product                @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku                     String                 @unique
+  name                    String
+  isDefault               Boolean                @default(false) @map("is_default")
+  position                Int                    @default(0)
+  priceMinor              Int                    @map("price_minor")
+  salePriceMinor          Int?                   @map("sale_price_minor")
+  currency                String                 @default("USD") @db.Char(3)
+  stockQuantity           Int                    @default(0) @map("stock_quantity")
+  imageUrl                String                 @map("image_url")
+  imageAltText            String                 @map("image_alt_text")
+  specificationOverrideId String?                @unique @map("specification_override_id") @db.Uuid
+  specificationOverride   LightingSpecification? @relation("VariantSpecificationOverride", fields: [specificationOverrideId], references: [id], onDelete: SetNull)
+  options                 VariantOption[]
+  createdAt               DateTime               @default(now()) @map("created_at")
+  updatedAt               DateTime               @updatedAt @map("updated_at")
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model VariantOption {
+  id        String         @id @default(uuid()) @db.Uuid
+  variantId String         @map("variant_id") @db.Uuid
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  name      String
+  value     String
+  position  Int            @default(0)
+
+  @@unique([variantId, name])
+  @@index([name, value])
+  @@map("variant_options")
+}
+
+model LightingSpecification {
+  id                String          @id @default(uuid()) @db.Uuid
+  wattageW          Int?            @map("wattage_w")
+  lumens            Int?
+  colorTemperatureK Int?            @map("color_temperature_k")
+  dimmable          Boolean?
+  bulbType          String?         @map("bulb_type")
+  baseType          String?         @map("base_type")
+  voltageV          Int?            @map("voltage_v")
+  material          String?
+  finish            String?
+  widthMm           Int?            @map("width_mm")
+  heightMm          Int?            @map("height_mm")
+  depthMm           Int?            @map("depth_mm")
+  ipRating          String?         @map("ip_rating") @db.VarChar(4)
+  product           Product?        @relation("ProductSpecification")
+  variant           ProductVariant? @relation("VariantSpecificationOverride")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  @@map("lighting_specifications")
+}

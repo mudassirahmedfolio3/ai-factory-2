@@ -1,0 +1,661 @@
+{
+  "colors": [
+    {
+      "name": "colorPrimary",
+      "light": "#1B4332",
+      "dark": "#52B788"
+    },
+    {
+      "name": "colorPrimaryContainer",
+      "light": "#D8F3DC",
+      "dark": "#081C15"
+    },
+    {
+      "name": "colorOnPrimary",
+      "light": "#FFFFFF",
+      "dark": "#081C15"
+    },
+    {
+      "name": "colorOnPrimaryContainer",
+      "light": "#1B4332",
+      "dark": "#B7E4C7"
+    },
+    {
+      "name": "colorSecondary",
+      "light": "#BC6C25",
+      "dark": "#F4A261"
+    },
+    {
+      "name": "colorSecondaryContainer",
+      "light": "#FFE8D6",
+      "dark": "#3D2817"
+    },
+    {
+      "name": "colorOnSecondary",
+      "light": "#FFFFFF",
+      "dark": "#1A1208"
+    },
+    {
+      "name": "colorOnSecondaryContainer",
+      "light": "#5C3D1E",
+      "dark": "#FFDDB8"
+    },
+    {
+      "name": "colorSurface",
+      "light": "#FFFBF7",
+      "dark": "#121212"
+    },
+    {
+      "name": "colorSurfaceContainerLow",
+      "light": "#F5F0EB",
+      "dark": "#1E1E1E"
+    },
+    {
+      "name": "colorSurfaceContainer",
+      "light": "#EFEBE6",
+      "dark": "#2A2A2A"
+    },
+    {
+      "name": "colorSurfaceContainerHigh",
+      "light": "#E8E4DF",
+      "dark": "#363636"
+    },
+    {
+      "name": "colorOnSurface",
+      "light": "#1C1B1F",
+      "dark": "#E6E1E5"
+    },
+    {
+      "name": "colorOnSurfaceVariant",
+      "light": "#49454F",
+      "dark": "#CAC4D0"
+    },
+    {
+      "name": "colorOutline",
+      "light": "#79747E",
+      "dark": "#938F99"
+    },
+    {
+      "name": "colorOutlineVariant",
+      "light": "#CAC4D0",
+      "dark": "#49454F"
+    },
+    {
+      "name": "colorError",
+      "light": "#BA1A1A",
+      "dark": "#FFB4AB"
+    },
+    {
+      "name": "colorOnError",
+      "light": "#FFFFFF",
+      "dark": "#690005"
+    },
+    {
+      "name": "colorErrorContainer",
+      "light": "#FFDAD6",
+      "dark": "#93000A"
+    },
+    {
+      "name": "colorOnErrorContainer",
+      "light": "#410002",
+      "dark": "#FFDAD6"
+    },
+    {
+      "name": "colorSuccess",
+      "light": "#2D6A4F",
+      "dark": "#95D5B2"
+    },
+    {
+      "name": "colorOnSuccess",
+      "light": "#FFFFFF",
+      "dark": "#081C15"
+    },
+    {
+      "name": "colorWarning",
+      "light": "#9A6700",
+      "dark": "#FFD666"
+    },
+    {
+      "name": "colorStarFilled",
+      "light": "#E9A319",
+      "dark": "#FBBF24"
+    },
+    {
+      "name": "colorStarEmpty",
+      "light": "#CAC4D0",
+      "dark": "#49454F"
+    },
+    {
+      "name": "colorBadgeOutOfStock",
+      "light": "#49454F",
+      "dark": "#E6E1E5"
+    },
+    {
+      "name": "colorBadgeSale",
+      "light": "#BC6C25",
+      "dark": "#F4A261"
+    },
+    {
+      "name": "colorScrim",
+      "light": "#00000080",
+      "dark": "#000000B3"
+    },
+    {
+      "name": "colorShadow",
+      "light": "#0000001A",
+      "dark": "#00000040"
+    },
+    {
+      "name": "colorFocusRing",
+      "light": "#1B4332",
+      "dark": "#52B788"
+    }
+  ],
+  "typography": [
+    {
+      "name": "displayLarge",
+      "size": 57.0,
+      "weight": 400,
+      "line_height": 64.0
+    },
+    {
+      "name": "displayMedium",
+      "size": 45.0,
+      "weight": 400,
+      "line_height": 52.0
+    },
+    {
+      "name": "displaySmall",
+      "size": 36.0,
+      "weight": 400,
+      "line_height": 44.0
+    },
+    {
+      "name": "headlineLarge",
+      "size": 32.0,
+      "weight": 600,
+      "line_height": 40.0
+    },
+    {
+      "name": "headlineMedium",
+      "size": 28.0,
+      "weight": 600,
+      "line_height": 36.0
+    },
+    {
+      "name": "headlineSmall",
+      "size": 24.0,
+      "weight": 600,
+      "line_height": 32.0
+    },
+    {
+      "name": "titleLarge",
+      "size": 22.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "titleMedium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "titleSmall",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "bodyLarge",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "bodyMedium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "bodySmall",
+      "size": 12.0,
+      "weight": 400,
+      "line_height": 16.0
+    },
+    {
+      "name": "labelLarge",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "labelMedium",
+      "size": 12.0,
+      "weight": 600,
+      "line_height": 16.0
+    },
+    {
+      "name": "labelSmall",
+      "size": 11.0,
+      "weight": 600,
+      "line_height": 16.0
+    },
+    {
+      "name": "priceLarge",
+      "size": 24.0,
+      "weight": 700,
+      "line_height": 32.0
+    },
+    {
+      "name": "priceMedium",
+      "size": 18.0,
+      "weight": 700,
+      "line_height": 24.0
+    },
+    {
+      "name": "priceSmall",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "priceStrikethrough",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "specKey",
+      "size": 12.0,
+      "weight": 600,
+      "line_height": 16.0
+    },
+    {
+      "name": "specValue",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    }
+  ],
+  "spacing": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    56,
+    64,
+    80
+  ],
+  "corner_radii": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    24,
+    999
+  ],
+  "shared_widgets": [
+    {
+      "name": "AppShell",
+      "description": "Root scaffold with Material 3 NavigationBar (Home, Products, Cart). Badge on Cart tab shows line-item count from CartNotifier. Respects safe areas; selected tab uses colorPrimary. Minimum 48dp tap targets on all nav destinations. Semantic labels: Home, Browse products, Shopping cart with N items."
+    },
+    {
+      "name": "LumenAppBar",
+      "description": "PreferredSize app bar with optional back, title (titleLarge), optional trailing actions (search, filter). Uses colorSurface and colorOnSurface. Leading back button min 48x48dp with Semantics label Go back."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Vertical card: 1:1 image (BoxFit.cover, semantic label product name), brand (labelSmall, colorOnSurfaceVariant), name (titleSmall, max 2 lines), price row (PriceDisplay), optional OutOfStockBadge or SaleBadge. Entire card tappable min height including padding 48dp effective target. Elevation 1, radius 12dp, padding spacing 12."
+    },
+    {
+      "name": "CategoryTile",
+      "description": "Grid tile: icon or thumbnail 64dp, category label titleSmall centered. Min tap 48dp; semantics: Browse {category name}. Background colorSurfaceContainerLow, radius 12dp."
+    },
+    {
+      "name": "FeaturedProductCarousel",
+      "description": "Horizontal ListView of ProductCard variant (width 160dp) with page dots optional. Semantics: Featured products carousel."
+    },
+    {
+      "name": "SearchField",
+      "description": "TextField with search icon, hint Search by name, SKU, or brand, clear button when non-empty. Min height 48dp. Debounce 300ms before filter apply. Semantics: Product search."
+    },
+    {
+      "name": "FilterSortBar",
+      "description": "Row of FilterChip (active filter count) and SortChip opening FilterSortBottomSheet. Each chip min 48dp height."
+    },
+    {
+      "name": "FilterSortBottomSheet",
+      "description": "Modal bottom sheet (not a route): sections Price range (GBP sliders in pence), Brand multi-select, Category, Wattage multi-select, Finish/color multi-select, In stock only switch, Sort radio (price low/high, newest, popularity). Apply and Reset filters actions min 48dp. Uses colorSurfaceContainerHigh."
+    },
+    {
+      "name": "PriceDisplay",
+      "description": "Formats integer pence to en-GB GBP string via intl (e.g. £24.99). Shows sale price in priceMedium colorPrimary; list price strikethrough priceStrikethrough when compareAtPriceCents present. Semantics include full price text."
+    },
+    {
+      "name": "OutOfStockBadge",
+      "description": "Pill badge labelMedium on colorBadgeOutOfStock with onPrimary contrast text Out of stock. Used on cards and detail."
+    },
+    {
+      "name": "SaleBadge",
+      "description": "Pill badge Sale on colorBadgeSale when item on promotion."
+    },
+    {
+      "name": "StarRatingSummary",
+      "description": "Row of 5 StarRatingIcon (filled/empty/half), numeric average bodyMedium, review count link bodySmall. Semantics: Rated X out of 5 stars, Y reviews."
+    },
+    {
+      "name": "StarRatingIcon",
+      "description": "Icon 20dp colorStarFilled or colorStarEmpty; semantic hidden when part of summary."
+    },
+    {
+      "name": "VariantChipGroup",
+      "description": "Wrap of ChoiceChip for variant axes (finish, wattage, CCT). Selected: colorPrimaryContainer; disabled+OOS: strikethrough label and colorOutline. Min 48dp height per chip. On select updates ProductDetailNotifier selectedVariantId."
+    },
+    {
+      "name": "LightingSpecsTable",
+      "description": "Two-column list showing only non-null spec fields from domain: Product Name, SKU, Wattage, Lumens, Color Temperature, Light Type, Voltage, Dimmable, Material, Finish, Dimensions, IP Rating, Bulb Included, Installation Type. specKey left, specValue right; divider colorOutlineVariant."
+    },
+    {
+      "name": "ReviewListItem",
+      "description": "Avatar initial, author titleSmall, date bodySmall, StarRatingSummary compact, body bodyMedium max 4 lines with Read more on detail preview."
+    },
+    {
+      "name": "ImageGallery",
+      "description": "PageView hero 4:3, dot indicators, pinch optional phase 2. Semantics per image: {product name} image N of M."
+    },
+    {
+      "name": "PrimaryButton",
+      "description": "FilledButton full-width min height 48dp, labelLarge colorOnPrimary. Loading state shows CircularProgressIndicator. Used for Add to cart, Apply filters, Retry."
+    },
+    {
+      "name": "SecondaryButton",
+      "description": "OutlinedButton min 48dp for secondary actions e.g. View all reviews."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Row: IconButton decrease (48dp), quantity label titleMedium center min width 48dp, IconButton increase. Decrease disabled at qty 1 if remove is separate; increase capped by available stock in demo or soft max 99. Semantics: Quantity N."
+    },
+    {
+      "name": "CartLineItem",
+      "description": "ListTile-style row: thumbnail 56dp, productName titleSmall, variantLabel bodySmall, PriceDisplay unit, QuantityStepper, IconButton delete 48dp Semantics Remove {name} from cart."
+    },
+    {
+      "name": "EmptyStateView",
+      "description": "Centered illustration placeholder, headlineSmall title, bodyMedium message, optional PrimaryButton or TextButton action. Used for empty catalog, empty search, empty cart, empty reviews."
+    },
+    {
+      "name": "ErrorStateView",
+      "description": "Icon error colorError, title Could not load, body message from error, PrimaryButton Retry calling notifier refresh. For API M2 failures offer offline mock fallback note in debug only."
+    },
+    {
+      "name": "LoadingStateView",
+      "description": "Center CircularProgressIndicator colorPrimary with optional Shimmer placeholders on listing grid."
+    },
+    {
+      "name": "SnackbarCartConfirmation",
+      "description": "After add to cart: Added to cart with action View cart navigating to /cart."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "HomeScreen",
+      "route": "/",
+      "purpose": "Entry point for guest shoppers: top-level category taxonomy grid, featured product carousel, and quick search that forwards query to product listing. M1 loads categories and featured from LocalCatalogDataSource; M2 uses CatalogRepository getHome when API healthy.",
+      "components": [
+        "AppShell",
+        "LumenAppBar",
+        "SearchField",
+        "CategoryTile",
+        "FeaturedProductCarousel",
+        "ProductCard",
+        "LoadingStateView",
+        "EmptyStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading: shimmer or LoadingStateView while HomeNotifier AsyncLoading",
+        "success: category grid 2 columns spacing 16, featured carousel below hero title headlineSmall Shop by room",
+        "empty: EmptyStateView No categories available with Retry if seed empty",
+        "error: ErrorStateView with Retry; M2 may silently fall back to mock per NFR-06 when configured"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-006"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "ProductListingScreen",
+      "route": "/products",
+      "purpose": "Scrollable catalog with product cards, inline search, filter/sort bottom sheet, and category context from go_router query params (categorySlug, q). ProductListNotifier holds filter state and sort. Serves browse, search, filter, and sort for guest demo.",
+      "components": [
+        "AppShell",
+        "LumenAppBar",
+        "SearchField",
+        "FilterSortBar",
+        "FilterSortBottomSheet",
+        "ProductCard",
+        "OutOfStockBadge",
+        "SaleBadge",
+        "PriceDisplay",
+        "LoadingStateView",
+        "EmptyStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading: grid skeleton 2 columns",
+        "success: infinite-style ListView or GridView of ProductCard; active filters shown as removable InputChips below search",
+        "empty_search: EmptyStateView No products match your search with Clear search restoring full list",
+        "empty_filters: EmptyStateView No products match these filters with Reset filters",
+        "error: ErrorStateView Retry refreshes ProductListNotifier"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-006"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "ProductDetailScreen",
+      "route": "/products/:productId",
+      "purpose": "Full product detail: gallery, variant selection, price/SKU/stock per variant, lighting specifications, ratings summary, reviews preview with link to full list, add to cart with OOS guard. ProductDetailNotifier loads by id and tracks selectedVariantId.",
+      "components": [
+        "LumenAppBar",
+        "ImageGallery",
+        "PriceDisplay",
+        "OutOfStockBadge",
+        "VariantChipGroup",
+        "LightingSpecsTable",
+        "StarRatingSummary",
+        "ReviewListItem",
+        "SecondaryButton",
+        "PrimaryButton",
+        "SnackbarCartConfirmation",
+        "LoadingStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading: hero shimmer and spec placeholders",
+        "success: sticky bottom bar PrimaryButton Add to cart enabled when variant in stock; disabled with label Out of stock when OOS",
+        "error: ErrorStateView product not found or network error with Retry and back navigation",
+        "add_blocked: PrimaryButton disabled semantics explains variant out of stock; no cart mutation"
+      ],
+      "story_ids": [
+        "US-004",
+        "US-005",
+        "US-006"
+      ]
+    },
+    {
+      "id": "SCR-04",
+      "name": "ProductReviewsScreen",
+      "route": "/products/:productId/reviews",
+      "purpose": "Paginated full review list and aggregate star summary for a product. ReviewsNotifier paginates listProductReviews; M1 from mock, M2 from API when integrated.",
+      "components": [
+        "LumenAppBar",
+        "StarRatingSummary",
+        "ReviewListItem",
+        "LoadingStateView",
+        "EmptyStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading: first page skeleton list",
+        "success: ListView with load-more at scroll end; header shows aggregate rating",
+        "empty: EmptyStateView No reviews yet",
+        "error: ErrorStateView Retry"
+      ],
+      "story_ids": [
+        "US-004",
+        "US-006"
+      ]
+    },
+    {
+      "id": "SCR-05",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "In-memory session cart: line items with name, variant label, unit price snapshot in pence GBP, quantity steppers, remove, subtotal. No checkout in demo run. CartNotifier Map keyed by variantId.",
+      "components": [
+        "AppShell",
+        "LumenAppBar",
+        "CartLineItem",
+        "QuantityStepper",
+        "PriceDisplay",
+        "PrimaryButton",
+        "EmptyStateView"
+      ],
+      "states": [
+        "empty: EmptyStateView Your cart is empty with Browse products navigating to /products",
+        "success: ListView of CartLineItem, bottom summary card subtotal label titleMedium, grand total priceLarge; checkout button visible but demo shows Coming in full MVP snackbar or disabled with tooltip",
+        "success_mutation: immediate recalc on qty change or remove without network"
+      ],
+      "story_ids": [
+        "US-005"
+      ]
+    },
+    {
+      "id": "SCR-06",
+      "name": "AppShellHost",
+      "route": "shell",
+      "purpose": "Non-leaf shell wrapping tab routes Home, Products, Cart within six-screen budget. go_router StatefulShellRoute or indexed stack; filter UI remains modal on SCR-02 not a separate route.",
+      "components": [
+        "AppShell"
+      ],
+      "states": [
+        "success: bottom nav visible on SCR-01 SCR-02 SCR-05",
+        "hidden: full-bleed SCR-03 SCR-04 use LumenAppBar back only without bottom nav or with nav hidden per UX choice consistent on emulator"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-005"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap category CategoryTile navigates to /products?categorySlug={slug}"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Submit SearchField navigates to /products?q={encodedQuery}"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Tap ProductCard in featured carousel go_router push /products/{productId}"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "AppShell Products tab to /products"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-05",
+      "trigger": "AppShell Cart tab to /cart"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Tap ProductCard push /products/{productId}"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-02",
+      "trigger": "FilterSortBar opens FilterSortBottomSheet modal; Apply updates query state in place"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "AppShell Home tab to /"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-05",
+      "trigger": "AppShell Cart tab to /cart"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-04",
+      "trigger": "Tap View all reviews or review count push /products/{productId}/reviews"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-05",
+      "trigger": "SnackbarCartConfirmation View cart or after add optional icon in app bar if present"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-02",
+      "trigger": "System back or LumenAppBar back pops to listing"
+    },
+    {
+      "from_screen": "SCR-04",
+      "to_screen": "SCR-03",
+      "trigger": "Back pops to product detail"
+    },
+    {
+      "from_screen": "SCR-05",
+      "to_screen": "SCR-02",
+      "trigger": "Empty state Browse products or AppShell Products tab"
+    },
+    {
+      "from_screen": "SCR-05",
+      "to_screen": "SCR-01",
+      "trigger": "AppShell Home tab"
+    },
+    {
+      "from_screen": "SCR-05",
+      "to_screen": "SCR-03",
+      "trigger": "Optional tap product name on line item if linked in implementation"
+    }
+  ],
+  "accessibility": [
+    "All interactive controls minimum 48x48dp touch target including IconButtons, chips, nav bar items, and stepper buttons.",
+    "Text contrast minimum WCAG 2.1 AA: colorOnSurface on colorSurface ≥4.5:1 body text; colorOnPrimary on colorPrimary ≥4.5:1; colorOnSurfaceVariant used only for non-essential secondary text ≥4.5:1 on surface.",
+    "Every product and category image has Semantics label describing product or category name; decorative hero backgrounds excludedWithSemantics.",
+    "SearchField, filters, sort, add to cart, quantity steppers, and delete cart line expose clear English en-GB accessibility labels and hints where action is non-obvious.",
+    "StarRatingSummary announces aggregate rating and review count for screen readers.",
+    "VariantChipGroup announces selected variant and disabled out-of-stock state.",
+    "Support system font scaling up to 200% without clipping critical actions; use maxLines with ellipsis on titles only, not on prices.",
+    "Focus order follows visual top-to-bottom; modal bottom sheet traps focus and announces title Filters and sort.",
+    "Error and empty states use live region or SemanticsService announce for dynamic search no results.",
+    "PriceDisplay semantics speak full GBP amounts including pence to avoid ambiguous truncated text."
+  ]
+}

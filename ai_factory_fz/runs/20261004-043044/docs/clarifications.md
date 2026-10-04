@@ -1,0 +1,30 @@
+# Clarifications
+
+Q: Which primary country/market, ISO 4217 currency, and language(s) are in scope for the MVP demo and launch?
+A: United Kingdom (domestic market only for MVP). Currency: GBP (ISO 4217). Language: English (en-GB) only for MVP demo and launch. We are not shipping cross-border or supporting multiple locales in the first release.
+Q: What shipping fee model applies at checkout (flat rate, free above a threshold, weight-based, or other) and which delivery speed options must customers be able to select?
+A: Domestic UK shipping only. Standard delivery: flat rate £4.99. Free standard delivery on orders over £75. Customers must be able to choose Standard (3–5 business days, flat rate or free over threshold) and Express (1–2 business days, flat rate £9.99). No weight-based or live carrier-calculated rates in MVP.
+Q: Should checkout tax be a single fixed domestic rate for MVP or calculated from the shipping address (jurisdiction-based)?
+A: Single fixed domestic VAT rate for MVP: 20% applied to eligible goods, shown as one tax line on order review. Addresses are validated as UK domestic only; we are not doing full jurisdiction-based tax rules in MVP.
+Q: Besides Stripe card payments, must Apple Pay, Google Pay, or other payment methods be supported in MVP?
+A: No. MVP must support Stripe card payments (secure hosted/tokenized flow, no raw card storage on our systems). Apple Pay, Google Pay, wallets, and buy-now-pay-later are out of scope for MVP sign-off and can follow in a fast iteration after the Android demo.
+Q: For returns and refunds in MVP, is displaying policy text sufficient, or must the app support return requests and admin-processed refunds that update order status to refunded?
+A: Display-only is sufficient for MVP: clear returns and refunds policy text linked from checkout, order confirmation, and customer support/FAQ. No in-app return request workflow and no admin refund flow that changes order status to refunded in MVP; customers contact us by phone or email per the support channel.
+Q: For FR-18 notifications, are email, push, or both required for order confirmation and shipping updates?
+A: Email is required for order confirmation and for shipping/status updates (using the email collected at guest or registered checkout). Push notifications are not required for MVP sign-off; add push later once account/device permissions and privacy copy are ready.
+Q: For FR-12 wishlist, must saving a wishlist require a registered account, or should guests have a device-local wishlist for MVP?
+A: A persisted wishlist that survives reinstall and works across devices requires a registered account. For MVP we also allow a device-local wishlist for guests (saved on the device only, no sync); guest wishlist is a nice demo path but account wishlist is the real feature for registered customers.
+Q: For promotions (FR-19 / AR-08), confirm coupon rules beyond one coupon per order: minimum order value, expiration dates, single-use per customer, and whether coupons apply to already-discounted or sale prices.
+A: One coupon code per order. Admin can set optional minimum order value and mandatory expiration date on each coupon. Promo codes can be marked single-use per customer (by account email) or multi-use for generic codes. Coupons apply to the pre-coupon subtotal of non-sale items only—they do not stack on top of sale or already discounted line prices in MVP.
+Q: For FR-17 order tracking, is manual admin status updates with an optional carrier tracking number sufficient for MVP, or is live carrier API tracking integration required?
+A: Manual admin updates are sufficient for MVP: statuses processing, shipped, delivered, with an optional carrier name and tracking number shown to the customer. No live carrier API integration in MVP.
+Q: For admin operations (AR-01–AR-09), is a single admin role acceptable for MVP or are separate roles required (e.g. catalog vs order management vs super-admin)?
+A: A single admin role with full access to catalog, inventory, orders, promotions, and homepage content is acceptable for MVP. Separate roles are not required until we scale the internal team.
+Q: What are the agreed minimum Android and iOS OS versions for NFR-02 acceptance testing?
+A: Minimum supported versions for acceptance testing: Android 8.0 (API level 26) and iOS 15.0. The prioritized MVP demo target is a current Android emulator image at or above API 26.
+Q: Is MVP sign-off based on a runnable Android emulator demo only, or must an iOS build be delivered and tested before MVP is considered complete?
+A: MVP sign-off is based on a runnable end-to-end guest shopper path on Android emulator plus NestJS API with OpenAPI. iOS build and device/simulator testing are phase 2 immediately after Android sign-off; iOS is not a gate for calling MVP complete for the stakeholder demo.
+Q: What defines popularity for FR-08 sorting in MVP (e.g. sales volume, product views, manual merchandising flag, or other)?
+A: Primary sort key is a manual merchandising popularity rank set in admin (lower number = more popular). Where rank is equal or unset, tie-break by units sold in the last 90 days. Product view counts are tracked for analytics but do not drive sort in MVP.
+Q: What is the approved top-level and subcategory taxonomy for the lighting catalog, or should the PRD propose a default taxonomy subject to merchandising sign-off?
+A: Use this default taxonomy for build; merchandising may refine labels before launch but structure should not block development. Top-level: (1) Ceiling Lights — sub: flush & semi-flush, pendant, chandelier, track & spot; (2) Wall Lights — sub: sconces, picture lights, bathroom vanity; (3) Outdoor & Security — sub: wall lanterns, flood & security, garden & path, porch; (4) Bulbs & Tubes — sub: LED bulbs, smart bulbs, tubes & capsules; (5) LED Strips & Profiles — sub: strips, drivers, profiles & accessories; (6) Lamps & Portable — sub: desk, floor, table; (7) Commercial & Trade — sub: panel, high-bay, emergency. Brands remain filterable attributes under our single-store retailer experience, not separate seller storefronts.

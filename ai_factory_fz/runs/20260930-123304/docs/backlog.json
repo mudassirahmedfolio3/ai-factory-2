@@ -1,0 +1,108 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Browse and Product Detail – Flutter MVP",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Set up Flutter project, mock catalogue repository and project structure",
+      "description": "Initialize Flutter 3.x project with Riverpod, go_router, freezed and json_serializable. Create the mock product catalogue data (10–20 products with integer pence prices, GBP currency, images and stock levels). Define a ProductRepository interface and local mock implementation that returns products from the bundled catalogue. Set up centralized theme tokens (colours, typography, spacing) in a single theme file. Ensure the app builds and runs with flutter run on Android emulator.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Build product list screen and repository integration",
+      "description": "Build the ProductListScreen widget displaying a scrollable ListView of products from the repository. Each product row shows a thumbnail image (lazy-loaded), product name and tax-inclusive GBP price formatted as £x.xx (integer pence internally). Handle out-of-stock products by displaying them with a clear out-of-stock badge and no tap action. Implement smooth scrolling and empty state message if catalogue is empty. Add TalkBack labels and 48x48 dp touch targets. Include basic widget tests for the list screen.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Build product detail screen with navigation",
+      "description": "Build the ProductDetailScreen widget showing product image, name, description, tax-inclusive GBP price and stock availability (in stock or out of stock). Integrate go_router to navigate from product list (tap row) to detail screen and back (system back gesture returns to list at same scroll position). Disable add-to-cart button for out-of-stock products. Show placeholder image if product image is missing. Add TalkBack labels and screen reader support. Include basic widget tests for the detail screen.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Implement in-memory cart state and cart screen (optional)",
+      "description": "Create a simple in-memory cart state (Riverpod provider) that stores cart items (product id, name, unit price in pence, quantity). Build a CartScreen widget displaying cart lines (product name, quantity, unit price) and a cart total formatted as £x.xx in integer pence. Implement add-to-cart button on detail screen that adds to cart and shows confirmation. Allow remove and quantity update on cart screen. Ensure cart is cleared on app restart (in-memory only, no persistence). Add TalkBack labels and screen reader support.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Polish, performance testing and release readiness",
+      "description": "Run performance checks: cold start to product list within 3 seconds on emulator, smooth scrolling with 300+ mock products (scale the catalogue), lazy-load images to ensure list and detail scrolling remain smooth. Test on Android emulator with dynamic text sizing enabled (accessibility). Verify TalkBack support and WCAG 2.1 AA colour contrast. Handle edge cases: missing images (placeholder), empty catalogue (empty state message), out-of-stock products (no crash). Run flutter test to ensure all widget tests pass. Verify app builds and runs with flutter run.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-002",
+        "WI-003",
+        "WI-004"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Browse and Detail MVP – Runnable on Emulator",
+      "goal": "Deliver a runnable Flutter app on Android emulator with product list and detail screens backed by a local mock catalogue, smooth scrolling, accessible UI, and optional in-memory cart. The app must start within 3 seconds, handle out-of-stock products, and require no backend, authentication or payments. Team and stakeholders can demo the core browse-to-detail journey end to end.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,504 @@
+openapi: 3.1.0
+info:
+  title: Lighting Shop API
+  version: 0.1.0
+  description: >-
+    Contract for the lighting e-commerce app. In the Speed Demo MVP (M1) the Flutter app uses a bundled mock catalog and calls no endpoints; the only operation is the infrastructure health check. The catalog component schemas define the exact shape of the bundled mock catalog JSON (root schema MockCatalog) and of future catalog responses, so the mock can be replaced by a generated dart-dio client without changing app models. All money values are integer minor units (cents) with an ISO 4217 currency code; floating-point money is never used. Errors use the shared Error schema. List endpoints (future) paginate with page and pageSize and return items and total.
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: http://10.0.2.2:3000/api/v1
+    description: Local staging reached from the Android emulator (debug builds only)
+  - url: http://localhost:3000/api/v1
+    description: Local development
+tags:
+  - name: health
+    description: Infrastructure endpoints
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags:
+        - health
+      operationId: getHealth
+      summary: Health check
+      description: Returns 200 when the API is running and the database is reachable, otherwise 503. Public endpoint; no authentication required.
+      security: []
+      responses:
+        '200':
+          description: Service and database are healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  value:
+                    status: ok
+                    database: up
+                    timestamp: '2026-09-30T12:00:00Z'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token (15 minute lifetime) obtained with a refresh token. Applied globally; public operations opt out with an empty security array. No M1 operation requires it.
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      description: 1-based page number.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Number of items per page.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  responses:
+    ServiceUnavailable:
+      description: The database is not reachable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            databaseDown:
+              value:
+                statusCode: 503
+                error: Service Unavailable
+                message: Database is not reachable
+    InternalServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            unexpected:
+              value:
+                statusCode: 500
+                error: Internal Server Error
+                message: An unexpected error occurred
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code.
+          examples:
+            - 503
+        error:
+          type: string
+          description: HTTP reason phrase.
+          examples:
+            - Service Unavailable
+        message:
+          type: string
+          description: Human-readable error description.
+          examples:
+            - Database is not reachable
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+        database:
+          type: string
+          enum:
+            - up
+        timestamp:
+          type: string
+          format: date-time
+    CurrencyCode:
+      type: string
+      description: ISO 4217 currency code. Only USD is supported in the first release.
+      enum:
+        - USD
+    Money:
+      type: object
+      additionalProperties: false
+      description: Monetary amount in integer minor units (cents). Never a float.
+      required:
+        - amountMinor
+        - currency
+      properties:
+        amountMinor:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
+          description: Amount in minor units, e.g. 12999 means $129.99.
+          examples:
+            - 12999
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+    StockStatus:
+      type: string
+      description: Derived from stock quantity. 0 = out_of_stock, 1 to 5 = low_stock, more than 5 = in_stock.
+      enum:
+        - in_stock
+        - low_stock
+        - out_of_stock
+    ProductType:
+      type: string
+      enum:
+        - bulb
+        - ceiling_light
+        - pendant
+        - lamp
+        - smart_light
+    Category:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - slug
+        - name
+      properties:
+        id:
+          type: string
+          minLength: 1
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        name:
+          type: string
+          minLength: 1
+    Image:
+      type: object
+      additionalProperties: false
+      required:
+        - url
+        - altText
+      properties:
+        url:
+          type: string
+          format: uri-reference
+          description: Bundled asset path in the mock catalog (e.g. assets/images/products/aria-pendant-black.webp); https URL when served by the API.
+        altText:
+          type: string
+          minLength: 1
+          description: Accessible description used as the image semantic label.
+    LightingSpecifications:
+      type: object
+      additionalProperties: false
+      description: Typed lighting specifications. A null or absent field means not applicable and must not be displayed.
+      properties:
+        wattageW:
+          type:
+            - integer
+            - 'null'
+          minimum: 0
+          description: Power in watts.
+        lumens:
+          type:
+            - integer
+            - 'null'
+          minimum: 0
+        colorTemperatureK:
+          type:
+            - integer
+            - 'null'
+          minimum: 1000
+          maximum: 10000
+          description: Color temperature in kelvin.
+        dimmable:
+          type:
+            - boolean
+            - 'null'
+        bulbType:
+          type:
+            - string
+            - 'null'
+          examples:
+            - A19 LED
+        baseType:
+          type:
+            - string
+            - 'null'
+          examples:
+            - E26
+        voltageV:
+          type:
+            - integer
+            - 'null'
+          minimum: 0
+        material:
+          type:
+            - string
+            - 'null'
+        finish:
+          type:
+            - string
+            - 'null'
+        widthMm:
+          type:
+            - integer
+            - 'null'
+          minimum: 0
+        heightMm:
+          type:
+            - integer
+            - 'null'
+          minimum: 0
+        depthMm:
+          type:
+            - integer
+            - 'null'
+          minimum: 0
+        ipRating:
+          type:
+            - string
+            - 'null'
+          pattern: '^IP[0-9X]{2}$'
+          examples:
+            - IP44
+    VariantOption:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Option dimension, e.g. color, finish, wattage, color_temperature.
+          examples:
+            - finish
+        value:
+          type: string
+          minLength: 1
+          examples:
+            - Matte Black
+    ProductVariant:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - sku
+        - name
+        - isDefault
+        - options
+        - price
+        - salePrice
+        - stockQuantity
+        - image
+        - specificationOverrides
+      properties:
+        id:
+          type: string
+          minLength: 1
+        sku:
+          type: string
+          minLength: 1
+          examples:
+            - ARIA-PND-BLK-2700
+        name:
+          type: string
+          minLength: 1
+          examples:
+            - Matte Black / 2700K
+        isDefault:
+          type: boolean
+          description: Exactly one variant per product is the default.
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/VariantOption'
+        price:
+          $ref: '#/components/schemas/Money'
+        salePrice:
+          description: Sale price actually charged when on sale; null when not on sale. Must be lower than price.
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        stockQuantity:
+          type: integer
+          minimum: 0
+        image:
+          $ref: '#/components/schemas/Image'
+        specificationOverrides:
+          description: Non-null fields replace the product specifications for this variant; null when the variant has no overrides.
+          oneOf:
+            - $ref: '#/components/schemas/LightingSpecifications'
+            - type: 'null'
+    Product:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - slug
+        - name
+        - brand
+        - description
+        - productType
+        - category
+        - images
+        - ratingAverage
+        - ratingCount
+        - specifications
+        - defaultVariantId
+        - variants
+      properties:
+        id:
+          type: string
+          minLength: 1
+        slug:
+          type: string
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
+        name:
+          type: string
+          minLength: 1
+        brand:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        productType:
+          $ref: '#/components/schemas/ProductType'
+        category:
+          $ref: '#/components/schemas/Category'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+        ratingAverage:
+          type:
+            - number
+            - 'null'
+          minimum: 0
+          maximum: 5
+          description: Average rating with one decimal; null when there are no ratings. Display only.
+        ratingCount:
+          type: integer
+          minimum: 0
+        specifications:
+          $ref: '#/components/schemas/LightingSpecifications'
+        defaultVariantId:
+          type: string
+          minLength: 1
+          description: Id of the variant with isDefault true.
+        variants:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+    ProductSummary:
+      type: object
+      additionalProperties: false
+      description: List row projection. Price and image come from the default variant; stockStatus is derived from the sum of all variant stock.
+      required:
+        - id
+        - slug
+        - name
+        - brand
+        - productType
+        - image
+        - price
+        - salePrice
+        - stockStatus
+        - ratingAverage
+        - ratingCount
+        - defaultVariantId
+      properties:
+        id:
+          type: string
+          minLength: 1
+        slug:
+          type: string
+        name:
+          type: string
+        brand:
+          type: string
+        productType:
+          $ref: '#/components/schemas/ProductType'
+        image:
+          $ref: '#/components/schemas/Image'
+        price:
+          $ref: '#/components/schemas/Money'
+        salePrice:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        stockStatus:
+          $ref: '#/components/schemas/StockStatus'
+        ratingAverage:
+          type:
+            - number
+            - 'null'
+          minimum: 0
+          maximum: 5
+        ratingCount:
+          type: integer
+          minimum: 0
+        defaultVariantId:
+          type: string
+          minLength: 1
+    ProductPage:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of products across all pages.
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+    MockCatalog:
+      type: object
+      additionalProperties: false
+      description: Root of the bundled asset assets/mock_catalog.json used by the M1 app.
+      required:
+        - catalogVersion
+        - products
+      properties:
+        catalogVersion:
+          type: integer
+          minimum: 1
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'

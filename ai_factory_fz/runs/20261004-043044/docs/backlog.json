@@ -1,0 +1,546 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Foundations, delivery infra, and shared catalog contract alignment",
+      "story_ids": [
+        "US-001",
+        "US-006"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "M1 Flutter guest catalog browse, detail, reviews, and session cart",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "M2 NestJS catalog API slice and conditional Dart client integration",
+      "story_ids": [
+        "US-006"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Monorepo bootstrap, Docker staging, and Android API networking",
+      "description": "Initialize Flutter 3.x (Riverpod, go_router, dio, freezed/json_serializable) and NestJS /api/v1 skeleton with Prisma + PostgreSQL 16; docker-compose for local/staging; GitHub Actions jobs for backend Jest and Flutter analyze/test; lib/core/network ApiConfig (debug baseUrl http://10.0.2.2:3000/api/v1); android debug network_security_config cleartext limited to 10.0.2.2; release HTTPS-only policy documented.",
+      "epic_id": "E-01",
+      "feature": "Delivery bootstrap",
+      "component": "infra",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [],
+      "modules": [
+        "health"
+      ],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Dual-stack scaffold, compose Postgres, CI smoke, and emulator cleartext networking. | deployment_engineer: Dual-stack monorepo scaffold (Flutter deps/codegen + NestJS/Prisma/health), Postgres 16 compose with reliable startup/healthchecks, two CI jobs to green, and Android 10.0.2.2 cleartext plus release HTTPS docs each touch distinct toolchain friction.; concerns: Stack mentions OpenAPI dart-dio client generation but WI-001 does not wire codegen or contract sync; CI must cache pub/npm, run build_runner for freezed/json_serializable, and apply Prisma migrate against compose Postgres; monorepo path/working-directory conventions and Flutter integration_test vs unit job split are unspecified; staging secrets and image tagging/push for real staging deploy are out of scope here.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "deployment_engineer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-002",
+      "title": "Design system tokens and AppShell navigation",
+      "description": "Implement lib/core/theme design tokens (colour, spacing, typography) for UK lighting retailer; configure go_router with AppShellHost (SCR-06) bottom navigation linking Home (/), Products (/products), and Cart (/cart); consolidate filter UI as modal bottom sheet route pattern on listing (not a separate screen); loading/empty/error shell patterns shared across catalog flows.",
+      "epic_id": "E-02",
+      "feature": "App shell",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "modules": [],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [
+        "SCR-06"
+      ],
+      "estimate_points": 4,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Theme tokens, three-tab shell, and router wiring within six-screen budget. | frontend_developer: Theme tokens, go_router shell with three tabs, debug cleartext for 10.0.2.2, and shared loading/empty/error scaffolds plus widget tests for AppShell routes take slightly more than token wiring alone.; concerns: WI-001 scaffold quality (folder layout, Riverpod/bootstrap) determines rework; filter bottom-sheet route pattern here is structural—the full facet UI lands in WI-004.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-003",
+      "title": "M1 mock catalog seed and LocalCatalogDataSource",
+      "description": "Author 12–20 seeded lighting SKUs across fixed taxonomy (Ceiling, Wall, Outdoor & Security, Bulbs & Tubes, LED Strips & Profiles, Lamps & Portable, Commercial & Trade) with brands, variant finish/wattage/CCT, integer priceMinorUnits GBP, stock per variant, lighting specs, images, popularity rank, 90-day units sold tie-break fields, and paginated review samples; implement LocalCatalogDataSource and CatalogRepository abstraction with GBP en-GB formatting helpers (no float money storage).",
+      "epic_id": "E-02",
+      "feature": "Local catalog data",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Brand",
+        "Category",
+        "Product",
+        "ProductImage",
+        "LightingSpecification",
+        "ProductVariant",
+        "Review"
+      ],
+      "screens": [],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Rich seed set with variants, specs, reviews, and repository abstraction matching future OpenAPI shapes. | frontend_developer: Rich 12–20 SKU seed with variants, specs, reviews, and paginated review samples plus freezed models, CatalogRepository contract, LocalCatalogDataSource, and en-GB pence formatters with repository/unit tests.; concerns: Seed field names and enums must stay aligned with NestJS/OpenAPI for WI-011; popularity and 90-day units sold tie-break data must match backend sort semantics.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 5,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-004",
+      "title": "HomeScreen and ProductListingScreen with search, filters, and sort",
+      "description": "Build SCR-01 HomeScreen (/) with category grid, featured carousel, quick search forwarding query to /products; build SCR-02 ProductListingScreen with product cards (image, name, brand, GBP from pence, Out of stock badge), inline search (name/SKU/brand/keywords), filter bottom sheet (price range pence, brand, category, wattage, finish, availability), sort (price low/high, newest, popularity rank then 90-day units sold), empty search state with clear; ProductListNotifier holds filter state; category context from route/query.",
+      "epic_id": "E-02",
+      "feature": "Home and product listing",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Brand",
+        "Category",
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-01",
+        "SCR-02"
+      ],
+      "estimate_points": 8,
+      "complexity": "high",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Two screens plus combined search, multi-facet filters, popularity sort rules, and stable list layout. | frontend_developer: Two screens, ProductListNotifier filter state, inline search, modal multi-facet filters, composite sort (popularity then 90-day units), category/query routing, empty-search clear, and stable card layout with widget tests dominate effort.; concerns: Filter sheet state restore on rotation; debounced search vs local filter performance; PM may underestimate golden/accessibility pass on product cards and 48dp targets.",
+      "status": "todo",
+      "pm_points": 8,
+      "dev_points": 8,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-005",
+      "title": "Product detail, variants, lighting specs, and reviews screens",
+      "description": "Build SCR-03 ProductDetailScreen (/products/:productId) with gallery, variant chips, per-variant price/SKU/stock, add-to-cart disabled when OOS, lighting specifications section showing only non-null fields, ratings summary, reviews preview with navigation to SCR-04 ProductReviewsScreen (/products/:productId/reviews) for paginated review list; ProductDetailNotifier tracks selectedVariantId; ReviewsNotifier paginates locally in M1.",
+      "epic_id": "E-02",
+      "feature": "Product detail and reviews",
+      "component": "frontend",
+      "story_ids": [
+        "US-004"
+      ],
+      "depends_on": [
+        "WI-003",
+        "WI-004"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Product",
+        "ProductImage",
+        "LightingSpecification",
+        "ProductVariant",
+        "Review"
+      ],
+      "screens": [
+        "SCR-03",
+        "SCR-04"
+      ],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Variant-driven detail UI, conditional spec matrix, and paginated reviews across two routes. | frontend_developer: Gallery, variant chips with per-variant price/SKU/stock, conditional lighting-spec section, reviews preview, full paginated reviews route, and two notifiers with screen widget tests match a solid medium slice.; concerns: Add-to-cart hook is WI-006—detail must expose a clean callback/provider contract; image semantic labels and OOS edge cases on default variant selection.",
+      "status": "todo",
+      "pm_points": 6,
+      "dev_points": 6,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-006",
+      "title": "In-memory session cart screen and notifier",
+      "description": "Implement CartNotifier (Notifier<CartState>) as session-only Map keyed by variantId snapshotting productName, variantLabel, unitPriceCents, currency at add time; SCR-05 CartScreen (/cart) with line items, quantity steppers, remove, subtotal, empty state; block add-to-cart from detail when variant OOS; no persistence, auth, or cart API in demo run.",
+      "epic_id": "E-02",
+      "feature": "Session cart",
+      "component": "frontend",
+      "story_ids": [
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-005"
+      ],
+      "modules": [
+        "cart"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Cart",
+        "CartItem"
+      ],
+      "screens": [
+        "SCR-05"
+      ],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "In-memory cart snapshots, quantity math in pence, and single cart screen. | frontend_developer: In-memory CartNotifier with variant-keyed snapshots, quantity steppers, pence subtotal, empty state, and CartScreen widget tests are bounded without persistence or API.; concerns: Duplicate variant lines vs merge-on-add behavior should be explicit in acceptance; detail screen must disable add when OOS before cart integration is verified in tests.",
+      "status": "todo",
+      "pm_points": 4,
+      "dev_points": 3,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-007",
+      "title": "Prisma schema, full MVP model stubs, and catalog seed parity",
+      "description": "Define Prisma models for User, RefreshToken, PasswordResetToken, Address, Brand, Category, Product, ProductImage, LightingSpecification, ProductVariant, Review, ProductViewEvent, Cart, CartItem, Coupon, CouponRedemption, Order, OrderItem, StockReservation, Payment, WishlistItem; migrate PostgreSQL 16; seed catalog entities to match M1 mock SKUs and core fields; MVP auth/order/payment models present without demo endpoints.",
+      "epic_id": "E-03",
+      "feature": "Database schema and seed",
+      "component": "backend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "User",
+        "RefreshToken",
+        "PasswordResetToken",
+        "Address",
+        "Brand",
+        "Category",
+        "Product",
+        "ProductImage",
+        "LightingSpecification",
+        "ProductVariant",
+        "Review",
+        "ProductViewEvent",
+        "Cart",
+        "CartItem",
+        "Coupon",
+        "CouponRedemption",
+        "Order",
+        "OrderItem",
+        "StockReservation",
+        "Payment",
+        "WishlistItem"
+      ],
+      "screens": [],
+      "estimate_points": 7,
+      "complexity": "high",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Full entity graph plus seed parity across variants, specs, reviews, and deferred MVP tables. | backend_developer: Twenty-model Prisma graph, initial migration on PostgreSQL 16, and seed script work to match M1 SKUs across variants, lighting specs, images, and reviews dominate effort plus smoke verification.; concerns: Seed parity depends on a complete M1 mock inventory and field mapping; stub MVP relations for auth, cart, orders, and payments must not block later migrations or constrain indexes incorrectly.",
+      "status": "todo",
+      "pm_points": 6,
+      "dev_points": 7,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-008",
+      "title": "Health module and OpenAPI publication",
+      "description": "Implement health module with getHealth GET /health (liveness and DB connectivity); configure @nestjs/swagger at /api/docs-json (infrastructure, excluded from twelve-operation cap); declare bearerAuth security scheme for future auth operations without implementing auth module in M2 slice.",
+      "epic_id": "E-03",
+      "feature": "Health and OpenAPI",
+      "component": "backend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-007"
+      ],
+      "modules": [
+        "health"
+      ],
+      "api_operations": [
+        "getHealth"
+      ],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Single health op, Swagger bootstrap, and DB probe wiring. | backend_developer: Single health operation with DB probe, global prefix wiring, Swagger docs-json bootstrap, and bearerAuth declaration is a small focused slice with straightforward Jest or Supertest coverage.; concerns: Confirm whether GET /health lives at /api/v1/health per global prefix and that docs-json is explicitly excluded from the twelve-operation cap in OpenAPI metadata.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 3,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-009",
+      "title": "Catalog home and category read APIs",
+      "description": "Implement catalog module endpoints getHome GET /home (featured merchandising aligned to seed), listCategories GET /categories, getCategoryBySlug GET /categories/{slug}; DTOs expose integer price minor units and ISO 4217 GBP; Jest/Supertest coverage for happy paths and slug not found.",
+      "epic_id": "E-03",
+      "feature": "Home and categories API",
+      "component": "backend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-008"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "getHome",
+        "listCategories",
+        "getCategoryBySlug"
+      ],
+      "data_models": [
+        "Category",
+        "Product",
+        "ProductVariant",
+        "Brand"
+      ],
+      "screens": [],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Three read endpoints with merchandising assembly and category tree by slug. | backend_developer: Three read endpoints require assembling home merchandising from seed, flat and slug-based category responses, and DTO mapping to minor-unit GBP with happy-path and 404 tests.; concerns: Featured carousel and category grid rules may be underspecified relative to seed data; response shapes must match OpenAPI exactly including nested brand and product summaries.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 5,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-010",
+      "title": "Catalog facets, product list/detail, and reviews APIs",
+      "description": "Implement getCatalogFacets GET /catalog/facets, listProducts GET /products (search, multi-filter, sort including popularity rank then 90-day units sold), getProductById GET /products/{productId} (variants, lighting specs, images), listProductReviews GET /products/{productId}/reviews (pagination); enforce public read-only catalog within twelve-operation budget.",
+      "epic_id": "E-03",
+      "feature": "Faceted catalog API",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-009"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "getCatalogFacets",
+        "listProducts",
+        "getProductById",
+        "listProductReviews"
+      ],
+      "data_models": [
+        "Brand",
+        "Category",
+        "Product",
+        "ProductVariant",
+        "LightingSpecification",
+        "ProductImage",
+        "Review"
+      ],
+      "screens": [],
+      "estimate_points": 8,
+      "complexity": "high",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Four endpoints with faceted query composition, sort rules, and paginated reviews. | backend_developer: Four endpoints with multi-filter Prisma queries, popularity then 90-day units sort, facet aggregation, full product detail joins, and paginated reviews drive the largest backend catalog slice and test matrix.; concerns: Popularity rank and 90-day units sold need seed columns or derived logic agreed with product; facet counts under combined filters need indexes and may expose performance gaps in local docker-compose.",
+      "status": "todo",
+      "pm_points": 8,
+      "dev_points": 8,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-011",
+      "title": "OpenAPI Dart client and ApiCatalogDataSource integration",
+      "description": "Generate dart-dio client from /api/docs-json when Flutter analyze/tests pass; implement ApiCatalogDataSource calling getHealth, getHome, listCategories, getCategoryBySlug, getCatalogFacets, listProducts, getProductById, listProductReviews; wire HomeNotifier, ProductListNotifier, ProductDetailNotifier, ReviewsNotifier through CatalogRepository with graceful fallback to LocalCatalogDataSource when API unreachable or generation blocked; document API readiness for stakeholder demo.",
+      "epic_id": "E-03",
+      "feature": "Mobile API catalog integration",
+      "component": "frontend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-004",
+        "WI-005",
+        "WI-010"
+      ],
+      "modules": [
+        "catalog",
+        "health"
+      ],
+      "api_operations": [
+        "getHealth",
+        "getHome",
+        "listCategories",
+        "getCategoryBySlug",
+        "getCatalogFacets",
+        "listProducts",
+        "getProductById",
+        "listProductReviews"
+      ],
+      "data_models": [],
+      "screens": [
+        "SCR-01",
+        "SCR-02",
+        "SCR-03",
+        "SCR-04"
+      ],
+      "estimate_points": 7,
+      "complexity": "high",
+      "risk": "high",
+      "confidence": "medium",
+      "estimate_rationale": "Codegen gate, dio client wiring across four screens, and mock fallback path. | frontend_developer: OpenAPI dart-dio codegen gate, packages/api_client integration, ApiCatalogDataSource for eight operations, DTO-to-domain mapping, repository fallback when API unreachable, and rewiring four notifiers with tests exceed a thin wiring task.; concerns: Hard dependency on WI-010 backend/OpenAPI stability; generator/version drift; fallback policy (health vs per-call errors); hidden mapping maintenance if API schema diverges from M1 mock; analyze/test green before codegen is a serial blocker.",
+      "status": "todo",
+      "pm_points": 6,
+      "dev_points": 7,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-012",
+      "title": "M2 demo verification, contract tests, and release checklist",
+      "description": "Expand backend Supertest suite for all catalog operationIds and health; run docker-compose staging smoke; Flutter integration_test or emulator script for guest path home→listing→detail→reviews→cart; verify M1 mock path still passes when API down; publish demo runbook (Android API 26+, seed SKU list, API base URL, fallback behaviour).",
+      "epic_id": "E-01",
+      "feature": "Demo hardening",
+      "component": "shared",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-006",
+        "WI-011"
+      ],
+      "modules": [
+        "health",
+        "catalog"
+      ],
+      "api_operations": [
+        "getHealth",
+        "getHome",
+        "listCategories",
+        "getCategoryBySlug",
+        "getCatalogFacets",
+        "listProducts",
+        "getProductById",
+        "listProductReviews"
+      ],
+      "data_models": [],
+      "screens": [
+        "SCR-01",
+        "SCR-02",
+        "SCR-03",
+        "SCR-04",
+        "SCR-05",
+        "SCR-06"
+      ],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "End-to-end contract tests, emulator smoke, and dual-path demo sign-off checklist. | backend_developer: Backend Supertest coverage for all catalog operationIds plus health, docker-compose smoke, coordination with Flutter guest-path integration_test, M1 offline fallback check, and runbook authorship span backend and shared demo sign-off.; concerns: Depends on WI-006 and WI-011; emulator and integration_test flakiness often exceeds backend-only time; dual-path fallback criteria and seed SKU checklist need explicit acceptance before release sign-off.",
+      "status": "todo",
+      "pm_points": 4,
+      "dev_points": 6,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Showable Flutter guest shopping demo",
+      "goal": "Android emulator (API 26+) runs client-ready Flutter app: browse 12–20 local mock lighting SKUs with search, filters, and sort; product detail with variants, lighting specs, ratings and reviews; in-memory cart with quantity updates—guest only, no sign-in, no live backend required.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005",
+        "WI-006"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "NestJS catalog slice and conditional API client",
+      "goal": "NestJS serves GET /health and seven catalog operationIds with seed data matching M1 products; OpenAPI at /api/docs-json enables Dart client integration when analyze/tests pass, with M1 mock fallback documented and verified for stakeholder demo.",
+      "work_item_ids": [
+        "WI-007",
+        "WI-008",
+        "WI-009",
+        "WI-010",
+        "WI-011",
+        "WI-012"
+      ]
+    }
+  ],
+  "estimation_reviewed": true
+}

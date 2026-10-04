@@ -1,0 +1,163 @@
+{
+  "overview": "PulsePhones M1 (Speed Demo) delivers a Flutter 3.x Android-first smartphone storefront that browses a locally embedded mock catalog of 12–20 smartphones and shows product detail (name, USD price from integer cents, key details, star rating), with an optional in-memory cart that clears on process restart. No backend, auth, payments, or checkout ship in M1—the app must launch offline on an Android emulator immediately from seeded local data. This document freezes the production-ready target architecture (NestJS + PostgreSQL 16 + Stripe) and a minimal OpenAPI 3.1 contract (health plus two public catalog reads for US-001/US-002) so later milestones implement against an exact API and data model without guessing. Prices are integer USD cents with ISO 4217 currency; M1 assumes all seeded phones are in stock; star ratings are seeded display fields only.",
+  "components": [
+    {
+      "name": "Flutter Mobile App (M1 primary)",
+      "responsibility": "Renders PulsePhones-branded product list (browse), product detail, and optional in-memory cart. Embeds seeded mock smartphone catalog for M1. Handles loading, empty, and error states; list/detail run entirely against local data with no network. Post-M1 switches to generated OpenAPI client (dart-dio) against NestJS.",
+      "technology": "Flutter 3.x, Dart, Riverpod (Notifier/AsyncNotifier), go_router, freezed/json_serializable, flutter_secure_storage (M2+), flutter_test, integration_test"
+    },
+    {
+      "name": "Local Mock Catalog (M1)",
+      "responsibility": "Provides 12–20 smartphone SKUs with name, priceCents, currency USD, key details/specs, seeded star rating, and image placeholder or asset. Source of truth for M1 browse/detail; shapes mirror OpenAPI ProductSummary/ProductDetail for an easy M2 swap.",
+      "technology": "assets/data/catalog.json, bundled image assets or placeholders, Dart freezed models"
+    },
+    {
+      "name": "NestJS API Server (M2+)",
+      "responsibility": "Contract-first REST API under global prefix /api/v1. Thin controllers, service-layer logic, PrismaService for data access. Catalog read endpoints first; auth, cart, orders, payments modules added after M1. DTOs use class-validator; responses match OpenAPI exactly.",
+      "technology": "NestJS (TypeScript), @nestjs/swagger, @nestjs/config, class-validator, Jest, Supertest"
+    },
+    {
+      "name": "PostgreSQL Database (M2+)",
+      "responsibility": "System of record for users, catalog, carts, orders, and payment metadata. ACID transactions for stock reservation at checkout and order creation.",
+      "technology": "PostgreSQL 16, Prisma ORM"
+    },
+    {
+      "name": "Stripe (later release)",
+      "responsibility": "PaymentIntents in test mode; server creates intent, app confirms via Stripe SDK, webhook marks order paid. Card data never touches PulsePhones servers.",
+      "technology": "Stripe API, Stripe Flutter SDK, webhook signing secret"
+    },
+    {
+      "name": "Docker / CI (M2+)",
+      "responsibility": "docker-compose for local/staging (API + Postgres). GitHub Actions runs lint, unit, and e2e tests on PR.",
+      "technology": "Docker, docker-compose, GitHub Actions"
+    }
+  ],
+  "backend_modules": [
+    {
+      "name": "health",
+      "responsibility": "Liveness and database connectivity probe. Included in M1 OpenAPI contract; NestJS implementation deferred until backend work starts (does not block Flutter M1). Does not count toward the four API-operation cap.",
+      "entities": [],
+      "endpoints": [
+        "GET /api/v1/health"
+      ]
+    },
+    {
+      "name": "catalog",
+      "responsibility": "Public read-only smartphone catalog for browse and detail. Supports pagination. Product detail includes key details and star rating; variants carry per-variant price and stock for M2+. M1 Flutter uses local mock shaped like these responses; NestJS implements these two operations first in M2. Counts as two of at most four API operations.",
+      "entities": [
+        "Category",
+        "Product",
+        "ProductVariant"
+      ],
+      "endpoints": [
+        "GET /api/v1/products",
+        "GET /api/v1/products/{productId}"
+      ]
+    },
+    {
+      "name": "auth (deferred post-M1)",
+      "responsibility": "Email/password registration and login, JWT access (15 min) and refresh tokens, account deletion. Out of M1 OpenAPI scope.",
+      "entities": [
+        "User",
+        "RefreshToken"
+      ],
+      "endpoints": []
+    },
+    {
+      "name": "users (deferred post-M1)",
+      "responsibility": "Profile and saved shipping addresses for checkout. Out of M1 OpenAPI scope.",
+      "entities": [
+        "User",
+        "Address"
+      ],
+      "endpoints": []
+    },
+    {
+      "name": "cart (deferred post-M1)",
+      "responsibility": "Signed-in user cart persisted server-side. M1 uses in-memory CartNotifier only; guest carts out of scope. Out of M1 OpenAPI scope.",
+      "entities": [
+        "Cart",
+        "CartItem"
+      ],
+      "endpoints": []
+    },
+    {
+      "name": "orders (deferred post-M1)",
+      "responsibility": "Order placement and history with status lifecycle pending_payment → paid → fulfilled → delivered, plus cancelled and refunded. Order lines snapshot product name and unit price. Out of M1 OpenAPI scope.",
+      "entities": [
+        "Order",
+        "OrderItem"
+      ],
+      "endpoints": []
+    },
+    {
+      "name": "payments (deferred post-M1)",
+      "responsibility": "Stripe PaymentIntents and webhooks; card data never on server. Out of M1 OpenAPI scope.",
+      "entities": [
+        "Payment",
+        "Order"
+      ],
+      "endpoints": []
+    }
+  ],
+  "app_features": [
+    {
+      "name": "catalog",
+      "screens": [
+        "ProductListScreen (/products) — scrollable PulsePhones-branded list of 12–20 smartphones with name, price formatted from integer USD cents (e.g. $899.99 for 89999), star rating summary, and image/placeholder; empty and error states",
+        "ProductDetailScreen (/products/:id) — name, USD price from integer cents, key details/specs, star rating; optional add-to-cart; back returns to list without losing local catalog state"
+      ],
+      "state_management": "CatalogRepository (M1: LocalCatalogDataSource from assets/data/catalog.json; M2+: generated CatalogApi). ProductListNotifier (AsyncNotifier) holds AsyncValue of products. ProductDetailNotifier loads one product by id from the same local seed."
+    },
+    {
+      "name": "cart (optional M1)",
+      "screens": [
+        "CartScreen (/cart) — in-memory line items with product name, unit price snapshot (cents + USD), quantity increase/decrease/remove; empty state when cart has no lines"
+      ],
+      "state_management": "CartNotifier (Notifier<CartState>) session-only in-memory for M1; clears on full process restart. Add from ProductDetailScreen (stock assumed always available). No persistence, auth, or API in M1."
+    },
+    {
+      "name": "core",
+      "screens": [],
+      "state_management": "PulsePhones design tokens in lib/core/theme (agent-chosen, no style approval gate); go_router routes /products, /products/:id, /cart; no live HTTP in M1 debug builds (offline mock). Debug Android cleartext only for 10.0.2.2 when backend arrives."
+    }
+  ],
+  "data_model_notes": "All monetary amounts are Int minor units (cents) with ISO 4217 currency code USD; never floats. UI formats for display only. Product is the merchandising parent (smartphone model); ProductVariant is the purchasable SKU (e.g. storage + color) with its own priceCents, currency, and stockQuantity (plus reservedQuantity for M2+ checkout holds). M1 mock may use a single default variant per product with stock assumed always available. Listing and detail show seeded averageRating (and optional ratingCount) for social proof—review posting is out of scope. CartItem and OrderItem snapshot productName and unitPriceCents at write time so later catalog edits do not alter past carts/orders. Order.status: pending_payment → paid → fulfilled → delivered, plus cancelled and refunded. Stock reservation at checkout (M2+); failed or expired payment releases reserved stock. User.passwordHash uses bcrypt or argon2; support account deletion with PII removal/anonymization. M1 runtime uses only embedded mock catalog JSON—no Prisma/Postgres connection. Category is smartphones for this vertical.",
+  "security": [
+    "M1 ships no auth, no mandatory network calls, and no PII, passwords, or payment data—mock catalog is read-only embedded data.",
+    "M2+ JWT bearer auth: access tokens 15-minute TTL, refresh tokens rotated and stored hashed server-side; flutter_secure_storage on mobile.",
+    "Passwords hashed with bcrypt (cost ≥12) or argon2id; never store plaintext.",
+    "All API input validated via class-validator DTOs; responses match OpenAPI schemas exactly; errors return { statusCode, error, message }.",
+    "Stripe webhook verifies Stripe-Signature; idempotent event handling; card PAN/CVC never touch our servers.",
+    "HTTPS-only in release mobile builds; debug Android allows cleartext to 10.0.2.2 only via network_security_config.",
+    "Config and secrets via environment variables validated at NestJS startup (@nestjs/config)—never committed.",
+    "Minimum personal data collection; account deletion removes or anonymizes PII.",
+    "Catalog and health endpoints are public (security: []); bearerAuth scheme is declared for future protected modules.",
+    "Accessibility: ≥48dp touch targets; semantic labels on list items and primary buttons."
+  ],
+  "adrs": [
+    {
+      "id": "ADR-001",
+      "title": "Local embedded mock catalog for M1 Speed Demo",
+      "context": "PRD requires the smallest runnable Flutter MVP on an Android emulator in one sprint with browse and detail (optional cart). NestJS, Postgres, generated clients, and CI would delay the demo. US-001/US-002/US-003 need local catalog, detail, and session cart only—no auth or payments.",
+      "decision": "M1 loads 12–20 smartphones from embedded assets (catalog.json + images/placeholders). Browse, detail, and optional cart run in-process with zero commerce HTTP. CatalogRepository abstracts the data source so M2 can swap to the generated OpenAPI client without rewriting screens. Style tokens are chosen by the implementing agent without approval gates.",
+      "consequences": "Positive—offline demo, zero backend dependency, fastest path to validating browse→detail. Negative—cart is session-only; no shared stock truth; M2 must migrate to API and keep server as source of truth for catalog and inventory."
+    },
+    {
+      "id": "ADR-002",
+      "title": "Integer minor units for all money fields",
+      "context": "Floating-point money causes rounding errors in totals and Stripe amounts. Project rules forbid floats for prices; PRD example is 89999 cents → $899.99.",
+      "decision": "Store and transmit all prices as integer cents with currency code USD (ISO 4217). Flutter, NestJS, Prisma Int, and OpenAPI integer schemas agree. Formatting to display strings happens only in the presentation layer.",
+      "consequences": "Positive—exact math, Stripe-compatible amounts, consistent contract. Negative—developers must never use double for money; shared format helpers required in UI."
+    },
+    {
+      "id": "ADR-003",
+      "title": "Contract-first OpenAPI 3.1 limited to health and catalog reads",
+      "context": "Mobile convention mandates a dio client generated from OpenAPI; hard scope caps this run at four API operations. Must-have stories US-001/US-002 are satisfied by local mock in M1; cart is in-memory and needs no API. Prefer no backend work that slows the demo.",
+      "decision": "Freeze OpenAPI 3.1 now with GET /health (infra, uncapped), GET /products, and GET /products/{productId} only (two commerce operations). Bearer auth, pagination parameters, and ErrorResponse are declared for M2+. NestJS implements these controllers when backend work starts; Flutter generates packages/api_client then. Auth, cart, orders, and payments stay out of this document's paths.",
+      "consequences": "Positive—parallel M2 catalog work without over-building; mock models mirror ProductSummary/ProductDetail; stays within operation caps. Negative—M1 cannot exercise live API until NestJS ships; later milestones must extend the same OpenAPI file carefully."
+    }
+  ],
+  "openapi_yaml": "openapi: 3.1.0\ninfo:\n  title: PulsePhones API\n  version: 1.0.0\n  description: |\n    PulsePhones smartphone storefront API.\n    M1 mobile app uses local mock data only and does not call this API.\n    This contract covers M1 must-have stories (US-001 browse, US-002 detail):\n    health probe plus two public catalog read operations. Auth, cart, orders,\n    and payments are deferred to later milestones. Optional US-003 cart is\n    in-memory on device and has no API operations in M1.\n  contact:\n    name: PulsePhones Engineering\nservers:\n  - url: http://10.0.2.2:3000/api/v1\n    description: Android emulator → local staging\n  - url: https://api.staging.pulsephones.example/api/v1\n    description: Staging\n  - url: https://api.pulsephones.example/api/v1\n    description: Production\ntags:\n  - name: Health\n    description: Service health checks\n  - name: Catalog\n    description: Smartphone browse and detail (public)\npaths:\n  /health:\n    get:\n      tags:\n        - Health\n      operationId: getHealth\n      summary: Health check\n      description: Returns 200 when the service and database are reachable.\n      security: []\n      responses:\n        '200':\n          description: Service is healthy\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/HealthResponse'\n        '503':\n          description: Service unavailable (database unreachable)\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/ErrorResponse'\n  /products:\n    get:\n      tags:\n        - Catalog\n      operationId: listProducts\n      summary: List smartphones\n      description: |\n        Paginated smartphone product listing.\n        Supports US-001 browse requirements. Public endpoint; no authentication required.\n        M1 Flutter uses an embedded mock shaped like ProductListResponse.\n      security: []\n      parameters:\n        - $ref: '#/components/parameters/Page'\n        - $ref: '#/components/parameters/PageSize'\n      responses:\n        '200':\n          description: Paginated product list\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/ProductListResponse'\n        '400':\n          description: Invalid query parameters\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/ErrorResponse'\n  /products/{productId}:\n    get:\n      tags:\n        - Catalog\n      operationId: getProductById\n      summary: Get smartphone product detail\n      description: |\n        Returns full product detail including key details, star rating, and variants.\n        Supports US-002 product detail requirements. Public endpoint.\n      security: []\n      parameters:\n        - $ref: '#/components/parameters/ProductId'\n      responses:\n        '200':\n          description: Product detail\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/ProductDetail'\n        '404':\n          description: Product not found\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/ErrorResponse'\ncomponents:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT\n      description: |\n        JWT access token (15-minute TTL). Declared for M2+ protected endpoints.\n        Catalog and health operations in this document do not require a bearer token.\n  parameters:\n    Page:\n      name: page\n      in: query\n      description: 1-based page number\n      schema:\n        type: integer\n        minimum: 1\n        default: 1\n    PageSize:\n      name: pageSize\n      in: query\n      description: Items per page\n      schema:\n        type: integer\n        minimum: 1\n        maximum: 100\n        default: 20\n    ProductId:\n      name: productId\n      in: path\n      required: true\n      description: Product UUID\n      schema:\n        type: string\n        format: uuid\n  schemas:\n    HealthResponse:\n      type: object\n      required:\n        - status\n        - database\n        - timestamp\n      additionalProperties: false\n      properties:\n        status:\n          type: string\n          enum:\n            - ok\n            - degraded\n        database:\n          type: string\n          enum:\n            - up\n            - down\n        timestamp:\n          type: string\n          format: date-time\n    ErrorResponse:\n      type: object\n      required:\n        - statusCode\n        - error\n        - message\n      additionalProperties: false\n      properties:\n        statusCode:\n          type: integer\n          example: 400\n        error:\n          type: string\n          example: Bad Request\n        message:\n          oneOf:\n            - type: string\n            - type: array\n              items:\n                type: string\n          example: Invalid query parameter pageSize\n    Money:\n      type: object\n      required:\n        - amountCents\n        - currency\n      additionalProperties: false\n      properties:\n        amountCents:\n          type: integer\n          description: Amount in minor units (USD cents). Example 89999 = $899.99\n          minimum: 0\n          example: 89999\n        currency:\n          type: string\n          description: ISO 4217 currency code\n          pattern: '^[A-Z]{3}$'\n          example: USD\n    KeyDetail:\n      type: object\n      required:\n        - label\n        - value\n      additionalProperties: false\n      properties:\n        label:\n          type: string\n          example: Display\n        value:\n          type: string\n          example: 6.1-inch OLED\n    ProductSummary:\n      type: object\n      required:\n        - id\n        - name\n        - price\n        - averageRating\n        - primaryImageUrl\n      additionalProperties: false\n      properties:\n        id:\n          type: string\n          format: uuid\n        name:\n          type: string\n          example: iPhone X\n        price:\n          $ref: '#/components/schemas/Money'\n          description: Display price from default or lowest active variant (integer cents)\n        averageRating:\n          type: number\n          format: double\n          minimum: 0\n          maximum: 5\n          description: Seeded star rating for list/detail display (M1); not user-posted reviews\n          example: 4.5\n        ratingCount:\n          type: integer\n          minimum: 0\n          description: Optional count of ratings for social proof display\n          example: 128\n        primaryImageUrl:\n          type: string\n          description: Absolute URL or asset path for list imagery\n          example: assets/images/iphone-x.png\n        shortSpecs:\n          type: array\n          description: Optional short spec chips for list cards\n          items:\n            type: string\n          example:\n            - 64GB\n            - OLED\n    ProductListResponse:\n      type: object\n      required:\n        - items\n        - total\n        - page\n        - pageSize\n      additionalProperties: false\n      properties:\n        items:\n          type: array\n          items:\n            $ref: '#/components/schemas/ProductSummary'\n        total:\n          type: integer\n          minimum: 0\n        page:\n          type: integer\n          minimum: 1\n        pageSize:\n          type: integer\n          minimum: 1\n    ProductVariant:\n      type: object\n      required:\n        - id\n        - sku\n        - storageGb\n        - color\n        - price\n        - stockQuantity\n      additionalProperties: false\n      properties:\n        id:\n          type: string\n          format: uuid\n        sku:\n          type: string\n          example: PP-IPX-64-SLV\n        storageGb:\n          type: integer\n          minimum: 1\n          example: 64\n        color:\n          type: string\n          example: Silver\n        price:\n          $ref: '#/components/schemas/Money'\n        stockQuantity:\n          type: integer\n          minimum: 0\n          description: Stock tracked per variant (assumed available in M1 mock; enforced M2+)\n        imageUrl:\n          type: string\n          description: Optional variant-specific image\n    ProductDetail:\n      type: object\n      required:\n        - id\n        - name\n        - description\n        - price\n        - averageRating\n        - primaryImageUrl\n        - keyDetails\n        - variants\n      additionalProperties: false\n      properties:\n        id:\n          type: string\n          format: uuid\n        name:\n          type: string\n          example: iPhone X\n        description:\n          type: string\n          example: Flagship smartphone with OLED display and Face ID.\n        price:\n          $ref: '#/components/schemas/Money'\n          description: Default display price (integer cents, never a float)\n        averageRating:\n          type: number\n          format: double\n          minimum: 0\n          maximum: 5\n          example: 4.5\n        ratingCount:\n          type: integer\n          minimum: 0\n          example: 128\n        primaryImageUrl:\n          type: string\n          example: assets/images/iphone-x.png\n        keyDetails:\n          type: array\n          description: Key specs shown on detail screen\n          items:\n            $ref: '#/components/schemas/KeyDetail'\n        variants:\n          type: array\n          items:\n            $ref: '#/components/schemas/ProductVariant'\n",
+  "prisma_schema": "// PulsePhones — PostgreSQL 16 schema (Prisma)\n// M1 mobile app does NOT connect to this database; seeded for M2+ backend.\n\ngenerator client {\n  provider = \"prisma-client-js\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ─── Enums ───────────────────────────────────────────────────────────────\n\nenum OrderStatus {\n  pending_payment\n  paid\n  fulfilled\n  delivered\n  cancelled\n  refunded\n}\n\nenum PaymentStatus {\n  requires_payment_method\n  requires_confirmation\n  requires_action\n  processing\n  succeeded\n  canceled\n  failed\n}\n\nenum AddressLabel {\n  home\n  work\n  other\n}\n\n// ─── Auth & Users ──────────────────────────────────────────────────────\n\nmodel User {\n  id           String    @id @default(uuid()) @db.Uuid\n  email        String    @unique @db.VarChar(255)\n  passwordHash String?   @map(\"password_hash\") @db.VarChar(255)\n  displayName  String?   @map(\"display_name\") @db.VarChar(100)\n  deletedAt    DateTime? @map(\"deleted_at\") @db.Timestamptz\n  createdAt    DateTime  @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt    DateTime  @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  refreshTokens RefreshToken[]\n  addresses     Address[]\n  cart          Cart?\n  orders        Order[]\n\n  @@map(\"users\")\n}\n\nmodel RefreshToken {\n  id        String    @id @default(uuid()) @db.Uuid\n  userId    String    @map(\"user_id\") @db.Uuid\n  tokenHash String    @map(\"token_hash\") @db.VarChar(255)\n  expiresAt DateTime  @map(\"expires_at\") @db.Timestamptz\n  revokedAt DateTime? @map(\"revoked_at\") @db.Timestamptz\n  createdAt DateTime  @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt DateTime  @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@index([userId])\n  @@map(\"refresh_tokens\")\n}\n\nmodel Address {\n  id         String       @id @default(uuid()) @db.Uuid\n  userId     String       @map(\"user_id\") @db.Uuid\n  label      AddressLabel @default(home)\n  fullName   String       @map(\"full_name\") @db.VarChar(100)\n  line1      String       @db.VarChar(200)\n  line2      String?      @db.VarChar(200)\n  city       String       @db.VarChar(100)\n  state      String       @db.VarChar(100)\n  postalCode String       @map(\"postal_code\") @db.VarChar(20)\n  country    String       @default(\"US\") @db.VarChar(2)\n  isDefault  Boolean      @default(false) @map(\"is_default\")\n  createdAt  DateTime     @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt  DateTime     @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)\n  orders Order[]\n\n  @@index([userId])\n  @@map(\"addresses\")\n}\n\n// ─── Catalog ───────────────────────────────────────────────────────────\n\nmodel Category {\n  id        String   @id @default(uuid()) @db.Uuid\n  name      String   @db.VarChar(100)\n  slug      String   @unique @db.VarChar(100)\n  createdAt DateTime @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt DateTime @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  products Product[]\n\n  @@map(\"categories\")\n}\n\nmodel Product {\n  id              String   @id @default(uuid()) @db.Uuid\n  categoryId      String   @map(\"category_id\") @db.Uuid\n  name            String   @db.VarChar(200)\n  slug            String   @unique @db.VarChar(200)\n  description     String   @db.Text\n  primaryImageUrl String   @map(\"primary_image_url\") @db.VarChar(500)\n  averageRating   Decimal  @default(0) @map(\"average_rating\") @db.Decimal(2, 1)\n  ratingCount     Int      @default(0) @map(\"rating_count\")\n  keyDetailsJson  Json     @map(\"key_details_json\")\n  isActive        Boolean  @default(true) @map(\"is_active\")\n  createdAt       DateTime @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt       DateTime @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  category Category         @relation(fields: [categoryId], references: [id])\n  variants ProductVariant[]\n\n  @@index([categoryId])\n  @@index([isActive])\n  @@map(\"products\")\n}\n\nmodel ProductVariant {\n  id               String   @id @default(uuid()) @db.Uuid\n  productId        String   @map(\"product_id\") @db.Uuid\n  sku              String   @unique @db.VarChar(50)\n  storageGb        Int      @map(\"storage_gb\")\n  color            String   @db.VarChar(50)\n  priceCents       Int      @map(\"price_cents\")\n  currency         String   @default(\"USD\") @db.VarChar(3)\n  stockQuantity    Int      @default(0) @map(\"stock_quantity\")\n  reservedQuantity Int      @default(0) @map(\"reserved_quantity\")\n  imageUrl         String?  @map(\"image_url\") @db.VarChar(500)\n  isActive         Boolean  @default(true) @map(\"is_active\")\n  createdAt        DateTime @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt        DateTime @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)\n  cartItems  CartItem[]\n  orderItems OrderItem[]\n\n  @@unique([productId, storageGb, color])\n  @@index([productId])\n  @@map(\"product_variants\")\n}\n\n// ─── Cart ──────────────────────────────────────────────────────────────\n\nmodel Cart {\n  id        String   @id @default(uuid()) @db.Uuid\n  userId    String   @unique @map(\"user_id\") @db.Uuid\n  createdAt DateTime @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt DateTime @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)\n  items CartItem[]\n\n  @@map(\"carts\")\n}\n\nmodel CartItem {\n  id             String   @id @default(uuid()) @db.Uuid\n  cartId         String   @map(\"cart_id\") @db.Uuid\n  variantId      String   @map(\"variant_id\") @db.Uuid\n  quantity       Int      @default(1)\n  unitPriceCents Int      @map(\"unit_price_cents\")\n  currency       String   @default(\"USD\") @db.VarChar(3)\n  productName    String   @map(\"product_name\") @db.VarChar(200)\n  storageGb      Int      @map(\"storage_gb\")\n  color          String   @db.VarChar(50)\n  createdAt      DateTime @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt      DateTime @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)\n  variant ProductVariant @relation(fields: [variantId], references: [id])\n\n  @@unique([cartId, variantId])\n  @@index([cartId])\n  @@map(\"cart_items\")\n}\n\n// ─── Orders & Payments ─────────────────────────────────────────────────\n\nmodel Order {\n  id                    String      @id @default(uuid()) @db.Uuid\n  userId                String      @map(\"user_id\") @db.Uuid\n  status                OrderStatus @default(pending_payment)\n  currency              String      @default(\"USD\") @db.VarChar(3)\n  subtotalCents         Int         @map(\"subtotal_cents\")\n  shippingCents         Int         @default(0) @map(\"shipping_cents\")\n  taxCents              Int         @default(0) @map(\"tax_cents\")\n  totalCents            Int         @map(\"total_cents\")\n  shippingAddressId     String?     @map(\"shipping_address_id\") @db.Uuid\n  shippingAddressSnapshot Json?     @map(\"shipping_address_snapshot\")\n  stripePaymentIntentId String?     @unique @map(\"stripe_payment_intent_id\") @db.VarChar(255)\n  paidAt                DateTime?   @map(\"paid_at\") @db.Timestamptz\n  fulfilledAt           DateTime?   @map(\"fulfilled_at\") @db.Timestamptz\n  deliveredAt           DateTime?   @map(\"delivered_at\") @db.Timestamptz\n  cancelledAt           DateTime?   @map(\"cancelled_at\") @db.Timestamptz\n  createdAt             DateTime    @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt             DateTime    @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  user            User     @relation(fields: [userId], references: [id])\n  shippingAddress Address? @relation(fields: [shippingAddressId], references: [id])\n  items           OrderItem[]\n  payment         Payment?\n\n  @@index([userId])\n  @@index([status])\n  @@map(\"orders\")\n}\n\nmodel OrderItem {\n  id             String   @id @default(uuid()) @db.Uuid\n  orderId        String   @map(\"order_id\") @db.Uuid\n  variantId      String?  @map(\"variant_id\") @db.Uuid\n  productName    String   @map(\"product_name\") @db.VarChar(200)\n  sku            String   @db.VarChar(50)\n  storageGb      Int      @map(\"storage_gb\")\n  color          String   @db.VarChar(50)\n  quantity       Int\n  unitPriceCents Int      @map(\"unit_price_cents\")\n  currency       String   @default(\"USD\") @db.VarChar(3)\n  lineTotalCents Int      @map(\"line_total_cents\")\n  createdAt      DateTime @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt      DateTime @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)\n  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)\n\n  @@index([orderId])\n  @@map(\"order_items\")\n}\n\nmodel Payment {\n  id                    String        @id @default(uuid()) @db.Uuid\n  orderId               String        @unique @map(\"order_id\") @db.Uuid\n  stripePaymentIntentId String        @unique @map(\"stripe_payment_intent_id\") @db.VarChar(255)\n  status                PaymentStatus\n  amountCents           Int           @map(\"amount_cents\")\n  currency              String        @default(\"USD\") @db.VarChar(3)\n  stripeEventId         String?       @unique @map(\"stripe_event_id\") @db.VarChar(255)\n  createdAt             DateTime      @default(now()) @map(\"created_at\") @db.Timestamptz\n  updatedAt             DateTime      @updatedAt @map(\"updated_at\") @db.Timestamptz\n\n  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)\n\n  @@map(\"payments\")\n}\n"
+}

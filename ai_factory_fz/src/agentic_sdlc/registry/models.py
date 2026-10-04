@@ -82,8 +82,10 @@ class ModelRegistry:
         timeout = int(spec.params.get("timeout", 600))
 
         if provider is Provider.CURSOR_CLI:
+            per_agent = os.getenv(f"CURSOR_MODEL_{agent_key.upper()}", "").strip()
+            model = per_agent or os.getenv("CURSOR_PROXY_MODEL", "auto")
             return CursorAgentLLM(
-                model=os.getenv("CURSOR_PROXY_MODEL", "auto"),
+                model=model,
                 api_key=os.getenv("CURSOR_API_KEY", "").strip() or None,
                 working_dir=os.getenv("CURSOR_AGENT_CWD", os.getcwd()),
                 timeout_seconds=int(os.getenv("CURSOR_AGENT_TIMEOUT", str(timeout))),

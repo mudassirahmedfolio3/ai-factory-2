@@ -1,0 +1,377 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#0B57D0",
+      "dark": "#A8C7FA"
+    },
+    {
+      "name": "onPrimary",
+      "light": "#FFFFFF",
+      "dark": "#062E6F"
+    },
+    {
+      "name": "background",
+      "light": "#FAFAFA",
+      "dark": "#121212"
+    },
+    {
+      "name": "surface",
+      "light": "#FFFFFF",
+      "dark": "#1E1E1E"
+    },
+    {
+      "name": "surfaceVariant",
+      "light": "#E8EAF0",
+      "dark": "#2C2F36"
+    },
+    {
+      "name": "onSurface",
+      "light": "#1B1B1F",
+      "dark": "#E3E3E8"
+    },
+    {
+      "name": "onSurfaceVariant",
+      "light": "#44474F",
+      "dark": "#C4C6D0"
+    },
+    {
+      "name": "outline",
+      "light": "#74777F",
+      "dark": "#8E9099"
+    },
+    {
+      "name": "error",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "onError",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    },
+    {
+      "name": "success",
+      "light": "#1B6E3A",
+      "dark": "#7FD79A"
+    },
+    {
+      "name": "outOfStockContainer",
+      "light": "#F9DEDC",
+      "dark": "#8C1D18"
+    },
+    {
+      "name": "onOutOfStockContainer",
+      "light": "#410E0B",
+      "dark": "#F9DEDC"
+    },
+    {
+      "name": "badge",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "onBadge",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    },
+    {
+      "name": "selectedContainer",
+      "light": "#D3E3FD",
+      "dark": "#0842A0"
+    },
+    {
+      "name": "onSelectedContainer",
+      "light": "#041E49",
+      "dark": "#D3E3FD"
+    },
+    {
+      "name": "disabledContainer",
+      "light": "#E0E2E8",
+      "dark": "#3A3C42"
+    },
+    {
+      "name": "onDisabled",
+      "light": "#5F6168",
+      "dark": "#A9ABB3"
+    }
+  ],
+  "typography": [
+    {
+      "name": "headlineMedium",
+      "size": 28.0,
+      "weight": 700,
+      "line_height": 36.0
+    },
+    {
+      "name": "titleLarge",
+      "size": 22.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "titleMedium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "price",
+      "size": 18.0,
+      "weight": 700,
+      "line_height": 24.0
+    },
+    {
+      "name": "bodyLarge",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "bodyMedium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "labelLarge",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "labelSmall",
+      "size": 12.0,
+      "weight": 500,
+      "line_height": 16.0
+    }
+  ],
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ],
+  "corner_radii": [
+    4,
+    8,
+    12,
+    16,
+    999
+  ],
+  "shared_widgets": [
+    {
+      "name": "AppStrings",
+      "description": "Single English (US) string source in lib/core (e.g. app_strings.dart) holding all user-visible text, including 'No products available', 'Out of stock', 'In stock', 'Add to cart', 'Browse products', 'Retry', empty-cart message and all semantic labels. No hard-coded text or currency symbols in widgets."
+    },
+    {
+      "name": "MoneyFormatter",
+      "description": "Formats integer minor units (cents) with an ISO 4217 currency code (USD) into a display string (1999 -> $19.99) using the currency code, never a hard-coded symbol and never floating-point money. Used by PriceText, ProductCard, CartLineTile and subtotal."
+    },
+    {
+      "name": "PriceText",
+      "description": "Text widget showing a Money value via MoneyFormatter using the price type style and onSurface color. Supports a 'from' prefix from AppStrings for priceFrom on list cards and before a variant selection on detail."
+    },
+    {
+      "name": "ProductImage",
+      "description": "Bundled asset image (or generated placeholder on surfaceVariant with an icon) with rounded corners and a required Semantics label (product name). Falls back to placeholder on load error; no network images."
+    },
+    {
+      "name": "OutOfStockBadge",
+      "description": "Pill badge (radius 999) using outOfStockContainer/onOutOfStockContainer colors with the text 'Out of stock' from AppStrings; meaning conveyed by text, not color alone. Shown on list cards when no variant has stock and on detail for an out-of-stock variant."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Tappable card (min height 48dp, whole card is the touch target) with ProductImage, product name (titleMedium, max 2 lines, scales with system font), 'from' PriceText and OutOfStockBadge when no variant has stock. Semantics merged: name, price, availability. Tap pushes /products/:productId."
+    },
+    {
+      "name": "CartIconButton",
+      "description": "App bar IconButton (48x48dp) with cart icon and count badge (badge/onBadge colors) driven by cartItemCountProvider; badge hidden when 0. Semantic label 'Cart, N items'. Navigates to /cart."
+    },
+    {
+      "name": "VariantChoiceChip",
+      "description": "ChoiceChip for a size or color option with minimum 48dp height/width touch target. Selected state uses selectedContainer/onSelectedContainer plus a check icon and a 2dp primary outline; wrapped in Semantics(selected: true) when selected. Unavailable combinations remain selectable so out-of-stock status can be shown."
+    },
+    {
+      "name": "VariantChipGroup",
+      "description": "Labeled Wrap of VariantChoiceChips (section label 'Size' or 'Color', labelLarge) with 8dp spacing; reads and writes variantSelectionProvider(productId)."
+    },
+    {
+      "name": "StockStatusLabel",
+      "description": "Text with icon showing 'In stock' (success color) or 'Out of stock' (error color) for the resolved variant, announced as a live region when the selection changes."
+    },
+    {
+      "name": "AddToCartButton",
+      "description": "Full-width FilledButton (min height 48dp) labelled 'Add to cart'. Disabled (disabledContainer/onDisabled) until an in-stock variant is selected and stays disabled for out-of-stock variants; semantic label states the disabled reason."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Row with 48x48dp minus and plus IconButtons and a quantity text between; semantic labels 'Decrease quantity of <product>' and 'Increase quantity of <product>'. Minus at quantity 1 removes the line (quantity 0); plus disabled at the stock cap known at add time."
+    },
+    {
+      "name": "CartLineTile",
+      "description": "Cart row showing product name, variant label (size / color), unit price, QuantityStepper and line total (unitPrice.amountMinor * quantity in integer cents) plus a 48dp remove IconButton with semantic label 'Remove <product>'."
+    },
+    {
+      "name": "CartSubtotalBar",
+      "description": "Bottom summary bar with 'Subtotal' label and PriceText from cartSubtotalProvider. Contains no checkout or payment actions."
+    },
+    {
+      "name": "LoadingView",
+      "description": "Centered CircularProgressIndicator with a semantic label 'Loading'; shown during AsyncLoading. Optional skeleton list cards on the product list."
+    },
+    {
+      "name": "EmptyView",
+      "description": "Centered icon, message text and optional action button (48dp). Used for 'No products available' on list, empty cart message with 'Browse products' action on cart, and 'no variants' on detail."
+    },
+    {
+      "name": "ErrorView",
+      "description": "Centered error icon, error message and a 'Retry' button (48dp) that invalidates/re-reads the provider. Used for list error and detail not-found/error."
+    },
+    {
+      "name": "AppTheme",
+      "description": "ThemeData light and dark built from the design tokens in lib/core/theme (colors, typography, spacing, radii); widgets read tokens only and have no hard-coded colors or sizes. Follows system theme mode."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "ProductListScreen",
+      "route": "/",
+      "purpose": "Initial screen. Shows a smooth scrollable list of at least 12 products from the bundled local mock catalog (image or placeholder, name, 'from' price from integer cents in USD, out-of-stock badge when no variant has stock) so the shopper can quickly discover products. Scroll position is preserved when returning from detail via PageStorageKey and keeping the list mounted under the pushed detail route.",
+      "components": [
+        "AppBar with title and CartIconButton",
+        "ListView.builder with PageStorageKey",
+        "ProductCard",
+        "ProductImage",
+        "PriceText",
+        "MoneyFormatter",
+        "OutOfStockBadge",
+        "LoadingView",
+        "EmptyView",
+        "ErrorView",
+        "AppStrings"
+      ],
+      "states": [
+        "loading",
+        "empty (No products available)",
+        "error (with Retry)",
+        "success (scrollable product list)",
+        "product out of stock (badge on card)"
+      ],
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "ProductDetailScreen",
+      "route": "/products/:productId",
+      "purpose": "Shows a product's image, name, description and price (selected variant price, or priceFrom before a selection) with size and color choice chips, the selected variant's in-stock/out-of-stock status, and an Add to cart action that is enabled only for an in-stock variant. System back and app bar back pop to the list at the same scroll position.",
+      "components": [
+        "AppBar with back button and CartIconButton",
+        "ProductImage",
+        "Product name and description text",
+        "PriceText",
+        "MoneyFormatter",
+        "VariantChipGroup (Size)",
+        "VariantChipGroup (Color)",
+        "VariantChoiceChip",
+        "StockStatusLabel",
+        "OutOfStockBadge",
+        "AddToCartButton",
+        "SnackBar confirmation with 'View cart' action",
+        "LoadingView",
+        "EmptyView (no variants)",
+        "ErrorView",
+        "AppStrings"
+      ],
+      "states": [
+        "loading",
+        "not-found/error (with Retry or back to list)",
+        "no variants (message, Add to cart disabled)",
+        "success, no variant selected (priceFrom shown, Add to cart disabled)",
+        "variant selected in stock (variant price, In stock, Add to cart enabled)",
+        "variant selected out of stock (Out of stock shown, Add to cart disabled)",
+        "added to cart (cart badge updates, snackbar shown)"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Optional in-memory cart. Lists one line per variant with product name, variant label (size / color), unit price, quantity stepper and line total, plus a subtotal, all integer cents displayed in USD. No checkout or payment actions exist; the cart is lost when the app process closes.",
+      "components": [
+        "AppBar with back button",
+        "ListView of CartLineTile",
+        "QuantityStepper",
+        "PriceText",
+        "MoneyFormatter",
+        "CartSubtotalBar",
+        "EmptyView with 'Browse products' action",
+        "AppStrings"
+      ],
+      "states": [
+        "empty (empty-cart message with 'Browse products' action)",
+        "success (lines and subtotal)",
+        "line removed or quantity set to zero (line disappears, subtotal updates)",
+        "quantity at stock cap (plus button disabled)"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01 ProductListScreen",
+      "to_screen": "SCR-02 ProductDetailScreen",
+      "trigger": "Tap a ProductCard: context.push('/products/:productId') on top of the list so the list stays mounted and keeps its scroll position"
+    },
+    {
+      "from_screen": "SCR-02 ProductDetailScreen",
+      "to_screen": "SCR-01 ProductListScreen",
+      "trigger": "App bar back button or system back: pop to the list at the same scroll position"
+    },
+    {
+      "from_screen": "SCR-01 ProductListScreen",
+      "to_screen": "SCR-03 CartScreen",
+      "trigger": "Tap CartIconButton in the app bar: context.push('/cart')"
+    },
+    {
+      "from_screen": "SCR-02 ProductDetailScreen",
+      "to_screen": "SCR-03 CartScreen",
+      "trigger": "Tap CartIconButton in the app bar or the 'View cart' action on the added-to-cart snackbar: context.push('/cart')"
+    },
+    {
+      "from_screen": "SCR-03 CartScreen",
+      "to_screen": "SCR-01 ProductListScreen",
+      "trigger": "Tap 'Browse products' in the empty cart state: context.go('/')"
+    },
+    {
+      "from_screen": "SCR-03 CartScreen",
+      "to_screen": "Previous screen (SCR-01 or SCR-02)",
+      "trigger": "App bar back button or system back: pop"
+    }
+  ],
+  "accessibility": [
+    "All interactive elements (cart icon, product cards, variant chips, quantity +/- buttons, remove button, Add to cart, Retry, Browse products, back button) have a minimum 48x48dp touch target.",
+    "All images and icons have semantic labels: product images use the product name, the cart icon reads 'Cart, N items', decorative icons are excluded from semantics.",
+    "Selected variant chips use Semantics(selected: true) and also show a check icon and outline so selection is not conveyed by color alone.",
+    "Out-of-stock status is conveyed with text ('Out of stock') plus icon/badge, never by color alone; changes to stock status are announced as a live region.",
+    "Disabled Add to cart exposes a semantic label explaining why it is disabled (select an in-stock variant).",
+    "Text uses sp units and respects system font scaling; layouts allow wrapping (product names up to 2 lines on cards) and scrolling without clipping at 200% scale.",
+    "Color tokens meet WCAG AA in both light and dark themes: body text at least 4.5:1, large text and UI component boundaries at least 3:1 (e.g. onSurface #1B1B1F on surface #FFFFFF, primary #0B57D0 with onPrimary #FFFFFF, dark primary #A8C7FA on #121212).",
+    "Each product card merges its semantics into one node reading name, price and availability; cart lines read product name, variant, unit price, quantity and line total.",
+    "Prices are read from MoneyFormatter output derived from the currency code (USD), with no hard-coded currency symbols; all text comes from the single AppStrings source for localization readiness.",
+    "Loading, empty and error states are announced via semantic labels, and the error state offers a Retry button reachable by screen reader focus order.",
+    "Logical focus order follows visual order (app bar, content, primary action) and dark theme follows system setting."
+  ]
+}

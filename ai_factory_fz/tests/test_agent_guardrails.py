@@ -77,6 +77,13 @@ def test_dv3_scope_and_contract_copies(ws, profile):
     assert any("server/openapi.yaml must stay identical to the approved docs/openapi.yaml" in h for h in hits)
 
 
+def test_dv3_allows_reports_infra(ws, profile):
+    ws.write_text("reports/agent_transcript.jsonl", '{"agent":"backend_developer"}\n')
+    ws.write_text("reports/scaffold_backend.log", "ok\n")
+    hits = cg.check_changes(ws, profile.components["backend"], profile, {"DV3"})
+    assert hits == []
+
+
 def test_discard_changes_restores_the_component(ws):
     ws.write_text("server/src/cart.spec.ts", "gone\n")
     ws.write_text("server/src/new.ts", "x\n")

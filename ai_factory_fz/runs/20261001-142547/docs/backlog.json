@@ -1,0 +1,230 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "PulsePhones catalog browse and detail",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Session in-memory cart path",
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "OpenAPI contract, Prisma schema, and Nest catalog stubs",
+      "description": "Define NestJS OpenAPI for getHealth, listProducts, and getProductById; implement Nest stub handlers for those three operations; add Prisma models for Category, Product, ProductVariant plus deferred User, RefreshToken, Address, Cart, CartItem, Order, OrderItem, and Payment so the full solution schema exists. Minimal docker-compose for Postgres when probes run. Does not block Flutter M1 offline demo.",
+      "epic_id": "E-01",
+      "feature": "Catalog API",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [],
+      "modules": [
+        "health",
+        "catalog",
+        "auth",
+        "users",
+        "cart",
+        "orders",
+        "payments"
+      ],
+      "api_operations": [
+        "getHealth",
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [
+        "User",
+        "RefreshToken",
+        "Address",
+        "Category",
+        "Product",
+        "ProductVariant",
+        "Cart",
+        "CartItem",
+        "Order",
+        "OrderItem",
+        "Payment"
+      ],
+      "screens": [],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Three stub operations plus full Prisma entity set and OpenAPI contract scaffolding. | backend_developer: OpenAPI for three ops, full Prisma schema with eleven related models, Nest stubs across health/catalog plus deferred module shells, docker-compose Postgres, and Jest/Supertest to keep the build green is about one focused day.; concerns: OpenAPI response shapes must match the Flutter M1 catalog mock or M2 client generation will break; deferred modules still need correct Prisma relations and enums now; health e2e needs Postgres available when probes run.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 5,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-002",
+      "title": "Flutter scaffold, PulsePhones theme, and routing",
+      "description": "Create the Flutter 3.x Android-first app with Riverpod, go_router routes /products, /products/:id, and /cart, agent-chosen PulsePhones design tokens in lib/core/theme, and offline/debug setup so the app launches on an emulator with no live HTTP. Start coding immediately; no style or stakeholder approval gates.",
+      "epic_id": "E-01",
+      "feature": "App foundation",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [],
+      "modules": [
+        "core"
+      ],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 4,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Standard Flutter scaffold plus Riverpod/go_router wiring and theme tokens only. | frontend_developer: Flutter 3.x Android scaffold, Riverpod/go_router, PulsePhones tokens, debug cleartext for 10.0.2.2, and offline launch green on emulator—more than bare wiring.; concerns: Offline M1 still needs a deliberate no-live-HTTP path (stubs/flags) so debug builds never dial the network; android/app/src/debug network-security-config must not leak into release.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-003",
+      "title": "Local catalog seed, ProductListScreen, and ProductDetailScreen",
+      "description": "Add freezed/json_serializable models shaped like Category/Product/ProductVariant with integer USD cents, seed 12–20 smartphones in assets/data/catalog.json, LocalCatalogDataSource + CatalogRepository + ProductListNotifier/ProductDetailNotifier, and build SCR-01 and SCR-02: PulsePhones-branded list and detail with formatted prices, star ratings, key specs, empty/error states, and back navigation preserving local catalog state. Offline only in M1; responses mirror listProducts and getProductById.",
+      "epic_id": "E-01",
+      "feature": "Catalog screens",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [
+        "Category",
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-01",
+        "SCR-02"
+      ],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Seed JSON, cents+USD models, two screens with AsyncNotifiers and branding/ratings. | frontend_developer: freezed/json_serializable Category/Product/ProductVariant (cents), 12–20-seed catalog.json, LocalCatalogDataSource/repository, two AsyncNotifiers, and SCR-01/SCR-02 with loading/empty/error plus branding/ratings/specs.; concerns: Depends on WI-001 but M1 is local-only—clarify seed JSON shape vs listProducts/getProductById so M2 swap to generated CatalogApi stays clean; image/placeholder assets and build_runner CI are easy to under-scope.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-004",
+      "title": "In-memory CartNotifier and CartScreen",
+      "description": "Add session-only CartNotifier (Notifier<CartState>) with Cart/CartItem line snapshots (product name, unit price cents + USD, quantity), Add to cart from SCR-02 (stock assumed always available), and SCR-03 CartScreen at /cart with increase/decrease/remove and empty state. Clears on process restart; no persistence, auth, or API.",
+      "epic_id": "E-02",
+      "feature": "Cart screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "modules": [
+        "cart"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Cart",
+        "CartItem"
+      ],
+      "screens": [
+        "SCR-02",
+        "SCR-03"
+      ],
+      "estimate_points": 2,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "In-memory quantity CRUD and one cart screen wired from detail. | frontend_developer: Session CartNotifier with line snapshots, add-from-detail, and SCR-03 quantity CRUD/empty state—straightforward once catalog models exist.; concerns: Provider scope must keep cart across go_router list↔detail↔cart; no persistence is fine for M1 but document clear-on-restart for demo expectations.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 2,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-005",
+      "title": "Browse–detail–cart Flutter tests",
+      "description": "Add flutter_test (and light integration_test as needed) covering seeded list render with cents→USD formatting and ratings, navigation to detail and back preserving catalog state, and in-memory cart add/quantity/remove so the M1 demo journey is regression-safe on emulator.",
+      "epic_id": "E-01",
+      "feature": "M1 verification",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003",
+        "WI-004"
+      ],
+      "modules": [],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [
+        "SCR-01",
+        "SCR-02",
+        "SCR-03"
+      ],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Widget tests over local seed and in-memory cart; no device flakiness in M1. | frontend_developer: Widget (and light integration) coverage for cents→USD list, detail round-trip preserving catalog state, and in-memory cart add/qty/remove—Riverpod overrides + go_router harness drive the effort.; concerns: go_router/Riverpod pumpAndSettle flakiness and integration_test Android emulator setup often exceed a 2-pt slice; need shared test fixtures over the seed catalog.",
+      "status": "todo",
+      "pm_points": 2,
+      "dev_points": 3,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Browse & Detail Demo",
+      "goal": "Runnable PulsePhones Flutter Android MVP on emulator from local seed (list, detail, optional in-memory cart) plus OpenAPI/Prisma stubs for getHealth, listProducts, and getProductById covering the full solution schema—no auth, payments, or checkout in this demo.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ],
+  "estimation_reviewed": true
+}

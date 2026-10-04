@@ -15,11 +15,11 @@ from artifact_reader import (
 )
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 from config import AI_FACTORY_FZ_ROOT, AI_FACTORY_ROOT, FACTORY_ENGINE
 from dotenv import load_dotenv
-from run_manager import is_running, start_run
+from run_manager import is_running, resume_run, start_run
 from sse_starlette.sse import EventSourceResponse
 
 if FACTORY_ENGINE == "fz":
@@ -150,6 +150,26 @@ def run_detail(run_id: str) -> dict[str, Any]:
     return run
 
 
+@app.post("/runs/{run_id}/resume")
+def resume_existing_run(run_id: str) -> dict[str, Any]:
+    try:
+        return resume_run(run_id)
+    except RuntimeError as exc:
+        message = str(exc)
+        if message.startswith("RUN_IN_PROGRESS:"):
+            other = message.split(":", 1)[1] or None
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "message": "A different factory run is already in progress",
+                    "run_id": other,
+                },
+            ) from exc
+        if "not found" in message.lower():
+            raise HTTPException(status_code=404, detail=message) from exc
+        raise HTTPException(status_code=409, detail=message) from exc
+
+
 @app.post("/runs")
 def create_run(body: StartRunRequest) -> dict[str, Any]:
     try:
@@ -205,6 +225,89 @@ def run_audit(run_id: str) -> list[dict[str, Any]]:
     """Governance audit trail for project journey (developer, QA, fixes)."""
     events = read_audit_events(run_id=run_id)
     return events
+
+
+def _dossier_pdf_response(run_id: str) -> Response:
+    if FACTORY_ENGINE != "fz":
+        raise HTTPException(status_code=501, detail="Dossier export requires FACTORY_ENGINE=fz")
+    try:
+        from dossier import generate_dossier_pdf
+
+        pdf_bytes = generate_dossier_pdf(run_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ModuleNotFoundError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Dossier dependencies missing ({exc.name}). Run: pip install -r requirements.txt in ai_factory_ui/api",
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Dossier export failed: {exc}") from exc
+    filename = f"ai-factory-dossier-{run_id}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.get("/runs/{run_id}/dossier")
+def run_dossier(run_id: str, format: str = "pdf") -> Response:
+    """SDLC dossier export (default PDF). Prefer this path over dossier.pdf for proxies."""
+    if format.lower() in ("html", "htm"):
+        return run_dossier_html(run_id)
+    return _dossier_pdf_response(run_id)
+
+
+@app.get("/runs/{run_id}/dossier.pdf")
+def run_dossier_pdf(run_id: str) -> Response:
+    """Read-only SDLC dossier export (safe while the factory run is active)."""
+    return _dossier_pdf_response(run_id)
+
+
+@app.get("/dossier/combined")
+def combined_dossier(runs: str, format: str = "pdf") -> Response:
+    """Merge several run ids into one dossier (comma-separated run ids). Read-only."""
+    if FACTORY_ENGINE != "fz":
+        raise HTTPException(status_code=501, detail="Dossier export requires FACTORY_ENGINE=fz")
+    run_ids = [r.strip() for r in runs.split(",") if r.strip()]
+    if not run_ids:
+        raise HTTPException(status_code=400, detail="Query param 'runs' must list at least one run id")
+    try:
+        from dossier import generate_combined_dossier_html, generate_combined_dossier_pdf
+
+        if format.lower() in ("html", "htm"):
+            html = generate_combined_dossier_html(run_ids)
+            return Response(content=html, media_type="text/html; charset=utf-8")
+        pdf_bytes = generate_combined_dossier_pdf(run_ids)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Combined dossier export failed: {exc}") from exc
+    slug = "-".join(run_ids[:3]) + ("-etc" if len(run_ids) > 3 else "")
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="ai-factory-dossier-combined-{slug}.pdf"'},
+    )
+
+
+@app.get("/runs/{run_id}/dossier.html")
+def run_dossier_html(run_id: str) -> Response:
+    """HTML preview of the SDLC dossier (same content as PDF)."""
+    if FACTORY_ENGINE != "fz":
+        raise HTTPException(status_code=501, detail="Dossier export requires FACTORY_ENGINE=fz")
+    try:
+        from dossier import generate_dossier_html
+
+        html = generate_dossier_html(run_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Dossier export failed: {exc}") from exc
+    return Response(content=html, media_type="text/html; charset=utf-8")
 
 
 @app.get("/runs/{run_id}/artifacts/{path:path}")

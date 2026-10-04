@@ -1,0 +1,800 @@
+{
+  "catalogVersion": 1,
+  "products": [
+    {
+      "id": "prd_001",
+      "slug": "aria-pendant",
+      "name": "Aria Dome Pendant",
+      "brand": "Lumora",
+      "description": "A spun-metal dome pendant with an integrated LED module and a soft diffuser. Choose a finish and a color temperature to suit kitchens, islands and dining tables.",
+      "productType": "pendant",
+      "category": { "id": "cat_pendants", "slug": "pendants", "name": "Pendants" },
+      "images": [
+        { "url": "assets/images/products/aria-pendant-black.webp", "altText": "Aria Dome Pendant in matte black hanging over a kitchen island" }
+      ],
+      "ratingAverage": 4.6,
+      "ratingCount": 128,
+      "specifications": {
+        "wattageW": 18,
+        "lumens": 1400,
+        "colorTemperatureK": 2700,
+        "dimmable": true,
+        "voltageV": 120,
+        "material": "Spun aluminum",
+        "finish": "Matte Black",
+        "widthMm": 380,
+        "heightMm": 240,
+        "depthMm": 380,
+        "ipRating": "IP20"
+      },
+      "defaultVariantId": "var_001_a",
+      "variants": [
+        {
+          "id": "var_001_a",
+          "sku": "ARIA-PND-BLK-2700",
+          "name": "Matte Black / 2700K",
+          "isDefault": true,
+          "options": [
+            { "name": "finish", "value": "Matte Black" },
+            { "name": "color_temperature", "value": "2700K" }
+          ],
+          "price": { "amountMinor": 12999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 24,
+          "image": { "url": "assets/images/products/aria-pendant-black.webp", "altText": "Aria Dome Pendant in matte black" },
+          "specificationOverrides": null
+        },
+        {
+          "id": "var_001_b",
+          "sku": "ARIA-PND-BLK-3000",
+          "name": "Matte Black / 3000K",
+          "isDefault": false,
+          "options": [
+            { "name": "finish", "value": "Matte Black" },
+            { "name": "color_temperature", "value": "3000K" }
+          ],
+          "price": { "amountMinor": 12999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 12,
+          "image": { "url": "assets/images/products/aria-pendant-black.webp", "altText": "Aria Dome Pendant in matte black" },
+          "specificationOverrides": { "colorTemperatureK": 3000, "lumens": 1450 }
+        },
+        {
+          "id": "var_001_c",
+          "sku": "ARIA-PND-BRS-2700",
+          "name": "Brushed Brass / 2700K",
+          "isDefault": false,
+          "options": [
+            { "name": "finish", "value": "Brushed Brass" },
+            { "name": "color_temperature", "value": "2700K" }
+          ],
+          "price": { "amountMinor": 14999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 3,
+          "image": { "url": "assets/images/products/aria-pendant-brass.webp", "altText": "Aria Dome Pendant in brushed brass" },
+          "specificationOverrides": { "finish": "Brushed Brass" }
+        },
+        {
+          "id": "var_001_d",
+          "sku": "ARIA-PND-BRS-3000",
+          "name": "Brushed Brass / 3000K",
+          "isDefault": false,
+          "options": [
+            { "name": "finish", "value": "Brushed Brass" },
+            { "name": "color_temperature", "value": "3000K" }
+          ],
+          "price": { "amountMinor": 14999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 0,
+          "image": { "url": "assets/images/products/aria-pendant-brass.webp", "altText": "Aria Dome Pendant in brushed brass" },
+          "specificationOverrides": { "finish": "Brushed Brass", "colorTemperatureK": 3000, "lumens": 1450 }
+        }
+      ]
+    },
+    {
+      "id": "prd_002",
+      "slug": "clearview-a19-led-bulb-4-pack",
+      "name": "ClearView A19 LED Bulb (4-pack)",
+      "brand": "Brightwell",
+      "description": "Everyday 60W-equivalent A19 LED bulbs with an E26 base. Dimmable, flicker-free and rated for 15,000 hours. Pick warm white or daylight.",
+      "productType": "bulb",
+      "category": { "id": "cat_bulbs", "slug": "bulbs", "name": "Bulbs" },
+      "images": [
+        { "url": "assets/images/products/clearview-a19-warm.webp", "altText": "Four ClearView A19 LED bulbs in their box" }
+      ],
+      "ratingAverage": 4.4,
+      "ratingCount": 512,
+      "specifications": {
+        "wattageW": 9,
+        "lumens": 800,
+        "colorTemperatureK": 2700,
+        "dimmable": true,
+        "bulbType": "A19 LED",
+        "baseType": "E26",
+        "voltageV": 120
+      },
+      "defaultVariantId": "var_002_a",
+      "variants": [
+        {
+          "id": "var_002_a",
+          "sku": "CV-A19-9W-2700-4PK",
+          "name": "Warm White 2700K",
+          "isDefault": true,
+          "options": [
+            { "name": "color_temperature", "value": "2700K" }
+          ],
+          "price": { "amountMinor": 1999, "currency": "USD" },
+          "salePrice": { "amountMinor": 1499, "currency": "USD" },
+          "stockQuantity": 140,
+          "image": { "url": "assets/images/products/clearview-a19-warm.webp", "altText": "ClearView A19 bulb pack, warm white" },
+          "specificationOverrides": null
+        },
+        {
+          "id": "var_002_b",
+          "sku": "CV-A19-9W-5000-4PK",
+          "name": "Daylight 5000K",
+          "isDefault": false,
+          "options": [
+            { "name": "color_temperature", "value": "5000K" }
+          ],
+          "price": { "amountMinor": 1999, "currency": "USD" },
+          "salePrice": { "amountMinor": 1499, "currency": "USD" },
+          "stockQuantity": 85,
+          "image": { "url": "assets/images/products/clearview-a19-daylight.webp", "altText": "ClearView A19 bulb pack, daylight" },
+          "specificationOverrides": { "colorTemperatureK": 5000 }
+        }
+      ]
+    },
+    {
+      "id": "prd_003",
+      "slug": "halo-flush-mount-ceiling-light",
+      "name": "Halo Flush Mount Ceiling Light",
+      "brand": "Lumora",
+      "description": "A slim 13-inch flush mount with an opal acrylic lens and a brushed nickel trim ring. Ideal for hallways and bedrooms with low ceilings.",
+      "productType": "ceiling_light",
+      "category": { "id": "cat_ceiling", "slug": "ceiling-lights", "name": "Ceiling Lights" },
+      "images": [
+        { "url": "assets/images/products/halo-flush-mount.webp", "altText": "Halo flush mount ceiling light with brushed nickel trim" }
+      ],
+      "ratingAverage": 4.2,
+      "ratingCount": 76,
+      "specifications": {
+        "wattageW": 22,
+        "lumens": 1800,
+        "colorTemperatureK": 3000,
+        "dimmable": true,
+        "material": "Steel and acrylic",
+        "finish": "Brushed Nickel",
+        "widthMm": 330,
+        "heightMm": 90,
+        "depthMm": 330,
+        "ipRating": "IP20"
+      },
+      "defaultVariantId": "var_003_a",
+      "variants": [
+        {
+          "id": "var_003_a",
+          "sku": "HALO-FM-13-BN",
+          "name": "Brushed Nickel",
+          "isDefault": true,
+          "options": [
+            { "name": "finish", "value": "Brushed Nickel" }
+          ],
+          "price": { "amountMinor": 8999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 37,
+          "image": { "url": "assets/images/products/halo-flush-mount.webp", "altText": "Halo flush mount ceiling light with brushed nickel trim" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_004",
+      "slug": "nordic-oak-table-lamp",
+      "name": "Nordic Oak Table Lamp",
+      "brand": "Fjord & Co",
+      "description": "A solid oak turned base with a natural linen drum shade. Takes one E26 bulb up to 60W. Bulb not included.",
+      "productType": "lamp",
+      "category": { "id": "cat_lamps", "slug": "lamps", "name": "Lamps" },
+      "images": [
+        { "url": "assets/images/products/nordic-oak-table-lamp.webp", "altText": "Nordic oak table lamp with a linen drum shade" }
+      ],
+      "ratingAverage": 4.8,
+      "ratingCount": 41,
+      "specifications": {
+        "baseType": "E26",
+        "voltageV": 120,
+        "material": "Solid oak and linen",
+        "finish": "Natural Oak",
+        "widthMm": 300,
+        "heightMm": 520,
+        "depthMm": 300
+      },
+      "defaultVariantId": "var_004_a",
+      "variants": [
+        {
+          "id": "var_004_a",
+          "sku": "NORD-TL-OAK",
+          "name": "Natural Oak",
+          "isDefault": true,
+          "options": [],
+          "price": { "amountMinor": 11900, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 0,
+          "image": { "url": "assets/images/products/nordic-oak-table-lamp.webp", "altText": "Nordic oak table lamp with a linen drum shade" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_005",
+      "slug": "glow-smart-rgbw-bulb",
+      "name": "Glow Smart RGBW Bulb",
+      "brand": "Glowhaus",
+      "description": "A Wi-Fi A19 smart bulb with 16 million colors and tunable white from 2200K to 6500K. Works with popular voice assistants, no hub required.",
+      "productType": "smart_light",
+      "category": { "id": "cat_smart", "slug": "smart-lighting", "name": "Smart Lighting" },
+      "images": [
+        { "url": "assets/images/products/glow-smart-bulb.webp", "altText": "Glow smart bulb glowing purple" }
+      ],
+      "ratingAverage": 4.1,
+      "ratingCount": 233,
+      "specifications": {
+        "wattageW": 10,
+        "lumens": 810,
+        "colorTemperatureK": 2700,
+        "dimmable": true,
+        "bulbType": "A19 smart LED",
+        "baseType": "E26",
+        "voltageV": 120
+      },
+      "defaultVariantId": "var_005_a",
+      "variants": [
+        {
+          "id": "var_005_a",
+          "sku": "GLOW-A19-RGBW",
+          "name": "Single bulb",
+          "isDefault": true,
+          "options": [],
+          "price": { "amountMinor": 2499, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 60,
+          "image": { "url": "assets/images/products/glow-smart-bulb.webp", "altText": "Glow smart bulb glowing purple" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_006",
+      "slug": "vintage-edison-st64-filament-bulb",
+      "name": "Vintage Edison ST64 Filament Bulb",
+      "brand": "Brightwell",
+      "description": "An amber-glass ST64 LED filament bulb that recreates the glow of a classic Edison lamp while using a fraction of the energy.",
+      "productType": "bulb",
+      "category": { "id": "cat_bulbs", "slug": "bulbs", "name": "Bulbs" },
+      "images": [
+        { "url": "assets/images/products/edison-st64.webp", "altText": "Amber Edison ST64 filament bulb" }
+      ],
+      "ratingAverage": 4.5,
+      "ratingCount": 190,
+      "specifications": {
+        "wattageW": 6,
+        "lumens": 500,
+        "colorTemperatureK": 2200,
+        "dimmable": true,
+        "bulbType": "ST64 LED filament",
+        "baseType": "E26",
+        "voltageV": 120
+      },
+      "defaultVariantId": "var_006_a",
+      "variants": [
+        {
+          "id": "var_006_a",
+          "sku": "BW-ST64-6W-2200",
+          "name": "Amber 2200K",
+          "isDefault": true,
+          "options": [],
+          "price": { "amountMinor": 899, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 4,
+          "image": { "url": "assets/images/products/edison-st64.webp", "altText": "Amber Edison ST64 filament bulb" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_007",
+      "slug": "orbit-glass-globe-pendant",
+      "name": "Orbit Glass Globe Pendant",
+      "brand": "Lumora",
+      "description": "A mouth-blown 10-inch glass globe on an adjustable cord. Choose smoked glass for a moody look or clear glass to show off a filament bulb.",
+      "productType": "pendant",
+      "category": { "id": "cat_pendants", "slug": "pendants", "name": "Pendants" },
+      "images": [
+        { "url": "assets/images/products/orbit-pendant-smoke.webp", "altText": "Orbit globe pendant with smoked glass" }
+      ],
+      "ratingAverage": 4.3,
+      "ratingCount": 58,
+      "specifications": {
+        "baseType": "E26",
+        "voltageV": 120,
+        "material": "Blown glass and steel",
+        "finish": "Black",
+        "widthMm": 254,
+        "heightMm": 254,
+        "depthMm": 254,
+        "ipRating": "IP20"
+      },
+      "defaultVariantId": "var_007_a",
+      "variants": [
+        {
+          "id": "var_007_a",
+          "sku": "ORB-PND-SMK",
+          "name": "Smoked Glass",
+          "isDefault": true,
+          "options": [
+            { "name": "color", "value": "Smoke" }
+          ],
+          "price": { "amountMinor": 9950, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 18,
+          "image": { "url": "assets/images/products/orbit-pendant-smoke.webp", "altText": "Orbit globe pendant with smoked glass" },
+          "specificationOverrides": null
+        },
+        {
+          "id": "var_007_b",
+          "sku": "ORB-PND-CLR",
+          "name": "Clear Glass",
+          "isDefault": false,
+          "options": [
+            { "name": "color", "value": "Clear" }
+          ],
+          "price": { "amountMinor": 8950, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 9,
+          "image": { "url": "assets/images/products/orbit-pendant-clear.webp", "altText": "Orbit globe pendant with clear glass" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_008",
+      "slug": "arc-floor-lamp",
+      "name": "Arc Floor Lamp",
+      "brand": "Fjord & Co",
+      "description": "A sweeping arc floor lamp with a weighted marble base and a satin steel shade that reaches over sofas and reading chairs.",
+      "productType": "lamp",
+      "category": { "id": "cat_lamps", "slug": "lamps", "name": "Lamps" },
+      "images": [
+        { "url": "assets/images/products/arc-floor-lamp.webp", "altText": "Arc floor lamp arching over a sofa" }
+      ],
+      "ratingAverage": 4.7,
+      "ratingCount": 64,
+      "specifications": {
+        "baseType": "E26",
+        "voltageV": 120,
+        "material": "Steel and marble",
+        "finish": "Satin Chrome",
+        "widthMm": 1700,
+        "heightMm": 2000,
+        "depthMm": 400
+      },
+      "defaultVariantId": "var_008_a",
+      "variants": [
+        {
+          "id": "var_008_a",
+          "sku": "ARC-FL-CHR",
+          "name": "Satin Chrome",
+          "isDefault": true,
+          "options": [
+            { "name": "finish", "value": "Satin Chrome" }
+          ],
+          "price": { "amountMinor": 24900, "currency": "USD" },
+          "salePrice": { "amountMinor": 19900, "currency": "USD" },
+          "stockQuantity": 11,
+          "image": { "url": "assets/images/products/arc-floor-lamp.webp", "altText": "Arc floor lamp in satin chrome" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_009",
+      "slug": "mist-bathroom-ceiling-light",
+      "name": "Mist IP44 Bathroom Ceiling Light",
+      "brand": "Aquilux",
+      "description": "A splash-proof ceiling light with a frosted glass diffuser, rated IP44 for bathroom zones 2 and 3.",
+      "productType": "ceiling_light",
+      "category": { "id": "cat_ceiling", "slug": "ceiling-lights", "name": "Ceiling Lights" },
+      "images": [
+        { "url": "assets/images/products/mist-bathroom-light.webp", "altText": "Mist bathroom ceiling light with frosted glass" }
+      ],
+      "ratingAverage": null,
+      "ratingCount": 0,
+      "specifications": {
+        "wattageW": 15,
+        "lumens": 1200,
+        "colorTemperatureK": 4000,
+        "dimmable": false,
+        "material": "Frosted glass and polycarbonate",
+        "finish": "Chrome",
+        "widthMm": 280,
+        "heightMm": 100,
+        "depthMm": 280,
+        "ipRating": "IP44"
+      },
+      "defaultVariantId": "var_009_a",
+      "variants": [
+        {
+          "id": "var_009_a",
+          "sku": "MIST-CL-IP44-CHR",
+          "name": "Chrome",
+          "isDefault": true,
+          "options": [],
+          "price": { "amountMinor": 6499, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 22,
+          "image": { "url": "assets/images/products/mist-bathroom-light.webp", "altText": "Mist bathroom ceiling light with frosted glass" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_010",
+      "slug": "beam-br30-dimmable-flood-bulb",
+      "name": "Beam BR30 Dimmable Flood Bulb",
+      "brand": "Brightwell",
+      "description": "A BR30 LED flood bulb for recessed cans and track heads. Available in two wattages to match room size.",
+      "productType": "bulb",
+      "category": { "id": "cat_bulbs", "slug": "bulbs", "name": "Bulbs" },
+      "images": [
+        { "url": "assets/images/products/beam-br30.webp", "altText": "Beam BR30 flood bulb" }
+      ],
+      "ratingAverage": 4.0,
+      "ratingCount": 87,
+      "specifications": {
+        "wattageW": 9,
+        "lumens": 650,
+        "colorTemperatureK": 3000,
+        "dimmable": true,
+        "bulbType": "BR30 LED",
+        "baseType": "E26",
+        "voltageV": 120
+      },
+      "defaultVariantId": "var_010_a",
+      "variants": [
+        {
+          "id": "var_010_a",
+          "sku": "BEAM-BR30-9W",
+          "name": "9W",
+          "isDefault": true,
+          "options": [
+            { "name": "wattage", "value": "9W" }
+          ],
+          "price": { "amountMinor": 799, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 75,
+          "image": { "url": "assets/images/products/beam-br30.webp", "altText": "Beam BR30 flood bulb, 9 watt" },
+          "specificationOverrides": null
+        },
+        {
+          "id": "var_010_b",
+          "sku": "BEAM-BR30-13W",
+          "name": "13W",
+          "isDefault": false,
+          "options": [
+            { "name": "wattage", "value": "13W" }
+          ],
+          "price": { "amountMinor": 999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 40,
+          "image": { "url": "assets/images/products/beam-br30.webp", "altText": "Beam BR30 flood bulb, 13 watt" },
+          "specificationOverrides": { "wattageW": 13, "lumens": 1100 }
+        }
+      ]
+    },
+    {
+      "id": "prd_011",
+      "slug": "glow-smart-led-strip-kit",
+      "name": "Glow Smart LED Strip Kit (16 ft)",
+      "brand": "Glowhaus",
+      "description": "A 16-foot cuttable RGB LED strip with adhesive backing, a plug-in controller and app control for scenes and schedules.",
+      "productType": "smart_light",
+      "category": { "id": "cat_smart", "slug": "smart-lighting", "name": "Smart Lighting" },
+      "images": [
+        { "url": "assets/images/products/glow-led-strip.webp", "altText": "Glow LED strip lighting under kitchen cabinets" }
+      ],
+      "ratingAverage": 3.9,
+      "ratingCount": 301,
+      "specifications": {
+        "wattageW": 24,
+        "lumens": 1600,
+        "dimmable": true,
+        "voltageV": 12,
+        "material": "Flexible PCB with silicone coating",
+        "widthMm": 10,
+        "heightMm": 3,
+        "depthMm": 4877,
+        "ipRating": "IP65"
+      },
+      "defaultVariantId": "var_011_a",
+      "variants": [
+        {
+          "id": "var_011_a",
+          "sku": "GLOW-STRIP-16FT",
+          "name": "16 ft kit",
+          "isDefault": true,
+          "options": [],
+          "price": { "amountMinor": 3999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 52,
+          "image": { "url": "assets/images/products/glow-led-strip.webp", "altText": "Glow LED strip lighting under kitchen cabinets" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_012",
+      "slug": "linea-linear-led-pendant",
+      "name": "Linea Linear LED Pendant",
+      "brand": "Lumora",
+      "description": "A 48-inch extruded aluminum linear pendant with up and down light, designed for conference tables and long kitchen islands.",
+      "productType": "pendant",
+      "category": { "id": "cat_pendants", "slug": "pendants", "name": "Pendants" },
+      "images": [
+        { "url": "assets/images/products/linea-pendant.webp", "altText": "Linea linear LED pendant over a dining table" }
+      ],
+      "ratingAverage": 4.5,
+      "ratingCount": 22,
+      "specifications": {
+        "wattageW": 40,
+        "lumens": 4200,
+        "colorTemperatureK": 3500,
+        "dimmable": true,
+        "voltageV": 120,
+        "material": "Extruded aluminum",
+        "finish": "Matte White",
+        "widthMm": 1220,
+        "heightMm": 60,
+        "depthMm": 70,
+        "ipRating": "IP20"
+      },
+      "defaultVariantId": "var_012_a",
+      "variants": [
+        {
+          "id": "var_012_a",
+          "sku": "LINEA-PND-48-WHT",
+          "name": "Matte White",
+          "isDefault": true,
+          "options": [
+            { "name": "finish", "value": "Matte White" }
+          ],
+          "price": { "amountMinor": 32900, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 7,
+          "image": { "url": "assets/images/products/linea-pendant.webp", "altText": "Linea linear LED pendant in matte white" },
+          "specificationOverrides": null
+        },
+        {
+          "id": "var_012_b",
+          "sku": "LINEA-PND-48-BLK",
+          "name": "Matte Black",
+          "isDefault": false,
+          "options": [
+            { "name": "finish", "value": "Matte Black" }
+          ],
+          "price": { "amountMinor": 32900, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 5,
+          "image": { "url": "assets/images/products/linea-pendant-black.webp", "altText": "Linea linear LED pendant in matte black" },
+          "specificationOverrides": { "finish": "Matte Black" }
+        }
+      ]
+    },
+    {
+      "id": "prd_013",
+      "slug": "pebble-ceramic-bedside-lamp",
+      "name": "Pebble Ceramic Bedside Lamp",
+      "brand": "Fjord & Co",
+      "description": "A hand-glazed ceramic base with a pleated fabric shade and an inline dimmer switch on the cord.",
+      "productType": "lamp",
+      "category": { "id": "cat_lamps", "slug": "lamps", "name": "Lamps" },
+      "images": [
+        { "url": "assets/images/products/pebble-lamp-white.webp", "altText": "Pebble ceramic bedside lamp in white" }
+      ],
+      "ratingAverage": 4.4,
+      "ratingCount": 35,
+      "specifications": {
+        "dimmable": true,
+        "baseType": "E12",
+        "voltageV": 120,
+        "material": "Glazed ceramic and cotton",
+        "finish": "Gloss White",
+        "widthMm": 200,
+        "heightMm": 380,
+        "depthMm": 200
+      },
+      "defaultVariantId": "var_013_a",
+      "variants": [
+        {
+          "id": "var_013_a",
+          "sku": "PEBBLE-BL-WHT",
+          "name": "White",
+          "isDefault": true,
+          "options": [
+            { "name": "color", "value": "White" }
+          ],
+          "price": { "amountMinor": 5900, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 14,
+          "image": { "url": "assets/images/products/pebble-lamp-white.webp", "altText": "Pebble ceramic bedside lamp in white" },
+          "specificationOverrides": null
+        },
+        {
+          "id": "var_013_b",
+          "sku": "PEBBLE-BL-SGE",
+          "name": "Sage",
+          "isDefault": false,
+          "options": [
+            { "name": "color", "value": "Sage" }
+          ],
+          "price": { "amountMinor": 5900, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 0,
+          "image": { "url": "assets/images/products/pebble-lamp-sage.webp", "altText": "Pebble ceramic bedside lamp in sage green" },
+          "specificationOverrides": { "finish": "Matte Sage" }
+        }
+      ]
+    },
+    {
+      "id": "prd_014",
+      "slug": "drum-semi-flush-ceiling-light",
+      "name": "Drum Semi-Flush Ceiling Light",
+      "brand": "Aquilux",
+      "description": "A 16-inch fabric drum semi-flush fixture with a frosted inner diffuser. Takes three E26 bulbs up to 60W each.",
+      "productType": "ceiling_light",
+      "category": { "id": "cat_ceiling", "slug": "ceiling-lights", "name": "Ceiling Lights" },
+      "images": [
+        { "url": "assets/images/products/drum-semi-flush.webp", "altText": "Drum semi-flush ceiling light with a grey fabric shade" }
+      ],
+      "ratingAverage": 4.1,
+      "ratingCount": 49,
+      "specifications": {
+        "baseType": "E26",
+        "voltageV": 120,
+        "material": "Linen and steel",
+        "finish": "Oil-Rubbed Bronze",
+        "widthMm": 406,
+        "heightMm": 230,
+        "depthMm": 406,
+        "ipRating": "IP20"
+      },
+      "defaultVariantId": "var_014_a",
+      "variants": [
+        {
+          "id": "var_014_a",
+          "sku": "DRUM-SF-16-ORB",
+          "name": "Oil-Rubbed Bronze",
+          "isDefault": true,
+          "options": [
+            { "name": "finish", "value": "Oil-Rubbed Bronze" }
+          ],
+          "price": { "amountMinor": 10999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 16,
+          "image": { "url": "assets/images/products/drum-semi-flush.webp", "altText": "Drum semi-flush ceiling light in oil-rubbed bronze" },
+          "specificationOverrides": null
+        },
+        {
+          "id": "var_014_b",
+          "sku": "DRUM-SF-16-BN",
+          "name": "Brushed Nickel",
+          "isDefault": false,
+          "options": [
+            { "name": "finish", "value": "Brushed Nickel" }
+          ],
+          "price": { "amountMinor": 10999, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 8,
+          "image": { "url": "assets/images/products/drum-semi-flush-nickel.webp", "altText": "Drum semi-flush ceiling light in brushed nickel" },
+          "specificationOverrides": { "finish": "Brushed Nickel" }
+        }
+      ]
+    },
+    {
+      "id": "prd_015",
+      "slug": "spot-gu10-led-bulb-6-pack",
+      "name": "Spot GU10 LED Bulb (6-pack)",
+      "brand": "Brightwell",
+      "description": "GU10 LED spotlight bulbs with a 36 degree beam, ideal for track lighting and recessed downlights.",
+      "productType": "bulb",
+      "category": { "id": "cat_bulbs", "slug": "bulbs", "name": "Bulbs" },
+      "images": [
+        { "url": "assets/images/products/spot-gu10.webp", "altText": "Six Spot GU10 LED bulbs" }
+      ],
+      "ratingAverage": 4.3,
+      "ratingCount": 144,
+      "specifications": {
+        "wattageW": 5,
+        "lumens": 400,
+        "colorTemperatureK": 3000,
+        "dimmable": false,
+        "bulbType": "MR16 LED",
+        "baseType": "GU10",
+        "voltageV": 120
+      },
+      "defaultVariantId": "var_015_a",
+      "variants": [
+        {
+          "id": "var_015_a",
+          "sku": "SPOT-GU10-5W-6PK",
+          "name": "3000K 6-pack",
+          "isDefault": true,
+          "options": [],
+          "price": { "amountMinor": 2799, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 33,
+          "image": { "url": "assets/images/products/spot-gu10.webp", "altText": "Six Spot GU10 LED bulbs" },
+          "specificationOverrides": null
+        }
+      ]
+    },
+    {
+      "id": "prd_016",
+      "slug": "halo-smart-ceiling-panel",
+      "name": "Halo Smart Ceiling Panel",
+      "brand": "Glowhaus",
+      "description": "A 24-inch edge-lit smart ceiling panel with tunable white and app scheduling. The graphite frame variant has no product photo yet.",
+      "productType": "smart_light",
+      "category": { "id": "cat_smart", "slug": "smart-lighting", "name": "Smart Lighting" },
+      "images": [
+        { "url": "assets/images/products/smart-ceiling-panel.webp", "altText": "Halo smart ceiling panel in a living room" }
+      ],
+      "ratingAverage": 4.6,
+      "ratingCount": 12,
+      "specifications": {
+        "wattageW": 32,
+        "lumens": 3000,
+        "colorTemperatureK": 4000,
+        "dimmable": true,
+        "voltageV": 120,
+        "material": "Aluminum and acrylic",
+        "finish": "White",
+        "widthMm": 610,
+        "heightMm": 35,
+        "depthMm": 610,
+        "ipRating": "IP40"
+      },
+      "defaultVariantId": "var_016_a",
+      "variants": [
+        {
+          "id": "var_016_a",
+          "sku": "HALO-SCP-24-WHT",
+          "name": "White frame",
+          "isDefault": true,
+          "options": [
+            { "name": "finish", "value": "White" }
+          ],
+          "price": { "amountMinor": 18900, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 20,
+          "image": { "url": "assets/images/products/smart-ceiling-panel.webp", "altText": "Halo smart ceiling panel with a white frame" },
+          "specificationOverrides": null
+        },
+        {
+          "id": "var_016_b",
+          "sku": "HALO-SCP-24-GPH",
+          "name": "Graphite frame",
+          "isDefault": false,
+          "options": [
+            { "name": "finish", "value": "Graphite" }
+          ],
+          "price": { "amountMinor": 19900, "currency": "USD" },
+          "salePrice": null,
+          "stockQuantity": 6,
+          "image": { "url": "assets/images/products/missing-graphite-panel.webp", "altText": "Halo smart ceiling panel with a graphite frame" },
+          "specificationOverrides": { "finish": "Graphite" }
+        }
+      ]
+    }
+  ]
+}

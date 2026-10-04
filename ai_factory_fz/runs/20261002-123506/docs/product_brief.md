@@ -1,0 +1,40 @@
+# Product brief: Womens Jewellery
+
+Build a Flutter e-commerce MVP for Womens Jewellery. Target shoppers interested in this vertical. Example listing style: Tropical Earring ($19.99). MVP must include: shopping cart with quantity updates, product catalog with search and filters, order confirmation email, product reviews and star ratings. Mobile-first UX, small releasable increment, demo-ready in one sprint.
+
+## Target users
+- Women shopping for fashion and everyday jewellery on mobile
+- Gift buyers looking for accessible-priced pieces like earrings around $20
+- Returning customers who want to browse by style, price, and ratings before purchasing
+
+## Business goals
+- Launch a demo-ready mobile shopping MVP in one sprint
+- Convert browsers into buyers with a simple catalog, cart, and checkout confirmation flow
+- Build trust through product reviews and star ratings
+- Validate demand for the Womens Jewellery vertical with a small releasable increment
+- Keep average ticket accessible, using Tropical Earring at $19.99 as the reference price point
+
+## Key features
+- Product catalog with search and filters
+- Shopping cart with quantity updates
+- Order confirmation email
+- Product reviews and star ratings
+- Mobile-first UX for Flutter iOS and Android
+- Example product listing style: Tropical Earring ($19.99)
+
+## Constraints
+- Flutter mobile app only for the MVP
+- One-sprint scope: small releasable increment, demo-ready
+- Must include cart quantity updates, catalog search/filters, order confirmation email, and reviews with star ratings
+- Mobile-first UX; desktop is out of scope for this release
+- Focus on Womens Jewellery vertical only
+
+## Open questions
+- Which payment methods are required for the first demo (card only, Apple Pay/Google Pay, or cash-on-delivery mock)?
+- Do we need guest checkout, or must shoppers create an account before ordering?
+- What are the initial filter dimensions beyond search (price range, metal, occasion, category, in-stock only)?
+- Who sends the order confirmation email and from which address/brand name?
+- Are reviews verified-purchase only, or can any signed-in user leave a rating?
+- How many starter SKUs should the catalog include for the demo?
+- Is inventory/stock quantity required in MVP, or is unlimited stock acceptable for the sprint demo?
+- What is the return/refund policy copy shown at checkout for this release?

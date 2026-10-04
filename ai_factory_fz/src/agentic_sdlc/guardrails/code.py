@@ -20,6 +20,9 @@ from agentic_sdlc.workspace import Workspace
 
 CODE_RULES = ["DV1", "DV2", "DV3"]
 
+# Run-level artifacts (transcripts, QA reports, scaffold logs) — not owned by a single component.
+SCOPE_INFRA_PREFIXES = ("reports/",)
+
 # Test file patterns per toolchain; a profile can override them under guardrails.tests.
 DEFAULT_TESTS: dict[str, dict[str, Any]] = {
     "node": {"files": ["*.spec.ts", "*.test.ts", "*.e2e-spec.ts", "*.spec.js", "*.test.js"],
@@ -122,7 +125,11 @@ def dv3_scope(ws: Workspace, comp: Component, profile: Profile, files: list[str]
     if comp.workdir not in (".", ""):
         prefix = comp.workdir.rstrip("/") + "/"
         allowed = [prefix, *(profile.guardrails.get("scope_also_allowed") or [])]
-        outside = [f for f in files if not any(f.startswith(a) for a in allowed)]
+        outside = [
+            f for f in files
+            if not any(f.startswith(a) for a in allowed)
+            and not any(f.startswith(p) for p in SCOPE_INFRA_PREFIXES)
+        ]
         errors += [f"DV3: {f} is outside this work item's component ({comp.workdir}/); undo that change" for f in outside]
     for source, copies in (profile.guardrails.get("contract_copies") or {}).items():
         src = ws.root / source

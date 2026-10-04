@@ -1,0 +1,119 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Browse Lighting Products",
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "View Product Details and Variants",
+      "story_ids": [
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "In-Memory Shopping Cart",
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Set up Flutter project structure with Riverpod and go_router",
+      "description": "Initialize a new Flutter 3.x project with Riverpod for state management and go_router for navigation. Configure pubspec.yaml with necessary dependencies including freezed, json_serializable, dio, and flutter_test. Set up project folder structure (lib/models, lib/screens, lib/providers, lib/services, lib/widgets, lib/utils). Choose and apply style tokens (colors, typography, spacing) for the demo without awaiting approval. Ensure the app can run on an Android emulator with no network dependency.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Create mock catalog data model and bundled asset",
+      "description": "Define Dart data models for Product, ProductVariant, and Catalog using freezed and json_serializable. Capture all fields needed: product id, name, brand, description, price (integer cents), sale price (if applicable), SKU, image URL (local asset), stock per variant, specifications (wattage, lumens, color temperature, dimmable, bulb type, material, finish, dimensions, IP rating as applicable), and variant attributes (color, finish, wattage, color temperature). Create a local JSON asset file with 10–20 sample products including at least one multi-variant product, one on sale, one low stock (≤5 units), and one out of stock. Load and validate the mock catalog at app startup. Include unit tests for model serialization.",
+      "epic_id": "E-01",
+      "component": "shared",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Build product list screen with lazy-loaded images and scroll performance",
+      "description": "Implement the product list screen using ListView.builder with lazy image loading and loading placeholders. Display product image, name, price formatted from integer cents (e.g., 12999 cents as $129.99), and stock status (In stock / Low stock / Out of stock). For products with a sale price, show both sale and original price with the original struck through. Use go_router to navigate to product detail on tap. Implement smooth scrolling and lazy image loading so images appear as rows come into view. Add a loading placeholder state. Build unit and widget tests covering price formatting, stock status display, and navigation. Ensure the list renders within 3 seconds on an Android emulator.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Build product detail screen with variant switching and specifications",
+      "description": "Implement the product detail screen showing product name, brand, SKU, description, price, availability, and a structured specifications section. Dynamically display only the specifications applicable to the product type (e.g., wattage, lumens, color temperature, dimmable, bulb type for bulbs; material, finish, dimensions, IP rating for fixtures). Implement variant selection (color, finish, wattage, color temperature) so that selecting a variant updates the displayed price, image, SKU, and availability in real-time using integer cents. Disable the Add to cart button when the selected variant is out of stock. Implement back navigation to the product list at the same scroll position. Add unit and widget tests for variant switching, price updates, and out-of-stock state.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002",
+        "WI-003"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Implement in-memory cart with totals calculation and tax/shipping logic",
+      "description": "Create a Riverpod provider to manage an in-memory cart with add, remove, and quantity update operations. Display a cart screen showing line items with quantity selectors, line totals (unit price × quantity in integer cents), subtotal, shipping (flat $9.99, free when subtotal ≥ $150.00 in cents), calculated tax (flat configurable rate applied to subtotal in integer cents), and order total. Implement quantity validation so quantity cannot exceed available stock. Add a cart badge to the navigation bar showing item count. Use integer arithmetic only for all monetary calculations. Add a floating action button or navigation item to open the cart screen. Implement empty-state messaging when the cart is empty. Build unit tests for cart operations, tax calculation, shipping threshold, and integer-based totals. Ensure the app clears the cart on full restart (in-memory only, no persistence).",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-004"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Speed Demo MVP Complete",
+      "goal": "Deliver a runnable Android Flutter app with product browse, product detail, and optional in-memory cart. All must-have user stories (US-001 and US-002) are complete and tested. Optional cart (US-003) is included if it does not delay core delivery. The app launches on an Android emulator within 3 seconds, loads products from a bundled mock catalog, supports variant switching with real-time price and SKU updates, displays prices as integer cents formatted in USD, and provides a simple in-memory cart with tax and shipping totals calculated using integer arithmetic. No backend API, authentication, or payment processing is required. Style tokens are chosen by the delivery team without approval delays.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ]
+}

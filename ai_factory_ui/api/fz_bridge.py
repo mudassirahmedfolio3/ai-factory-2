@@ -47,8 +47,67 @@ def _step_status(current_phase: str, step_phases: list[str], run_status: str) ->
     return "pending"
 
 
+def _work_item_components(state: Any) -> dict[str, str]:
+    """Map work item id → component (frontend, backend, infra, shared)."""
+    backlog = getattr(state, "backlog", None)
+    if backlog is None:
+        return {}
+    items = getattr(backlog, "work_items", None) or []
+    out: dict[str, str] = {}
+    for wi in items:
+        wid = getattr(wi, "id", None) or (wi.get("id") if isinstance(wi, dict) else None)
+        comp = getattr(wi, "component", None) or (wi.get("component") if isinstance(wi, dict) else "")
+        if wid:
+            out[str(wid)] = str(comp or "")
+    return out
+
+
+def _item_status(items: Any, wid: str) -> str:
+    if isinstance(items, dict):
+        p = items.get(wid)
+    else:
+        p = getattr(items, "get", lambda _k: None)(wid) if hasattr(items, "get") else None
+    if p is None:
+        return "todo"
+    return p.get("status") if isinstance(p, dict) else getattr(p, "status", "todo")
+
+
+def _any_incomplete_work_items(items: Any) -> bool:
+    if not items:
+        return False
+    values = items.values() if isinstance(items, dict) else []
+    for p in values:
+        st = p.get("status") if isinstance(p, dict) else getattr(p, "status", "todo")
+        if st in ("todo", "blocked", "failed"):
+            return True
+    return False
+
+
+def _milestone_qa_in_progress(state: Any) -> bool:
+    """True when every WI in a milestone is done/blocked but milestone QA is not finished."""
+    milestones = getattr(state.build, "milestones", {}) or {}
+    items = getattr(state.build, "items", {}) or {}
+    backlog = getattr(state, "backlog", None)
+    if backlog is None:
+        return False
+    for m in getattr(backlog, "milestones", None) or []:
+        mid = getattr(m, "id", None) or (m.get("id") if isinstance(m, dict) else None)
+        wids = getattr(m, "work_item_ids", None) or (m.get("work_item_ids") if isinstance(m, dict) else [])
+        if not mid or not wids:
+            continue
+        mp = milestones.get(str(mid)) if isinstance(milestones, dict) else None
+        if mp is None:
+            continue
+        mstat = mp.get("status") if isinstance(mp, dict) else getattr(mp, "status", "todo")
+        if mstat == "done":
+            continue
+        if all(_item_status(items, str(w)) in ("done", "blocked") for w in wids):
+            return True
+    return False
+
+
 def infer_ui_phase(state: Any) -> str:
-    """Best-effort phase label for the React journey map."""
+    """Best-effort phase label for the React pipeline step map (not the 11-stage carousel)."""
     status = getattr(state, "status", "running")
     if status == "completed":
         return "complete"
@@ -57,12 +116,16 @@ def infer_ui_phase(state: Any) -> str:
 
     if state.prd and not state.gate_approved("prd"):
         return "prd_review"
+
+    items = getattr(state.build, "items", {}) or {}
+    if _any_incomplete_work_items(items):
+        return "build"
+
+    if items and _milestone_qa_in_progress(state):
+        return "qa"
+
     if state.architecture and not state.gate_approved("architecture"):
         return "design"
-    if state.build.items and any(p.status in ("todo", "blocked", "failed") for p in state.build.items.values()):
-        if any(mp.qa_rounds > 0 for mp in state.build.milestones.values()):
-            return "qa"
-        return "build"
     if state.design and not state.build.items:
         return "build"
     if state.backlog and not state.architecture:
@@ -73,7 +136,66 @@ def infer_ui_phase(state: Any) -> str:
         return "discovery"
     if state.release.verified:
         return "delivery"
+    if items:
+        return "qa"
     return "build"
+
+
+def _infer_build_stage_index(state: Any) -> int:
+    """Backend (5), frontend (6), or deployment (7) from the first incomplete work item."""
+    comps = _work_item_components(state)
+    items = getattr(state.build, "items", {}) or {}
+    if not isinstance(items, dict):
+        items = {}
+    # Prefer backlog order; include build-only ids (e.g. new WIs before backlog sync).
+    candidate_ids = sorted(set(comps.keys()) | {k for k in items if str(k).startswith("WI-")})
+    for wid in candidate_ids:
+        p = items.get(wid)
+        if p is None:
+            continue
+        st = p.get("status") if isinstance(p, dict) else getattr(p, "status", "todo")
+        if st not in ("todo", "blocked", "failed"):
+            continue
+        comp = comps.get(wid, "")
+        if comp == "frontend":
+            return 6
+        if comp == "infra":
+            return 7
+        return 5
+    return 6 if any(c == "frontend" for c in comps.values()) else 5
+
+
+def infer_ui_stage_index(state: Any) -> int:
+    """Index 0–10 matching React `UI_STAGE_AGENTS` / journey carousel order."""
+    status = getattr(state, "status", "running")
+    if status == "completed":
+        return 10
+
+    phase = infer_ui_phase(state)
+
+    if phase in ("discovery", "kickoff"):
+        return 0 if state.product_brief is None else 1
+    if phase == "prd_review":
+        return 1
+
+    # Active build/QA must win over stale planning gates (Pass 2 replan may leave gates open).
+    if phase == "build":
+        return _infer_build_stage_index(state)
+    if phase == "qa":
+        return 8
+
+    if not state.architecture:
+        return 2
+    if state.architecture and not state.gate_approved("architecture"):
+        return 2
+    if not state.design:
+        return 3
+    if not state.backlog:
+        return 4
+
+    if phase in ("release", "delivery", "browser", "client_review"):
+        return 9 if phase == "browser" else 10
+    return 4
 
 
 def _token_budget(state: Any | None = None) -> int:
@@ -97,6 +219,33 @@ def _token_budget(state: Any | None = None) -> int:
         return max(0, int(raw_limit))
     except Exception:
         return 0
+
+
+def _short_product_name(name: str) -> str:
+    """Use the brand segment before em/en dash suffixes from expanded briefs."""
+    text = (name or "").strip()
+    for sep in (" — ", " – ", " - "):
+        if sep in text:
+            return text.split(sep, 1)[0].strip()
+    return text
+
+
+def infer_product_display_name(state: Any, project_name: str) -> str:
+    """Human-facing app title (ShopEase, Lighting …) vs intake slug project_name."""
+    pb = getattr(state, "product_brief", None)
+    if pb is not None:
+        raw = (getattr(pb, "product_name", None) or "").strip()
+        if raw:
+            return _short_product_name(raw)
+    prd = getattr(state, "prd", None)
+    if prd is not None:
+        title = (getattr(prd, "title", None) or "").strip()
+        if title:
+            return title
+    slug = (project_name or "").strip()
+    if slug and slug != getattr(state, "run_id", ""):
+        return slug.replace("-", " ").replace("_", " ").title()
+    return project_name or "Project"
 
 
 def _clip(text: str, limit: int = 140) -> str:
@@ -301,6 +450,7 @@ def publish_fz_run_state(
         ui_status = "failed"
 
     phase = infer_ui_phase(state)
+    ui_active_stage = infer_ui_stage_index(state)
     steps = [
         {
             "id": step["id"],
@@ -328,10 +478,13 @@ def publish_fz_run_state(
 
     qa_done = any(mp.status in ("done", "partial") for mp in state.build.milestones.values())
 
+    display_name = infer_product_display_name(state, project_name)
     payload = {
         "run_id": state.run_id,
         "project_name": project_name,
+        "product_name": display_name,
         "phase": phase,
+        "ui_active_stage": ui_active_stage,
         "status": ui_status,
         "release_number": 1,
         "complexity": complexity,

@@ -1,0 +1,86 @@
+# Product brief: Lighting E-Commerce Mobile App (MVP)
+
+A fast, simple mobile shopping app where customers can find, compare and buy lighting products (indoor, outdoor, ceiling, chandeliers, pendants, wall lights, table/floor lamps, bulbs and smart lighting) with confidence, using lighting-specific specifications and filters such as wattage, color temperature, IP rating and dimmability. It gives our business a direct, scalable sales channel, with admin tools to manage products, inventory and orders without technical help.
+
+## Target users
+- Homeowners and renters buying lighting for their own homes (primary customers; mostly mobile-first shoppers)
+- Guest shoppers who want to browse and check out without creating an account
+- Returning registered customers who use wishlists, saved addresses, order history and reviews
+- Smart-home enthusiasts looking for smart lighting and compatible bulbs
+- Small business owners and decorators doing occasional small-scale purchases (no separate B2B or trade features in the MVP)
+- Admin/store staff who manage products, categories, brands, variants, specifications, inventory, promotions and orders
+- Customer support staff who handle order-specific and general customer enquiries
+
+## Business goals
+- Launch a working MVP that lets a customer go from browsing to a paid, confirmed order on iOS and Android
+- Open a direct mobile sales channel and grow online revenue
+- Convert browsers into buyers through lighting-specific search, filters, specifications and variants that make choosing the right product easy
+- Reduce cart abandonment and track it through basic analytics (product views, searches, add to cart, remove from cart, wishlist additions, checkout started, orders completed, revenue, cart abandonment)
+- Drive repeat purchases and engagement through wishlist, reviews, coupons, promotions and push notifications (P1)
+- Avoid overselling by keeping accurate stock, including variant-level inventory where applicable
+- Let staff manage catalog and orders independently through the admin tools (product management, order management, refunds where applicable)
+- Protect customer data and payments through secure authentication, HTTPS and a secure payment gateway
+- Keep the app fast and reliable so customers do not drop off due to slow loading or errors
+
+## Key features
+- P0 - User Account: user registration, login/logout, forgot/reset password, guest browsing, guest checkout, customer profile, manage shipping addresses
+- P0 - Home Screen: app logo/header, search bar, promotional banner, featured products, new arrivals, popular products, shop by category
+- P0 - Product Categories: Indoor Lighting, Outdoor Lighting, Ceiling Lights, Chandeliers, Pendant Lights, Wall Lights, Table/Floor Lamps, Bulbs, Smart Lighting; category listing, subcategory navigation, product count, category images
+- P0 - Product Search: keyword search, search suggestions, recent searches, search results, no-results message
+- P0 - Product Listing: product image, name, price, sale price, discount, rating, stock status, add to wishlist, add to cart; sorting by Recommended, Price low → high, Price high → low, Newest, Best rated
+- P0 - Product Filters (lighting-specific): Price, Brand, Category, Availability, Color, Wattage, Color temperature, Material, Finish, Dimmable, Size
+- P0 - Product Details: product images, name, SKU, brand, price, discount, description, specifications, availability, variants, quantity selector, add to cart, buy now, add to wishlist
+- P0 - Lighting Specifications (for each applicable product): Wattage, Lumens, Color temperature, Voltage, Light type, Dimmable, Material, Finish, Dimensions, Weight, IP rating, Bulb type, Bulb included/not included
+- P0 - Product Variants: Color, Size, Wattage, Finish, Color temperature; changing a variant updates the relevant price, image, SKU and availability
+- P0 - Shopping Cart: view items, change quantity, remove items, display variants, subtotal, apply coupon, calculate shipping, display taxes where applicable, order total, proceed to checkout
+- P0 - Checkout: customer information, shipping address, select/add address, shipping method, order summary, coupon/discount, payment method, place order
+- P0 - Payment: methods required by the business (credit/debit card, cash on delivery, bank transfer) with processing through a secure payment gateway
+- P0 - Order Creation and Order History: customer can view orders, order details, order status, purchased products, total amount and shipping information; statuses Pending → Confirmed → Processing → Shipped → Delivered
+- P0 - Order Confirmation: confirmation screen, order number, order summary, estimated delivery, confirmation email/push notification, Track Order option
+- P0 - Inventory: product stock quantity, out-of-stock status, low-stock status, prevent purchase when unavailable, variant-level inventory where applicable
+- P0 - Admin Product Management: add product, edit product, activate/deactivate product, upload product images, manage price, inventory, categories, brands, variants and lighting specifications
+- P0 - Admin Order Management: view orders, search orders, view order details, update order status, cancel orders, process refunds where applicable, view customer/shipping information
+- P1 - Wishlist: add/remove products, view wishlist, move product to cart, display out-of-stock status
+- P1 - Reviews and Ratings: star rating, written review, customers can review purchased products, display average rating and review count
+- P1 - Notifications: order confirmation, payment confirmation, order shipped, order delivered, order cancellation, promotional notifications
+- P1 - Promotions and Coupons: discounted products, coupon codes, percentage discount, fixed amount discount, free shipping promotion
+- P1 - Customer Support: FAQ, contact support, email/contact form, order-specific support
+- P1 - Basic Analytics: product views, searches, add to cart, remove from cart, wishlist additions, checkout started, orders completed, revenue, cart abandonment
+- Security: HTTPS, secure authentication, password encryption/hashing, secure payment processing, API authorization, input validation, customer data protection, session management
+- Performance: fast app startup, lazy loading of product images, image optimization, pagination for product lists, cached frequently accessed data, proper error handling, loading indicators
+
+## Constraints
+- Scope is MVP only: P0 features must be complete and working before launch; P1 features (wishlist, reviews, push notifications, coupons, customer support, basic analytics) follow if time and budget allow and must not delay P0
+- Payments must go through a secure third-party payment gateway; the app must not store raw card data
+- Payment methods offered at launch are limited to those the business needs: credit/debit card, cash on delivery and bank transfer
+- Order statuses are limited to the defined flow: Pending → Confirmed → Processing → Shipped → Delivered (cancellation and refunds are handled by admin)
+- Business decision: launch in one country with one currency and one language (English), with shipping limited to our existing delivery coverage
+- Business decision: shipping is calculated from simple rules (flat rate or by region/order value) and free shipping is available as a promotion; no real-time courier rate integration in the MVP
+- Business decision: taxes are shown where applicable, using rates configured by the business
+- Business decision: reviews are allowed only for purchased products (as specified) and are shown after basic moderation by admin
+- Business decision: no social login, loyalty points, gift cards, multi-vendor marketplace, AR/room visualization or live chat in the MVP
+- Customer data must be protected and handled in line with applicable privacy and data-protection rules
+- The app must stay usable on typical mobile connections, with image optimization, lazy loading and pagination for product lists
+- Admin tools must be usable by non-technical staff
+
+## Open questions
+- Which countries/regions will we ship to at launch, and which currency and tax rules apply?
+- Which payment gateway provider will we use, and which card brands and local payment options must it support?
+- For bank transfer, how will payments be verified and confirmed, and how long do we hold an unpaid order before auto-cancelling?
+- For cash on delivery, are there order value limits, excluded regions or extra fees?
+- What shipping method options and prices will we offer (standard, express, pickup), and what are the free-shipping thresholds?
+- What is our return, refund and cancellation policy, and who can cancel an order and up to which status?
+- Should stock be reserved when an item is added to the cart or only when the order is placed or paid?
+- What threshold defines 'low stock', and should it be set per product or globally?
+- Will the admin tools be a web dashboard or inside the mobile app? (Current preference: web dashboard)
+- How many products, brands and variants will we load at launch, and do we need bulk import from spreadsheet?
+- Which specifications are mandatory per category (for example IP rating for outdoor, bulb type for bulbs)?
+- Should coupons be limited by minimum spend, expiry date, usage count, specific categories or first-time customers?
+- Should promotional push notifications require explicit customer opt-in, and who creates and sends them?
+- Do we need multiple admin roles and permissions (for example product manager, order manager, support agent)?
+- Which reviews need moderation, and can customers edit or delete their reviews?
+- Who handles customer support enquiries and in what time frame, and how are they routed to the team?
+- Which analytics tool do we want to use, and what dashboards or reports do we need on day one?
+- What is the target launch date and budget, and do we launch on iOS and Android at the same time?
+- Should guest checkout customers be offered account creation after ordering, and can guests track orders by email and order number?
+- What are our branding assets (logo, colors, banner images, category images) and who provides product photography and descriptions?

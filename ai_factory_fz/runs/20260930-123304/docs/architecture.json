@@ -1,0 +1,155 @@
+{
+  "overview": "Simple Shop Speed Demo MVP (M1) is a standalone Flutter 3.x Android-first app with three screens: Product List, Product Detail and an optional in-memory Cart. It needs no network, backend, sign-in or payments. The catalogue is a bundled JSON asset of 10-20 products, which can be regenerated to 300+ for performance checks, plus bundled images. The UI reads it only through a CatalogRepository interface (MockCatalogRepository in M1), so it can later be swapped for an ApiCatalogRepository built on the generated dart-dio client with no UI changes. The repository method signatures and domain models mirror the OpenAPI contract in this document: listProducts(page, pageSize) returning items and total, and getProduct(productId). The contract is the fixed shape the future NestJS catalog module will implement. It is deliberately limited to 2 business operations plus the health check. The Prisma schema shows the matching minimal catalogue data model (Product and ProductVariant, with stock per variant). Neither the NestJS backend nor PostgreSQL is built or run in M1. Prices are integer minor units (pence) with ISO 4217 code GBP everywhere and are shown tax-inclusive in en_GB format (1299 -> £12.99). The cart is a Riverpod Notifier held in memory only, so it is empty after a relaunch. The theme comes from central design tokens in lib/core/theme/tokens.dart. These use a neutral palette chosen by the team, meet WCAG 2.1 AA contrast and need no sign-off. Every screen handles loading, empty and error states, and all touch targets are at least 48dp. Deferred to later releases: auth, accounts, checkout, Stripe, orders, delivery, admin, search, filters and categories.",
+  "components": [
+    {
+      "name": "Flutter app shell (lib/main.dart, lib/app.dart)",
+      "responsibility": "Bootstraps a ProviderScope and a MaterialApp.router with the en_GB locale, the theme from design tokens and the go_router config. It is runnable with a single 'flutter run' and has no required environment config. It overrides catalogRepositoryProvider with MockCatalogRepository in M1.",
+      "technology": "Flutter 3.x, Dart 3, flutter_riverpod, go_router, flutter_localizations"
+    },
+    {
+      "name": "core/theme",
+      "responsibility": "Holds the single source of design tokens: colours (neutral palette, WCAG AA contrast), typography scale (respects system text scaling), spacing, radii and minimum touch target (48dp). It also builds ThemeData from these tokens. Widgets never hard-code colours or sizes. Swapping brand tokens later is a one-file change.",
+      "technology": "Flutter ThemeData, ColorScheme, TextTheme, ThemeExtension<AppTokens>"
+    },
+    {
+      "name": "core/router",
+      "responsibility": "Defines one route per screen spec. '/' is ProductListScreen. '/products/:productId' is ProductDetailScreen, nested under '/' so the list stays mounted and keeps its scroll position on back. '/cart' is CartScreen. Unknown product ids show an error state rather than crashing.",
+      "technology": "go_router"
+    },
+    {
+      "name": "core/money",
+      "responsibility": "Provides the Money value type (int amountMinor, String currency) and the formatMoney() function. formatMoney() uses integer arithmetic only (pounds = amountMinor ~/ 100, pence = amountMinor % 100 zero-padded) and formats the grouped pound part with intl NumberFormat('#,##0', 'en_GB'), producing strings such as £12.99 and £1,234.50. Money is never converted to double. It also provides add and multiply helpers for cart totals.",
+      "technology": "Dart, intl"
+    },
+    {
+      "name": "core/widgets",
+      "responsibility": "Holds shared widgets: ProductImage, which lazy-loads bundled asset or network images, shows a placeholder on null or missing images via errorBuilder, and carries a semantic label. It also holds StockBadge, LoadingView, EmptyView, ErrorView with retry, and CartBadgeButton, which shows the item count and has a TalkBack label.",
+      "technology": "Flutter widgets, Semantics"
+    },
+    {
+      "name": "features/catalog (data/domain/presentation)",
+      "responsibility": "domain holds the freezed models ProductSummary, ProductDetail, ProductPage and Money, which mirror the OpenAPI schemas, and the abstract CatalogRepository interface. data holds MockCatalogRepository, which parses assets/mock/catalogue.json once, caches it in memory and serves pages and lookups. presentation holds the list and detail screens and their providers.",
+      "technology": "Riverpod AsyncNotifier and FutureProvider.family, freezed, json_serializable"
+    },
+    {
+      "name": "features/cart (domain/presentation) – optional US-003",
+      "responsibility": "Holds the in-memory cart: CartLine (productId, variantId, name, unitPrice Money, quantity), CartState with totals in integer pence, and CartNotifier with add, remove and setQuantity. Quantity is capped at the known stock quantity, and adding is disabled when out of stock. It also provides CartScreen. Nothing is persisted.",
+      "technology": "Riverpod Notifier (non-autoDispose, app lifetime), freezed"
+    },
+    {
+      "name": "Mock catalogue assets",
+      "responsibility": "assets/mock/catalogue.json follows the ProductDetail schema shape. It has 10-20 curated products, including at least one with zero stock and one with a null imageUrl, and all prices are integer pence in GBP. It is accompanied by assets/images/products/*.webp. The script tool/generate_mock_catalogue.dart produces 300+ products for performance checks.",
+      "technology": "JSON asset declared in pubspec.yaml, Dart script"
+    },
+    {
+      "name": "Tests",
+      "responsibility": "Widget tests for ProductListScreen and ProductDetailScreen covering loading, empty, error, out-of-stock and missing image. There is a widget test for CartScreen if US-003 is delivered. Unit tests cover formatMoney, MockCatalogRepository pagination and CartNotifier totals. There is one integration_test for the browse -> detail -> back journey, plus the cart journey if delivered.",
+      "technology": "flutter_test, integration_test, ProviderScope overrides with a fake repository"
+    },
+    {
+      "name": "API contract (deferred implementation)",
+      "responsibility": "Publishes the OpenAPI 3.1 contract now. It is the source of truth for the domain model shape and for the future generated packages/api_client (dart-dio). It is not generated or used by the app in M1.",
+      "technology": "OpenAPI 3.1 YAML, openapi-generator dart-dio (later)"
+    },
+    {
+      "name": "NestJS backend + PostgreSQL (deferred, not built in M1)",
+      "responsibility": "In a later release it will implement the contract with catalog and health modules backed by the Prisma schema. It is documented here so the mock data model and repository interface match it.",
+      "technology": "NestJS, Prisma, PostgreSQL 16, @nestjs/swagger, Docker (later)"
+    }
+  ],
+  "backend_modules": [
+    {
+      "name": "catalog (deferred – contract only in M1)",
+      "responsibility": "Provides public read-only access to active products: a paginated product summary list and product detail. Price and stock are exposed from the default variant, and inStock is derived from stockQuantity > 0. Controllers stay thin, CatalogService holds the logic, and data access goes through PrismaService. It is not implemented in M1; the Flutter MockCatalogRepository implements the same shape.",
+      "entities": [
+        "Product",
+        "ProductVariant"
+      ],
+      "endpoints": [
+        "GET /api/v1/products",
+        "GET /api/v1/products/{productId}"
+      ]
+    },
+    {
+      "name": "health (deferred – contract only in M1)",
+      "responsibility": "Liveness and readiness check. It returns 200 when the database is reachable (SELECT 1 via PrismaService) and 503 with the shared error schema otherwise.",
+      "entities": [],
+      "endpoints": [
+        "GET /api/v1/health"
+      ]
+    }
+  ],
+  "app_features": [
+    {
+      "name": "catalog – Product List (US-001)",
+      "screens": [
+        "ProductListScreen (route '/')"
+      ],
+      "state_management": "productListProvider is an AsyncNotifier<ProductListState>, where ProductListState holds items, total, page and hasMore. It calls catalogRepositoryProvider.listProducts(page, pageSize: 20) and appends pages as the user nears the end of the list (infinite scroll), mirroring the API pagination. The list is a ListView.builder with itemExtent for smooth scrolling at 300+ items, and thumbnails are lazily decoded with cacheWidth. States are: loading (spinner), empty (the 'No products available' EmptyView), error (ErrorView with retry that calls ref.invalidate), and data. Out-of-stock rows remain visible with a StockBadge. The app bar shows CartBadgeButton, watching cartProvider.itemCount, only when the cart feature is enabled. catalogRepositoryProvider is a Provider<CatalogRepository>, overridden with MockCatalogRepository in M1."
+    },
+    {
+      "name": "catalog – Product Detail (US-002)",
+      "screens": [
+        "ProductDetailScreen (route '/products/:productId', nested under '/')"
+      ],
+      "state_management": "productDetailProvider is a FutureProvider.autoDispose.family<ProductDetail, String>(productId) that calls catalogRepositoryProvider.getProduct(productId). It handles loading, error (including ProductNotFound, which shows 'Product not found' with a back action) and data. The image falls back to a placeholder when imageUrl is null or fails to load. The Add to cart button (48dp, with a semantic label) is disabled when inStock is false, and on tap it calls cartProvider.notifier.add(...) and shows a SnackBar confirmation. The app bar shows CartBadgeButton. Back navigation returns to the still-mounted list, which preserves scroll position via PageStorageKey on the ListView."
+    },
+    {
+      "name": "cart – In-memory Cart (US-003, could-have)",
+      "screens": [
+        "CartScreen (route '/cart')"
+      ],
+      "state_management": "cartProvider is a NotifierProvider<CartNotifier, CartState>, non-autoDispose so it lives for the app session. CartState holds List<CartLine> and the derived itemCount and totalMinor (an int sum of unitPrice.amountMinor * quantity), always in GBP. The operations are add(product), increment, decrement and setQuantity (minimum 1, maximum stockQuantity), and remove(productId). There is no persistence, so a relaunch yields an empty cart. The screen has an empty state ('Your cart is empty' with a Browse products action), and each line shows name, quantity stepper and unit price, with the total shown via formatMoney. There is no checkout button in M1."
+    }
+  ],
+  "data_model_notes": "1) Money: all prices are integer minor units (pence) plus an ISO 4217 currency code. In M1 the only currency is GBP. JSON uses { amountMinor: int, currency: 'GBP' }. Dart models use int, never double. Prisma uses Int priceMinor and Char(3) currency. Displayed prices are tax-inclusive (UK VAT included in the stored amount), so there are no separate tax fields in M1. 2) Stock: stock is tracked per ProductVariant (stockQuantity Int >= 0) as the project rules require. For this demo every product has exactly one default variant (isDefault = true). The API and mock expose the default variant's id (defaultVariantId), price and stockQuantity at product level, with inStock = stockQuantity > 0. Stock reservation, releasing stock and checkout are out of scope. The mock stock is informational and the in-memory cart does not decrement it; it only caps quantity. 3) Images: imageUrl and thumbnailUrl are nullable. The mock uses asset paths such as 'asset://images/products/p001.webp', which the ProductImage widget resolves to Image.asset. The API will return https URLs. null means placeholder. 4) Identifiers: UUID strings are used in both API and DB. The mock uses fixed UUIDs so tests are deterministic. 5) Pagination: page is 1-based, pageSize defaults to 20 with a maximum of 100, and the response is { items, total, page, pageSize }. 6) Only active products (isActive = true) are listed. Ordering is by sortOrder, then name. 7) The Prisma schema is intentionally limited to the catalogue entities this scope needs. User, Address, Category, Cart, CartItem, Order, OrderItem and Payment are deferred and will be added with their stories. OrderItem will copy product name and unit price at purchase time, and Cart will belong to a signed-in user. 8) Database CHECK constraints (price_minor >= 0, stock_quantity >= 0, currency ~ '^[A-Z]{3}$') and a partial unique index (one default variant per product) are added in a raw SQL migration, because Prisma cannot express them.",
+  "security": [
+    "M1 collects, stores and transmits no personal data, credentials, payment data or card details. There is no sign-in, no analytics and no crash reporting SDK.",
+    "M1 makes no network calls: the catalogue and images are bundled assets. The release AndroidManifest omits usesCleartextTraffic, so the default https-only policy applies. The INTERNET permission is only added when the API client is introduced.",
+    "When the backend arrives, debug builds may reach local staging at http://10.0.2.2:<port>. Cleartext is permitted for the domain 10.0.2.2 only, in android/app/src/debug/res/xml/network_security_config.xml, and release builds stay https-only.",
+    "The contract already defines a JWT bearerAuth security scheme for later authenticated endpoints. The catalog and health operations are explicitly public (security: []) because browsing must not require sign-in.",
+    "The future catalog API is read-only and exposes only active products. It validates page, pageSize and productId (UUID) with class-validator, and invalid input returns 400 with the shared { statusCode, error, message } error body. It never leaks stack traces.",
+    "The mock catalogue JSON is parsed defensively. Malformed entries, negative prices or negative stock are skipped and logged in debug builds, so bad data cannot crash the app. Missing images fall back to a placeholder.",
+    "No secrets exist in the M1 app. Future config (the API base URL) is injected via --dart-define, and backend secrets come via environment variables validated at startup with @nestjs/config.",
+    "Tokens (later releases) will be stored with flutter_secure_storage. The in-memory cart holds only public catalogue data."
+  ],
+  "adrs": [
+    {
+      "id": "ADR-001",
+      "title": "Bundled mock catalogue behind a CatalogRepository interface instead of a backend in M1",
+      "context": "The speed demo must run immediately on an Android emulator with no backend, network or sign-in. The project conventions require HTTP only through a generated OpenAPI client, and the later release will use a NestJS catalog API. We need to demo now without building throwaway UI that must be rewritten when the API arrives.",
+      "decision": "Define the abstract CatalogRepository in features/catalog/domain with listProducts({int page, int pageSize}) -> ProductPage and getProduct(String productId) -> ProductDetail, throwing ProductNotFoundException. M1 ships MockCatalogRepository, which reads assets/mock/catalogue.json, parses it once and pages it in memory. Domain models are freezed classes whose fields and JSON names match the OpenAPI schemas exactly. The implementation is selected via a Riverpod provider override. Later, ApiCatalogRepository will wrap the generated dart-dio client (packages/api_client) and map its DTOs to the same domain models.",
+      "consequences": "The app runs with a single 'flutter run' and tests use a fake repository via ProviderScope overrides. Swapping to the real API is a data-layer-only change. The mock must be kept in sync with the contract: a unit test validates catalogue.json against the model parsing. The generated client is not used in M1, which is a deliberate, time-boxed exception to the 'generated client only' rule, since M1 makes no HTTP calls at all."
+    },
+    {
+      "id": "ADR-002",
+      "title": "Money as integer minor units with integer-only formatting",
+      "context": "Project rules forbid floats for prices. The PRD requires GBP and tax-inclusive UK formatting (1299 -> £12.99), and cart totals must be summed in integer pence. Common formatting approaches (NumberFormat.currency with amount / 100) introduce doubles.",
+      "decision": "Use a Money value type { int amountMinor, String currency } in the app, the { amountMinor, currency } object in the API, and priceMinor Int plus currency Char(3) in the database. formatMoney() splits amountMinor with ~/ and % 100, formats pounds with grouping via intl for en_GB, and prefixes '£' for GBP. Totals are computed as int sums of amountMinor * quantity. Stored prices are VAT-inclusive.",
+      "consequences": "There are no rounding errors and the same representation holds across mock, API and DB. Multi-currency is structurally possible later but only GBP is accepted now (the contract enum is [GBP]). Unit tests cover 0, 5, 99, 1299, 123450 and large values."
+    },
+    {
+      "id": "ADR-003",
+      "title": "Riverpod + go_router with nested detail route; cart held in an app-lifetime Notifier",
+      "context": "We need list-to-detail navigation that preserves list scroll position on back (US-002), smooth paging for 300+ products, and an optional cart that survives navigation but not an app relaunch (US-003).",
+      "decision": "Use go_router with '/' (list) and a child route 'products/:productId' (detail), so the list remains in the navigation stack, and add a separate '/cart' route. ListView.builder uses a PageStorageKey, and productListProvider (AsyncNotifier, keepAlive) holds the loaded pages. productDetailProvider is an autoDispose family. cartProvider is a non-autoDispose Notifier with no persistence layer.",
+      "consequences": "Scroll position and loaded pages survive detail navigation, and the cart is naturally empty after a relaunch as the PRD requires. Adding persistence later means adding a repository behind CartNotifier. Deep links to /products/:id work because the detail screen fetches by id."
+    },
+    {
+      "id": "ADR-004",
+      "title": "Publish a minimal contract-first catalogue API and data model now, implement later",
+      "context": "There is no backend work in M1, but the team needs a stable target shape for the mock data and future work. The scope limits allow at most 4 API operations, and project rules put stock on variants.",
+      "decision": "Publish OpenAPI 3.1 with two public catalogue operations (listProducts, getProduct) and the getHealth infrastructure check, a shared Error schema and the page/pageSize pagination convention. The bearerAuth scheme is defined for future use. The Prisma model has Product plus ProductVariant, with stock and price on the variant and exactly one default variant per product in this release; the API flattens the default variant into the product responses.",
+      "consequences": "The mock and the future backend share one contract, and client generation later needs no redesign. Adding multi-variant selection later is additive (a variants array on ProductDetail). No cart, order or payment endpoints exist yet; they will be designed with their stories, following the pending_payment -> paid -> fulfilled -> delivered, cancelled and refunded flow and Stripe PaymentIntents."
+    },
+    {
+      "id": "ADR-005",
+      "title": "Team-chosen neutral design tokens in a single theme file",
+      "context": "The PRD states no brand or style approval is needed and that tokens must be easy to swap. The accessibility requirements are WCAG 2.1 AA contrast, dynamic text and 48dp touch targets.",
+      "decision": "Define AppTokens (colours, type scale, spacing, radii, minTouchTarget = 48) in lib/core/theme/tokens.dart and expose them via a ThemeExtension. The palette is neutral: near-black text on white, and one accent colour checked at 4.5:1 or better for text. Out of stock is always shown with a text label, never colour alone.",
+      "consequences": "There is no dependency on brand sign-off and a rebrand is a one-file change. A widget test asserts the minimum button size, and the list and detail screens are tested at a textScaler of 2.0 for overflow."
+    }
+  ],
+  "openapi_yaml": "openapi: 3.1.0\ninfo:\n  title: Simple Shop API\n  version: 0.1.0\n  description: >-\n    Contract for the Simple Shop catalogue. In release M1 (speed demo) this API is NOT implemented;\n    the Flutter app uses a bundled mock catalogue whose shape mirrors these schemas exactly.\n    Prices are integer minor units (pence) with ISO 4217 currency code, VAT-inclusive.\nservers:\n  - url: http://10.0.2.2:3000/api/v1\n    description: Local staging from the Android emulator (debug builds only)\n  - url: https://api.simpleshop.example/api/v1\n    description: Production (future)\ntags:\n  - name: catalog\n    description: Public product browsing\n  - name: health\n    description: Infrastructure health check\nsecurity:\n  - bearerAuth: []\npaths:\n  /health:\n    get:\n      tags: [health]\n      operationId: getHealth\n      summary: Health check (200 when the database is reachable)\n      security: []\n      responses:\n        '200':\n          description: Service and database are healthy\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/HealthStatus'\n        '503':\n          $ref: '#/components/responses/ServiceUnavailable'\n  /products:\n    get:\n      tags: [catalog]\n      operationId: listProducts\n      summary: List active products (paginated)\n      description: Returns active products ordered by sortOrder then name. Public, no authentication required.\n      security: []\n      parameters:\n        - $ref: '#/components/parameters/Page'\n        - $ref: '#/components/parameters/PageSize'\n      responses:\n        '200':\n          description: A page of product summaries\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/ProductPage'\n        '400':\n          $ref: '#/components/responses/BadRequest'\n        '500':\n          $ref: '#/components/responses/InternalError'\n  /products/{productId}:\n    get:\n      tags: [catalog]\n      operationId: getProduct\n      summary: Get product detail\n      description: Returns full details of one active product. Public, no authentication required.\n      security: []\n      parameters:\n        - $ref: '#/components/parameters/ProductId'\n      responses:\n        '200':\n          description: Product detail\n          content:\n            application/json:\n              schema:\n                $ref: '#/components/schemas/ProductDetail'\n        '400':\n          $ref: '#/components/responses/BadRequest'\n        '404':\n          $ref: '#/components/responses/NotFound'\n        '500':\n          $ref: '#/components/responses/InternalError'\ncomponents:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\n      bearerFormat: JWT\n      description: JWT access token (15 min). Reserved for authenticated endpoints in later releases; catalogue and health are public.\n  parameters:\n    Page:\n      name: page\n      in: query\n      required: false\n      description: 1-based page number\n      schema:\n        type: integer\n        format: int32\n        minimum: 1\n        default: 1\n    PageSize:\n      name: pageSize\n      in: query\n      required: false\n      description: Number of items per page\n      schema:\n        type: integer\n        format: int32\n        minimum: 1\n        maximum: 100\n        default: 20\n    ProductId:\n      name: productId\n      in: path\n      required: true\n      description: Product identifier (UUID)\n      schema:\n        type: string\n        format: uuid\n  schemas:\n    Money:\n      type: object\n      description: Monetary amount in integer minor units (pence for GBP), VAT-inclusive. Never a float.\n      additionalProperties: false\n      required: [amountMinor, currency]\n      properties:\n        amountMinor:\n          type: integer\n          format: int64\n          minimum: 0\n          description: Amount in minor units, e.g. 1299 means 12.99 GBP\n          examples: [1299]\n        currency:\n          type: string\n          description: ISO 4217 currency code. Only GBP is supported in this release.\n          enum: [GBP]\n          pattern: '^[A-Z]{3}$'\n    ProductSummary:\n      type: object\n      additionalProperties: false\n      required: [id, name, price, thumbnailUrl, inStock, stockQuantity]\n      properties:\n        id:\n          type: string\n          format: uuid\n        name:\n          type: string\n          minLength: 1\n          maxLength: 200\n        price:\n          $ref: '#/components/schemas/Money'\n        thumbnailUrl:\n          type: [string, 'null']\n          description: Thumbnail image URL; null means the client shows a placeholder\n        inStock:\n          type: boolean\n          description: True when stockQuantity is greater than 0\n        stockQuantity:\n          type: integer\n          format: int32\n          minimum: 0\n          description: Available stock of the default variant\n    ProductDetail:\n      type: object\n      additionalProperties: false\n      required: [id, name, description, price, imageUrl, thumbnailUrl, inStock, stockQuantity, defaultVariantId]\n      properties:\n        id:\n          type: string\n          format: uuid\n        name:\n          type: string\n          minLength: 1\n          maxLength: 200\n        description:\n          type: string\n          maxLength: 5000\n        price:\n          $ref: '#/components/schemas/Money'\n        imageUrl:\n          type: [string, 'null']\n          description: Full-size image URL; null means the client shows a placeholder\n        thumbnailUrl:\n          type: [string, 'null']\n        inStock:\n          type: boolean\n          description: True when stockQuantity is greater than 0\n        stockQuantity:\n          type: integer\n          format: int32\n          minimum: 0\n        defaultVariantId:\n          type: string\n          format: uuid\n          description: Id of the product's default variant (stock is tracked per variant)\n    ProductPage:\n      type: object\n      additionalProperties: false\n      required: [items, total, page, pageSize]\n      properties:\n        items:\n          type: array\n          items:\n            $ref: '#/components/schemas/ProductSummary'\n        total:\n          type: integer\n          format: int32\n          minimum: 0\n          description: Total number of matching products across all pages\n        page:\n          type: integer\n          format: int32\n          minimum: 1\n        pageSize:\n          type: integer\n          format: int32\n          minimum: 1\n          maximum: 100\n    HealthStatus:\n      type: object\n      additionalProperties: false\n      required: [status, database]\n      properties:\n        status:\n          type: string\n          enum: [ok]\n        database:\n          type: string\n          enum: [up]\n    Error:\n      type: object\n      additionalProperties: false\n      required: [statusCode, error, message]\n      properties:\n        statusCode:\n          type: integer\n          format: int32\n          examples: [404]\n        error:\n          type: string\n          examples: [Not Found]\n        message:\n          type: string\n          examples: [Product not found]\n  responses:\n    BadRequest:\n      description: Invalid request parameters\n      content:\n        application/json:\n          schema:\n            $ref: '#/components/schemas/Error'\n    NotFound:\n      description: Resource not found\n      content:\n        application/json:\n          schema:\n            $ref: '#/components/schemas/Error'\n    InternalError:\n      description: Unexpected server error\n      content:\n        application/json:\n          schema:\n            $ref: '#/components/schemas/Error'\n    ServiceUnavailable:\n      description: Database unreachable\n      content:\n        application/json:\n          schema:\n            $ref: '#/components/schemas/Error'\n",
+  "prisma_schema": "// Simple Shop - catalogue data model (contract for the future backend; not deployed in M1).\n// Prices: integer minor units + ISO 4217 code. Stock: per variant.\n// Extra constraints added via raw SQL migration:\n//   CHECK (price_minor >= 0), CHECK (stock_quantity >= 0), CHECK (currency ~ '^[A-Z]{3}$'),\n//   CREATE UNIQUE INDEX product_variants_one_default ON product_variants(product_id) WHERE is_default;\n\ngenerator client {\n  provider = \"prisma-client-js\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Product {\n  id           String           @id @default(uuid()) @db.Uuid\n  slug         String           @unique @db.VarChar(200)\n  name         String           @db.VarChar(200)\n  description  String           @default(\"\") @db.Text\n  imageUrl     String?          @map(\"image_url\") @db.VarChar(2048)\n  thumbnailUrl String?          @map(\"thumbnail_url\") @db.VarChar(2048)\n  isActive     Boolean          @default(true) @map(\"is_active\")\n  sortOrder    Int              @default(0) @map(\"sort_order\")\n  createdAt    DateTime         @default(now()) @map(\"created_at\") @db.Timestamptz(3)\n  updatedAt    DateTime         @updatedAt @map(\"updated_at\") @db.Timestamptz(3)\n  variants     ProductVariant[]\n\n  @@index([isActive, sortOrder, name])\n  @@map(\"products\")\n}\n\nmodel ProductVariant {\n  id            String   @id @default(uuid()) @db.Uuid\n  productId     String   @map(\"product_id\") @db.Uuid\n  sku           String   @unique @db.VarChar(64)\n  name          String   @default(\"Default\") @db.VarChar(200)\n  priceMinor    Int      @map(\"price_minor\")\n  currency      String   @default(\"GBP\") @db.Char(3)\n  stockQuantity Int      @default(0) @map(\"stock_quantity\")\n  isDefault     Boolean  @default(false) @map(\"is_default\")\n  createdAt     DateTime @default(now()) @map(\"created_at\") @db.Timestamptz(3)\n  updatedAt     DateTime @updatedAt @map(\"updated_at\") @db.Timestamptz(3)\n  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)\n\n  @@index([productId])\n  @@map(\"product_variants\")\n}\n"
+}

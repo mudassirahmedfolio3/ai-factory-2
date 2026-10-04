@@ -1,0 +1,394 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#7A4F00",
+      "dark": "#FFC857"
+    },
+    {
+      "name": "onPrimary",
+      "light": "#FFFFFF",
+      "dark": "#2B1B00"
+    },
+    {
+      "name": "primaryContainer",
+      "light": "#FFE7B8",
+      "dark": "#5C3B00"
+    },
+    {
+      "name": "onPrimaryContainer",
+      "light": "#2B1B00",
+      "dark": "#FFE7B8"
+    },
+    {
+      "name": "secondary",
+      "light": "#3F4A5A",
+      "dark": "#B8C4D6"
+    },
+    {
+      "name": "onSecondary",
+      "light": "#FFFFFF",
+      "dark": "#1B2431"
+    },
+    {
+      "name": "background",
+      "light": "#FFFBF5",
+      "dark": "#121212"
+    },
+    {
+      "name": "onBackground",
+      "light": "#1C1B1A",
+      "dark": "#EDE9E3"
+    },
+    {
+      "name": "surface",
+      "light": "#FFFFFF",
+      "dark": "#1E1E1E"
+    },
+    {
+      "name": "onSurface",
+      "light": "#1C1B1A",
+      "dark": "#EDE9E3"
+    },
+    {
+      "name": "surfaceVariant",
+      "light": "#F1EBE1",
+      "dark": "#2A2926"
+    },
+    {
+      "name": "onSurfaceVariant",
+      "light": "#5F5A52",
+      "dark": "#B9B3A8"
+    },
+    {
+      "name": "outline",
+      "light": "#7D766B",
+      "dark": "#958F84"
+    },
+    {
+      "name": "divider",
+      "light": "#E3DCCF",
+      "dark": "#3A3833"
+    },
+    {
+      "name": "error",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "onError",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    },
+    {
+      "name": "stockInStock",
+      "light": "#1B6E3A",
+      "dark": "#7EDC9A"
+    },
+    {
+      "name": "stockLow",
+      "light": "#8F4B00",
+      "dark": "#FFB74D"
+    },
+    {
+      "name": "stockOut",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "salePrice",
+      "light": "#B3261E",
+      "dark": "#FFB4AB"
+    },
+    {
+      "name": "originalPriceStruck",
+      "light": "#5F5A52",
+      "dark": "#B9B3A8"
+    },
+    {
+      "name": "disabledContainer",
+      "light": "#E0DBD2",
+      "dark": "#3A3833"
+    },
+    {
+      "name": "onDisabled",
+      "light": "#5F5A52",
+      "dark": "#B9B3A8"
+    },
+    {
+      "name": "snackbarBackground",
+      "light": "#322F2B",
+      "dark": "#EDE9E3"
+    },
+    {
+      "name": "onSnackbar",
+      "light": "#FFFFFF",
+      "dark": "#1C1B1A"
+    }
+  ],
+  "typography": [
+    {
+      "name": "headlineSmall",
+      "size": 24.0,
+      "weight": 700,
+      "line_height": 1.33
+    },
+    {
+      "name": "titleLarge",
+      "size": 20.0,
+      "weight": 600,
+      "line_height": 1.4
+    },
+    {
+      "name": "titleMedium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 1.5
+    },
+    {
+      "name": "priceLarge",
+      "size": 22.0,
+      "weight": 700,
+      "line_height": 1.27
+    },
+    {
+      "name": "priceMedium",
+      "size": 16.0,
+      "weight": 700,
+      "line_height": 1.5
+    },
+    {
+      "name": "priceStruck",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 1.43
+    },
+    {
+      "name": "bodyLarge",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 1.5
+    },
+    {
+      "name": "bodyMedium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 1.43
+    },
+    {
+      "name": "labelLarge",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 1.43
+    },
+    {
+      "name": "labelSmall",
+      "size": 12.0,
+      "weight": 500,
+      "line_height": 1.33
+    }
+  ],
+  "spacing": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ],
+  "corner_radii": [
+    4,
+    8,
+    12,
+    16,
+    28
+  ],
+  "shared_widgets": [
+    {
+      "name": "AppTheme (lib/core/theme)",
+      "description": "Builds light and dark ThemeData from the color, typography, spacing and corner radius tokens using ColorScheme and TextTheme extensions. No hard-coded colors or sizes in widgets. Text uses the system font scale (no clamping below 1.0). Material 3 enabled and ThemeMode follows the system."
+    },
+    {
+      "name": "LoadingView",
+      "description": "Centered CircularProgressIndicator with a Semantics label 'Loading'. Used by every AsyncValue.loading branch. The list screen may show skeleton cards, but the semantic label stays the same."
+    },
+    {
+      "name": "EmptyView",
+      "description": "Centered icon, title (titleMedium) and optional message plus optional action button (min 48dp). Product list uses the message 'No products available'. Cart uses 'Your cart is empty' with a 'Browse products' button. The icon has a semantic label."
+    },
+    {
+      "name": "ErrorView",
+      "description": "Centered error icon (semantic label 'Error'), message text and a 'Retry' FilledButton (min 48dp) that invalidates the screen's provider. Also used for the 'Product not found' state, where the retry is replaced by a 'Back to products' button."
+    },
+    {
+      "name": "CartBadgeButton",
+      "description": "IconButton (shopping cart icon, 48x48dp minimum) in the AppBar of list and detail screens. Watches cartProvider.select((s) => s.itemCount) and shows a Badge with the count when greater than 0 (99+ cap). Semantics label: 'Cart, N items'. Tap calls context.pushNamed('cart')."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Card with InkWell (min height 48dp, whole card tappable) containing ProductImage thumbnail, name, brand, PriceText and StockStatusChip. Wrapped in Semantics with a single label combining name, price and stock status. Opens detail with context.pushNamed('productDetail', pathParameters: {'productId': id})."
+    },
+    {
+      "name": "ProductImage",
+      "description": "Image.asset with cacheWidth set so only visible rows decode (lazy), BoxFit.cover, fixed aspect ratio, errorBuilder placeholder icon on surfaceVariant. Always has a semanticLabel from the imageAlt text."
+    },
+    {
+      "name": "PriceText",
+      "description": "Formats integer pence as GBP (for example £24.99) using a single formatter in lib/core; never floats for money. When a sale price is present it shows the sale price (salePrice color, priceMedium/priceLarge) and the original price struck through (originalPriceStruck color, priceStruck). Semantics label reads 'Now £X, was £Y'. Prices include 20% VAT."
+    },
+    {
+      "name": "StockStatusChip",
+      "description": "Chip-style label with icon plus text (never color only): 'In stock' (stockInStock), 'Low stock' when quantity is 5 or fewer (stockLow, global threshold 5), 'Out of stock' (stockOut). Uses labelSmall/labelLarge with WCAG AA contrast."
+    },
+    {
+      "name": "QuantitySelector",
+      "description": "Row with minus IconButton, current quantity text and plus IconButton, each at least 48x48dp, with semantic labels 'Decrease quantity' and 'Increase quantity'. Range 1 to stockQuantity on the detail screen (state via StateProvider.autoDispose.family keyed by productId). On the cart screen it edits the line quantity via cartProvider.setQuantity, and the plus button at the max shows the cap SnackBar. Buttons disabled at bounds."
+    },
+    {
+      "name": "SpecRow",
+      "description": "Label and value row for the specifications section (label in onSurfaceVariant bodyMedium, value in onSurface bodyLarge, divider below). Only non-null spec fields are rendered, in fixed order: wattage, lumens, color temperature, voltage, light type, dimmable, material, finish, dimensions, weight, IP rating, bulb type, bulb included. Merged into one Semantics node 'label: value'."
+    },
+    {
+      "name": "CartLineTile",
+      "description": "Cart row with thumbnail ProductImage, name, unit price, QuantitySelector, line total and a remove IconButton (48x48dp, label 'Remove <name> from cart'). Line total is unitPriceMinor * quantity in integer pence."
+    },
+    {
+      "name": "CartSummaryBar",
+      "description": "Bottom bar on the Cart screen showing 'Subtotal' and the subtotal in GBP (sum of line totals, includes 20% VAT note 'Prices include VAT'). No checkout button in this demo."
+    },
+    {
+      "name": "AppSnackBar helpers",
+      "description": "Floating SnackBar helpers using snackbarBackground/onSnackbar tokens: add-to-cart confirmation with a 'View cart' action, and the cap message 'Only N in stock - quantity limited to N'. Announced to screen readers as a live region."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "Product List",
+      "route": "/",
+      "purpose": "Launch screen. Browse the bundled mock catalog (10 or more lighting products across categories) as a scrollable list showing image, name, price (with struck-through original and sale price when on sale) and stock status. Tapping a card opens Product Detail. Scroll position is kept when returning from detail.",
+      "components": [
+        "AppBar (title 'Lighting', CartBadgeButton)",
+        "ListView.builder with PageStorageKey",
+        "ProductCard",
+        "ProductImage (Image.asset with cacheWidth, lazy)",
+        "PriceText",
+        "StockStatusChip",
+        "LoadingView",
+        "EmptyView",
+        "ErrorView"
+      ],
+      "states": [
+        "loading (LoadingView while productListProvider resolves)",
+        "empty (EmptyView 'No products available')",
+        "error (ErrorView with Retry that invalidates productListProvider)",
+        "success (list of ProductCards; in stock, low stock (5 or fewer), out of stock and sale price variants)"
+      ],
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "Product Detail",
+      "route": "/products/:productId",
+      "purpose": "Show the full product: image, name, SKU, brand, price (and sale price if applicable), description, stock status, quantity selector and lighting specifications (label/value pairs, only applicable ones). Add to cart adds the selected quantity to the in-memory cart, shows a confirmation SnackBar and updates the cart badge. Add to cart is disabled when out of stock. Back returns to the list at the same scroll position.",
+      "components": [
+        "AppBar (back button, product name, CartBadgeButton)",
+        "ProductImage",
+        "PriceText",
+        "StockStatusChip",
+        "Text: SKU, brand, description",
+        "QuantitySelector (1 to stockQuantity)",
+        "FilledButton 'Add to cart' (min 48dp, disabled when out of stock)",
+        "Specifications section with SpecRow list",
+        "AppSnackBar helpers",
+        "LoadingView",
+        "ErrorView"
+      ],
+      "states": [
+        "loading (LoadingView while productDetailProvider(productId) resolves)",
+        "error (ErrorView with Retry that invalidates productDetailProvider(productId))",
+        "not found (unknown productId shows 'Product not found' with a 'Back to products' button)",
+        "success in stock (quantity selector and enabled Add to cart)",
+        "success low stock (Low stock label, quantity capped at stockQuantity)",
+        "success out of stock (Out of stock label, Add to cart disabled, quantity selector disabled)",
+        "added (confirmation SnackBar with 'View cart' action and updated badge)",
+        "capped (SnackBar 'Only N in stock - quantity limited to N')"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "Cart",
+      "route": "/cart",
+      "purpose": "Optional in-memory cart (may be cut first if delivery is at risk). Lists each line with product name, unit price, quantity and line total, lets the shopper change quantity (capped at available stock with a message) or remove a line, and shows the subtotal in GBP computed with integer pence. Empty state when there are no lines. Cart is not persisted, so a relaunch starts empty.",
+      "components": [
+        "AppBar (back button, title 'Cart')",
+        "ListView of CartLineTile",
+        "QuantitySelector",
+        "CartSummaryBar (subtotal)",
+        "PriceText",
+        "AppSnackBar helpers (cap message)",
+        "EmptyView ('Your cart is empty' with 'Browse products' button)",
+        "LoadingView",
+        "ErrorView"
+      ],
+      "states": [
+        "loading (LoadingView only if a provider is async; cartProvider is synchronous in-memory so this resolves immediately)",
+        "empty (EmptyView shown when there are no lines, including after removing the last item)",
+        "error (ErrorView fallback with Retry that invalidates cartProvider; not expected for the in-memory cart)",
+        "success (lines with updated line totals and subtotal immediately after quantity change or removal)",
+        "capped (SnackBar 'Only N in stock - quantity limited to N' when the requested quantity exceeds maxQuantity)"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap a ProductCard: context.pushNamed('productDetail', pathParameters: {'productId': id}) so the list keeps its scroll position"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "System back button or AppBar back control (pop returns to the list at the same scroll position); 'Back to products' button on the Product not found state"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Tap CartBadgeButton in the AppBar: context.pushNamed('cart')"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Tap CartBadgeButton in the AppBar or the 'View cart' action on the add-to-cart confirmation SnackBar: context.pushNamed('cart')"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-01",
+      "trigger": "'Browse products' button on the empty cart state: context.go('/'); back button pops to the previous screen"
+    }
+  ],
+  "accessibility": [
+    "Minimum touch target 48x48dp for all tappable elements: product cards, CartBadgeButton, quantity plus/minus buttons, remove button, Add to cart, Retry and Browse products buttons.",
+    "Text contrast meets WCAG AA in both light and dark themes (at least 4.5:1 for body text, 3:1 for large text and UI components); all color tokens are chosen for this and stock status is never conveyed by color alone (icon plus text label).",
+    "Text respects the system font scale; layouts use flexible sizing and wrap or scroll rather than clip at large font scales.",
+    "All images and icons have semantic labels (product images use the imageAlt text; decorative icons are excluded from semantics); ProductImage placeholder on error also has a label.",
+    "Each ProductCard exposes a single Semantics label combining name, price and stock status (for example 'Name, £24.99, In stock'); sale prices read 'Now £X, was £Y'.",
+    "SpecRow items are merged into one node 'label: value' so screen readers read them as pairs; Specifications section heading is marked as a header.",
+    "Disabled Add to cart on out-of-stock products is exposed as disabled to assistive tech and the reason (Out of stock) is visible text next to it.",
+    "CartBadgeButton announces 'Cart, N items'; SnackBars (add-to-cart confirmation and stock cap message) are announced as live regions.",
+    "Loading, empty and error states are exposed with semantic labels; ErrorView Retry is focusable and labelled.",
+    "Focus and reading order follow visual order top to bottom; back navigation available via both system back and AppBar back control.",
+    "Supports light and dark themes following the system setting; no hard-coded colors or sizes in widgets, all values come from theme tokens."
+  ]
+}

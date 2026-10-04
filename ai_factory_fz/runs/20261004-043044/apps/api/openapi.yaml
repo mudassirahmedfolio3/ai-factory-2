@@ -1,0 +1,792 @@
+openapi: 3.1.0
+info:
+  title: Lighting Retail UK API
+  version: 1.0.0
+  description: |
+    Contract-first API for the Lighting Retail UK mobile MVP.
+    M1 Flutter uses local mock data shaped like these schemas.
+    M2 implements public catalog reads plus health. Infrastructure
+    GET /health and OpenAPI GET /api/docs-json are excluded from the
+    twelve-operation delivery cap.
+    Money is integer minor units (pence) with ISO 4217 currency GBP.
+  contact:
+    name: Lighting Retail Engineering
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+servers:
+  - url: http://10.0.2.2:3000/api/v1
+    description: Android emulator to local staging
+  - url: https://api.staging.lighting-retail.example/api/v1
+    description: Staging
+  - url: https://api.lighting-retail.example/api/v1
+    description: Production
+tags:
+  - name: Health
+    description: Service health
+  - name: Catalog
+    description: Public lighting catalog (guest)
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: getHealth
+      summary: Health check
+      description: Returns 200 when the API process and PostgreSQL are reachable.
+      security: []
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Database unreachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /home:
+    get:
+      tags:
+        - Catalog
+      operationId: getHome
+      summary: Home merchandising payload
+      description: Top-level categories and featured products for the home screen (US-001).
+      security: []
+      responses:
+        '200':
+          description: Home data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomeResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /categories:
+    get:
+      tags:
+        - Catalog
+      operationId: listCategories
+      summary: List category tree
+      description: Returns active categories with optional parent relationships for browse paths (US-001).
+      security: []
+      parameters:
+        - name: depth
+          in: query
+          description: 1 for top-level only, 2 includes children
+          schema:
+            type: integer
+            enum:
+              - 1
+              - 2
+            default: 2
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /categories/{slug}:
+    get:
+      tags:
+        - Catalog
+      operationId: getCategoryBySlug
+      summary: Get category by slug
+      description: Resolve a category or subcategory for listing context (US-001).
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CategorySlug'
+      responses:
+        '200':
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDetail'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /catalog/facets:
+    get:
+      tags:
+        - Catalog
+      operationId: getCatalogFacets
+      summary: Filter facet metadata
+      description: Brands, finishes, wattage bounds, and category options for the listing filter UI (US-003).
+      security: []
+      parameters:
+        - name: categorySlug
+          in: query
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        '200':
+          description: Facets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogFacetsResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products:
+    get:
+      tags:
+        - Catalog
+      operationId: listProducts
+      summary: List and search products
+      description: |
+        Paginated product listing with text search (name, SKU, brand, keywords),
+        filters, and sort (US-001, US-002, US-003). Prices in pence GBP.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: q
+          in: query
+          description: Search query (name, SKU, brand, description)
+          schema:
+            type: string
+            maxLength: 120
+        - name: categorySlug
+          in: query
+          schema:
+            type: string
+            maxLength: 100
+        - name: brand
+          in: query
+          description: Repeat for multiple brands
+          schema:
+            type: array
+            items:
+              type: string
+              maxLength: 80
+          style: form
+          explode: true
+        - name: minPriceCents
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: maxPriceCents
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: minWattage
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: maxWattage
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: finish
+          in: query
+          schema:
+            type: string
+            maxLength: 80
+        - name: inStockOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: sort
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProductSort'
+      responses:
+        '200':
+          description: Paginated products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          description: Invalid query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{productId}:
+    get:
+      tags:
+        - Catalog
+      operationId: getProductById
+      summary: Product detail
+      description: Detail with variants, lighting specifications, images, and ratings summary (US-004).
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{productId}/reviews:
+    get:
+      tags:
+        - Catalog
+      operationId: listProductReviews
+      summary: List product reviews
+      description: Paginated reviews for product detail (US-004).
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Review page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewListResponse'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token (15 min). Reserved for auth, cart, orders post-demo.
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CategorySlug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        type: string
+        maxLength: 100
+  schemas:
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - degraded
+        database:
+          type: string
+          enum:
+            - up
+            - down
+        timestamp:
+          type: string
+          format: date-time
+    Money:
+      type: object
+      additionalProperties: false
+      required:
+        - amountCents
+        - currency
+      properties:
+        amountCents:
+          type: integer
+          minimum: 0
+          description: Pence for GBP
+          example: 4999
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: GBP
+    ProductSort:
+      type: string
+      enum:
+        - priceAsc
+        - priceDesc
+        - newest
+        - popularity
+      default: popularity
+    CategorySummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - slug
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Ceiling Lights
+        slug:
+          type: string
+          example: ceiling-lights
+        parentId:
+          type:
+            - string
+            - 'null'
+          format: uuid
+        imageUrl:
+          type: string
+          format: uri
+    CategoryDetail:
+      allOf:
+        - $ref: '#/components/schemas/CategorySummary'
+        - type: object
+          properties:
+            description:
+              type: string
+            children:
+              type: array
+              items:
+                $ref: '#/components/schemas/CategorySummary'
+    CategoryListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategorySummary'
+    HomeResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - categories
+        - featuredProducts
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategorySummary'
+        featuredProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+    RatingSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - averageRating
+        - reviewCount
+      properties:
+        averageRating:
+          type: number
+          minimum: 0
+          maximum: 5
+          example: 4.5
+        reviewCount:
+          type: integer
+          minimum: 0
+          example: 12
+    ProductSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - brand
+        - slug
+        - category
+        - price
+        - primaryImageUrl
+        - inStock
+        - rating
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Modern LED Ceiling Light
+        brand:
+          type: string
+          example: Luminex
+        slug:
+          type: string
+        category:
+          $ref: '#/components/schemas/CategorySummary'
+        price:
+          $ref: '#/components/schemas/Money'
+        compareAtPrice:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        primaryImageUrl:
+          type: string
+          format: uri
+        inStock:
+          type: boolean
+        rating:
+          $ref: '#/components/schemas/RatingSummary'
+        popularityRank:
+          type:
+            - integer
+            - 'null'
+          minimum: 1
+    ProductListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+    LightingSpecs:
+      type: object
+      additionalProperties: false
+      properties:
+        wattageW:
+          type: integer
+          minimum: 0
+          example: 24
+        lumens:
+          type: integer
+          minimum: 0
+          example: 2400
+        colorTemperatureK:
+          type: integer
+          example: 3000
+        lightType:
+          type: string
+          example: LED
+        voltage:
+          type: string
+          example: 220-240V
+        dimmable:
+          type: boolean
+        material:
+          type: string
+          example: Aluminum
+        finish:
+          type: string
+          example: Matte Black
+        dimensionsMm:
+          type: string
+          example: 600x300 mm
+        ipRating:
+          type: string
+          example: IP44
+        bulbIncluded:
+          type: boolean
+        installationType:
+          type: string
+          example: Ceiling mounted
+    ProductVariant:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - sku
+        - label
+        - price
+        - stockQuantity
+        - availableQuantity
+        - isDefault
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+          example: CL-1001-BK
+        label:
+          type: string
+          example: Matte Black / 3000K / 24W
+        price:
+          $ref: '#/components/schemas/Money'
+        compareAtPrice:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        stockQuantity:
+          type: integer
+          minimum: 0
+        availableQuantity:
+          type: integer
+          minimum: 0
+          description: stockQuantity minus active reservations
+        finish:
+          type: string
+        wattageW:
+          type: integer
+        colorTemperatureK:
+          type: integer
+        imageUrl:
+          type: string
+          format: uri
+        isDefault:
+          type: boolean
+    ProductImage:
+      type: object
+      additionalProperties: false
+      required:
+        - url
+        - sortOrder
+      properties:
+        url:
+          type: string
+          format: uri
+        altText:
+          type: string
+        sortOrder:
+          type: integer
+          minimum: 0
+    ProductDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - brand
+        - slug
+        - description
+        - category
+        - price
+        - primaryImageUrl
+        - inStock
+        - variants
+        - images
+        - specs
+        - rating
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        brand:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        category:
+          $ref: '#/components/schemas/CategorySummary'
+        price:
+          $ref: '#/components/schemas/Money'
+        compareAtPrice:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        primaryImageUrl:
+          type: string
+          format: uri
+        inStock:
+          type: boolean
+        variants:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductImage'
+        specs:
+          $ref: '#/components/schemas/LightingSpecs'
+        rating:
+          $ref: '#/components/schemas/RatingSummary'
+        popularityRank:
+          type:
+            - integer
+            - 'null'
+        unitsSold90Days:
+          type: integer
+          minimum: 0
+    Review:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - rating
+        - title
+        - body
+        - authorDisplayName
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        title:
+          type: string
+        body:
+          type: string
+        authorDisplayName:
+          type: string
+          example: Verified Buyer
+        createdAt:
+          type: string
+          format: date-time
+    ReviewListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+        - rating
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+        rating:
+          $ref: '#/components/schemas/RatingSummary'
+    CatalogFacetsResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - brands
+        - finishes
+        - wattage
+        - price
+        - categories
+      properties:
+        brands:
+          type: array
+          items:
+            type: object
+            required:
+              - name
+              - productCount
+            properties:
+              name:
+                type: string
+              productCount:
+                type: integer
+                minimum: 0
+        finishes:
+          type: array
+          items:
+            type: string
+        wattage:
+          type: object
+          required:
+            - minW
+            - maxW
+          properties:
+            minW:
+              type: integer
+            maxW:
+              type: integer
+        price:
+          type: object
+          required:
+            - minPriceCents
+            - maxPriceCents
+          properties:
+            minPriceCents:
+              type: integer
+            maxPriceCents:
+              type: integer
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategorySummary'

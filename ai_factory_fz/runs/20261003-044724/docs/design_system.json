@@ -1,0 +1,855 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#2563EB",
+      "dark": "#60A5FA"
+    },
+    {
+      "name": "primary_variant",
+      "light": "#1D4ED8",
+      "dark": "#93C5FD"
+    },
+    {
+      "name": "secondary",
+      "light": "#0D9488",
+      "dark": "#2DD4BF"
+    },
+    {
+      "name": "background",
+      "light": "#F8FAFC",
+      "dark": "#0F172A"
+    },
+    {
+      "name": "surface",
+      "light": "#FFFFFF",
+      "dark": "#1E293B"
+    },
+    {
+      "name": "surface_variant",
+      "light": "#F1F5F9",
+      "dark": "#334155"
+    },
+    {
+      "name": "text_primary",
+      "light": "#0F172A",
+      "dark": "#F8FAFC"
+    },
+    {
+      "name": "text_secondary",
+      "light": "#475569",
+      "dark": "#CBD5E1"
+    },
+    {
+      "name": "text_on_primary",
+      "light": "#FFFFFF",
+      "dark": "#0F172A"
+    },
+    {
+      "name": "border",
+      "light": "#E2E8F0",
+      "dark": "#475569"
+    },
+    {
+      "name": "error",
+      "light": "#DC2626",
+      "dark": "#FCA5A5"
+    },
+    {
+      "name": "warning",
+      "light": "#D97706",
+      "dark": "#FCD34D"
+    },
+    {
+      "name": "success",
+      "light": "#059669",
+      "dark": "#6EE7B7"
+    },
+    {
+      "name": "disabled",
+      "light": "#94A3B8",
+      "dark": "#64748B"
+    },
+    {
+      "name": "scrim",
+      "light": "#00000066",
+      "dark": "#00000099"
+    },
+    {
+      "name": "image_placeholder",
+      "light": "#E2E8F0",
+      "dark": "#334155"
+    },
+    {
+      "name": "banner_overlay",
+      "light": "#0F172A80",
+      "dark": "#00000080"
+    },
+    {
+      "name": "availability_in_stock",
+      "light": "#059669",
+      "dark": "#6EE7B7"
+    },
+    {
+      "name": "availability_low_stock",
+      "light": "#D97706",
+      "dark": "#FCD34D"
+    },
+    {
+      "name": "availability_out_of_stock",
+      "light": "#DC2626",
+      "dark": "#FCA5A5"
+    },
+    {
+      "name": "discount",
+      "light": "#7C3AED",
+      "dark": "#C4B5FD"
+    }
+  ],
+  "typography": [
+    {
+      "name": "display",
+      "size": 28.0,
+      "weight": 700,
+      "line_height": 36.0
+    },
+    {
+      "name": "headline",
+      "size": 22.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "title",
+      "size": 18.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "body",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "body_emphasis",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "label",
+      "size": 14.0,
+      "weight": 500,
+      "line_height": 20.0
+    },
+    {
+      "name": "caption",
+      "size": 12.0,
+      "weight": 400,
+      "line_height": 16.0
+    },
+    {
+      "name": "price",
+      "size": 20.0,
+      "weight": 700,
+      "line_height": 28.0
+    },
+    {
+      "name": "price_strike",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "button",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "overline",
+      "size": 11.0,
+      "weight": 600,
+      "line_height": 16.0
+    }
+  ],
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    48,
+    64
+  ],
+  "corner_radii": [
+    4,
+    8,
+    12,
+    16,
+    24
+  ],
+  "shared_widgets": [
+    {
+      "name": "ShopEaseAppBar",
+      "description": "Material 3 AppBar using surface background, text_primary title, optional leading back (min 48dp), trailing actions (search, cart with badge, account) each min 48×48dp with Semantics labels. Cart badge shows item count from CartNotifier."
+    },
+    {
+      "name": "ShopEaseBottomNav",
+      "description": "Four-tab NavigationBar (Home, Search, Cart, Account) bound to go_router ShellRoute; selected state uses primary; labels use label typography; min 48dp tap height per destination."
+    },
+    {
+      "name": "PrimaryButton",
+      "description": "FilledButton using primary background and text_on_primary; min height 48dp, horizontal padding spacing 24; button typography; Semantics button role with explicit label."
+    },
+    {
+      "name": "SecondaryButton",
+      "description": "OutlinedButton with primary border and text_primary label; min 48dp; for secondary actions (Continue shopping, Sign in)."
+    },
+    {
+      "name": "TextLinkButton",
+      "description": "TextButton for inline legal links, Forgot password, and Remove item; min 48dp touch padding via TapTargetSize/shrinkWrap false; primary color text."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Grid/list tile: ProductImage, name (title, max 2 lines), brand (caption), PriceText, AvailabilityBadge, optional wishlist IconButton (48dp). Entire card tappable to product detail. Semantics merges name, price, availability."
+    },
+    {
+      "name": "ProductImage",
+      "description": "Aspect-ratio image (1:1 list, 4:3 detail) with corner radius 12, image_placeholder fill, BoxFit.cover, required semanticLabel with product name."
+    },
+    {
+      "name": "PriceText",
+      "description": "Formats integer minor units (cents) + ISO 4217 USD as $X.XX using int math only; price typography; optional strikethrough variant for compare-at; Semantics announces full currency phrase."
+    },
+    {
+      "name": "MoneySummaryRow",
+      "description": "Label/value row for subtotal, discount, shipping, estimated tax, total using body/label styles; total uses price typography; used in cart footer and checkout review."
+    },
+    {
+      "name": "AvailabilityBadge",
+      "description": "Pill chip showing In stock, Low stock, or Out of stock with token colors availability_*; caption typography; never color-only—always includes text."
+    },
+    {
+      "name": "CategoryChip",
+      "description": "Tappable chip for Clothing, Electronics, Home & Kitchen, Beauty, Sports & Outdoors; surface_variant fill, border, min 48dp when standalone; navigates to search with category filter."
+    },
+    {
+      "name": "BannerCarousel",
+      "description": "Horizontal PageView of promo banners from GET /home; 16:9 images with banner_overlay gradient, headline on banner; page indicators; auto Semantics for each banner title."
+    },
+    {
+      "name": "SectionHeader",
+      "description": "Row with headline title and optional See all TextLinkButton (48dp); used for Featured, New arrivals, Categories on home."
+    },
+    {
+      "name": "HorizontalProductList",
+      "description": "Horizontal ListView of compact ProductCard variants for featured and new arrivals sections."
+    },
+    {
+      "name": "SearchBarField",
+      "description": "TextField with search icon, hint Search products, submit on keyboard action; min 48dp height; label Search; clear button when non-empty."
+    },
+    {
+      "name": "SortFilterBar",
+      "description": "Row of FilterChip buttons: Sort (bottom sheet: price low-high, price high-low, newest) and Filters (opens FilterBottomSheet); each chip min 48dp."
+    },
+    {
+      "name": "FilterBottomSheet",
+      "description": "Modal sheet for price range slider, multi-select category, brand (8–12 seeded), availability (in stock, low stock, out of stock); Apply and Clear all Primary/Secondary buttons min 48dp."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Minus/plus IconButtons in 48dp containers with quantity label; disables plus at max stock; announces quantity changes."
+    },
+    {
+      "name": "CartLineItem",
+      "description": "Row: thumbnail, name, unit price snapshot (cents USD), QuantityStepper, line total, remove control; min row height 72dp; out-of-stock line shows error caption and blocks checkout."
+    },
+    {
+      "name": "WishlistToggle",
+      "description": "Heart IconButton 48dp; filled when wishlisted; guest persists locally, signed-in via API; Semantics Add to wishlist / Remove from wishlist."
+    },
+    {
+      "name": "AuthTextField",
+      "description": "Email/password/name fields with validation messages, obscure toggle on password, error color for field errors; min 56dp touch height."
+    },
+    {
+      "name": "TabLoginRegister",
+      "description": "TabBar with Login and Register tabs on AuthScreen; indicator primary; tab min 48dp."
+    },
+    {
+      "name": "CheckoutStepperHeader",
+      "description": "Linear step indicator: Shipping, Review & coupon, Payment; current step highlighted primary."
+    },
+    {
+      "name": "AddressForm",
+      "description": "US-only fields: full name, email, phone, address1, address2 optional, city, state (dropdown US contiguous), ZIP; client validation before quote; uses AuthTextField styling."
+    },
+    {
+      "name": "CouponField",
+      "description": "Row: text field for single coupon code, Apply button 48dp; shows applied code chip with remove; inline error text for invalid, expired, minimum not met, excluded items, stacking blocked."
+    },
+    {
+      "name": "OrderStatusStepper",
+      "description": "Horizontal stepper shopper labels Processing → Shipped → Delivered; maps server paid/fulfilled→processing, fulfilled+tracking→shipped, delivered→delivered; current step primary, future steps disabled color."
+    },
+    {
+      "name": "TrackingInfoCard",
+      "description": "Surface card showing carrier name and tracking number when status shipped or delivered; copy-to-clipboard icon 48dp with Semantics Copy tracking number."
+    },
+    {
+      "name": "LoadingStateView",
+      "description": "Centered CircularProgressIndicator primary with optional caption; liveRegion for screen readers."
+    },
+    {
+      "name": "EmptyStateView",
+      "description": "Illustration placeholder, headline, body, optional PrimaryButton CTA; used for empty cart, wishlist, orders, search results."
+    },
+    {
+      "name": "ErrorStateView",
+      "description": "Error icon error color, message body, Retry PrimaryButton 48dp; optional Sign in CTA for auth-gated screens."
+    },
+    {
+      "name": "GuestMergeBanner",
+      "description": "Info banner after login when guest cart replaced merged cart per API; body explains items combined or guest cart applied fallback."
+    },
+    {
+      "name": "WishlistImportDialog",
+      "description": "One-time alert dialog on login/register when local guest wishlist non-empty: Import favorites / Not now; Primary and Secondary 48dp."
+    },
+    {
+      "name": "SupportForm",
+      "description": "Fields: name, email, subject, message (required); Send PrimaryButton; success shows confirmation banner; copy states response within 1–2 business days."
+    },
+    {
+      "name": "LegalDocumentBody",
+      "description": "Scrollable static markdown/plain text from lib/core/legal for Privacy Policy or Terms of Sale; title headline typography."
+    },
+    {
+      "name": "MockPaymentCard",
+      "description": "Demo UI styled like PaymentIntent stub: order summary, Pay now PrimaryButton, Cancel SecondaryButton; no card fields; disclaimer caption demo payment only."
+    },
+    {
+      "name": "OrderConfirmationHeader",
+      "description": "Success icon success color, headline Thank you, order number display title typography, body with email receipt copy for demo."
+    },
+    {
+      "name": "ExpandableOrderCard",
+      "description": "Order history list tile: order number, date, total PriceText, status label; expands to show line items, address summary, OrderStatusStepper, TrackingInfoCard when applicable."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "AuthScreen",
+      "route": "/auth",
+      "purpose": "Register and log in with email/password tabs; links to forgot password and legal documents; on success stores JWT via flutter_secure_storage and triggers cart merge and optional wishlist import.",
+      "components": [
+        "ShopEaseAppBar",
+        "TabLoginRegister",
+        "AuthTextField",
+        "PrimaryButton",
+        "TextLinkButton",
+        "LoadingStateView",
+        "ErrorStateView",
+        "GuestMergeBanner",
+        "WishlistImportDialog"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "success_idle",
+        "validation_error"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-003",
+        "US-006"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "PasswordResetScreen",
+      "route": "/auth/password-reset",
+      "purpose": "Mock forgot-password flow: step 1 submit registered email shows demo sent confirmation; step 2 enter and confirm new password meeting registration rules; no real email delivery.",
+      "components": [
+        "ShopEaseAppBar",
+        "AuthTextField",
+        "PrimaryButton",
+        "SecondaryButton",
+        "TextLinkButton",
+        "LoadingStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "email_step",
+        "email_sent_confirmation",
+        "new_password_step",
+        "loading",
+        "error",
+        "success"
+      ],
+      "story_ids": [
+        "US-002"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "HomeScreen",
+      "route": "/home",
+      "purpose": "Merchandised storefront entry: promotional banners, featured products, new arrivals, and category chips for seeded categories; primary tab in bottom nav.",
+      "components": [
+        "ShopEaseBottomNav",
+        "ShopEaseAppBar",
+        "BannerCarousel",
+        "SectionHeader",
+        "HorizontalProductList",
+        "ProductCard",
+        "CategoryChip",
+        "LoadingStateView",
+        "ErrorStateView",
+        "SearchBarField"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "success",
+        "partial_error_sections"
+      ],
+      "story_ids": [
+        "US-004"
+      ]
+    },
+    {
+      "id": "SCR-04",
+      "name": "SearchResultsScreen",
+      "route": "/search",
+      "purpose": "Keyword catalog discovery with sort (price low/high, newest) and filters (price range, category, brand, availability); shows USD prices from integer cents; bottom nav Search tab.",
+      "components": [
+        "ShopEaseBottomNav",
+        "ShopEaseAppBar",
+        "SearchBarField",
+        "SortFilterBar",
+        "FilterBottomSheet",
+        "ProductCard",
+        "PriceText",
+        "AvailabilityBadge",
+        "WishlistToggle",
+        "LoadingStateView",
+        "EmptyStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "success",
+        "filter_active"
+      ],
+      "story_ids": [
+        "US-005"
+      ]
+    },
+    {
+      "id": "SCR-05",
+      "name": "ProductDetailScreen",
+      "route": "/products/:id",
+      "purpose": "M1 baseline detail extended with availability UX: blocks or warns add-to-cart when out of stock; wishlist toggle; navigates from home, search, wishlist.",
+      "components": [
+        "ShopEaseAppBar",
+        "ProductImage",
+        "PriceText",
+        "AvailabilityBadge",
+        "PrimaryButton",
+        "SecondaryButton",
+        "WishlistToggle",
+        "QuantityStepper",
+        "LoadingStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "success",
+        "out_of_stock"
+      ],
+      "story_ids": [
+        "US-005",
+        "US-006",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-06",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Guest local or signed-in API cart with line items, quantities, subtotal; merge on login; proceed to checkout when in stock; bottom nav Cart tab.",
+      "components": [
+        "ShopEaseBottomNav",
+        "ShopEaseAppBar",
+        "CartLineItem",
+        "MoneySummaryRow",
+        "PrimaryButton",
+        "SecondaryButton",
+        "EmptyStateView",
+        "LoadingStateView",
+        "ErrorStateView",
+        "GuestMergeBanner"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "success",
+        "checkout_blocked_stock"
+      ],
+      "story_ids": [
+        "US-003",
+        "US-007"
+      ]
+    },
+    {
+      "id": "SCR-07",
+      "name": "WishlistScreen",
+      "route": "/wishlist",
+      "purpose": "Saved favorites: local persistence for guests, API sync when signed in; add/remove; navigate to product detail; reachable from account and product cards.",
+      "components": [
+        "ShopEaseAppBar",
+        "ProductCard",
+        "WishlistToggle",
+        "PrimaryButton",
+        "EmptyStateView",
+        "LoadingStateView",
+        "ErrorStateView",
+        "WishlistImportDialog"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "success",
+        "guest_local",
+        "signed_in_synced"
+      ],
+      "story_ids": [
+        "US-006"
+      ]
+    },
+    {
+      "id": "SCR-08",
+      "name": "CheckoutScreen",
+      "route": "/checkout",
+      "purpose": "Stepped checkout: US shipping/contact address, order review with line snapshots, flat shipping or free above threshold, estimated tax after discounts, single coupon apply with server quote recalc.",
+      "components": [
+        "ShopEaseAppBar",
+        "CheckoutStepperHeader",
+        "AddressForm",
+        "CartLineItem",
+        "MoneySummaryRow",
+        "CouponField",
+        "PrimaryButton",
+        "SecondaryButton",
+        "TextLinkButton",
+        "LoadingStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading_quote",
+        "address_step",
+        "review_step",
+        "error",
+        "coupon_error_invalid",
+        "coupon_error_expired",
+        "coupon_error_minimum",
+        "coupon_error_excluded",
+        "coupon_error_stacking",
+        "success_ready_payment"
+      ],
+      "story_ids": [
+        "US-007",
+        "US-008",
+        "US-012"
+      ]
+    },
+    {
+      "id": "SCR-09",
+      "name": "MockPaymentScreen",
+      "route": "/checkout/payment",
+      "purpose": "Demo payment stub: POST order then complete-mock-payment; Pay now without card data; cancel releases reservation; on success navigates to confirmation with order number.",
+      "components": [
+        "ShopEaseAppBar",
+        "CheckoutStepperHeader",
+        "MockPaymentCard",
+        "MoneySummaryRow",
+        "PrimaryButton",
+        "SecondaryButton",
+        "LoadingStateView",
+        "ErrorStateView",
+        "OrderConfirmationHeader"
+      ],
+      "states": [
+        "loading",
+        "ready",
+        "processing",
+        "error",
+        "cancelled",
+        "success_confirmation"
+      ],
+      "story_ids": [
+        "US-009"
+      ]
+    },
+    {
+      "id": "SCR-10",
+      "name": "OrderConfirmationScreen",
+      "route": "/checkout/confirmation/:orderId",
+      "purpose": "Post-purchase confirmation showing human-readable order number, total, and CTAs to order history or continue shopping.",
+      "components": [
+        "ShopEaseAppBar",
+        "OrderConfirmationHeader",
+        "MoneySummaryRow",
+        "PrimaryButton",
+        "SecondaryButton"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "success"
+      ],
+      "story_ids": [
+        "US-009"
+      ]
+    },
+    {
+      "id": "SCR-11",
+      "name": "AccountScreen",
+      "route": "/account",
+      "purpose": "Signed-in hub: profile email, links to orders and wishlist, embedded SupportForm and support email, legal links, log out, delete account; guests see sign-in prompt.",
+      "components": [
+        "ShopEaseBottomNav",
+        "ShopEaseAppBar",
+        "PrimaryButton",
+        "SecondaryButton",
+        "TextLinkButton",
+        "SupportForm",
+        "ErrorStateView",
+        "LoadingStateView"
+      ],
+      "states": [
+        "guest_prompt",
+        "signed_in",
+        "loading",
+        "error",
+        "support_success",
+        "delete_confirm_dialog"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-010",
+        "US-012"
+      ]
+    },
+    {
+      "id": "SCR-12",
+      "name": "OrderHistoryScreen",
+      "route": "/orders",
+      "purpose": "Signed-in order list most recent first; guest redirect to auth; expandable order cards show detail, status stepper, and tracking without separate detail route.",
+      "components": [
+        "ShopEaseAppBar",
+        "ExpandableOrderCard",
+        "OrderStatusStepper",
+        "TrackingInfoCard",
+        "PriceText",
+        "EmptyStateView",
+        "LoadingStateView",
+        "ErrorStateView",
+        "PrimaryButton"
+      ],
+      "states": [
+        "guest_redirect",
+        "loading",
+        "empty",
+        "error",
+        "success",
+        "expanded_detail"
+      ],
+      "story_ids": [
+        "US-010",
+        "US-011"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-04",
+      "trigger": "Tap bottom nav Search or AppBar search action → /search"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-06",
+      "trigger": "Tap bottom nav Cart or cart icon with badge → /cart"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-11",
+      "trigger": "Tap bottom nav Account → /account"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-05",
+      "trigger": "Tap featured/new arrival ProductCard → push /products/:id"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-04",
+      "trigger": "Tap CategoryChip → /search?category=:slug"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-04",
+      "trigger": "Submit SearchBarField on home → /search?q=:query"
+    },
+    {
+      "from_screen": "SCR-04",
+      "to_screen": "SCR-05",
+      "trigger": "Tap ProductCard → push /products/:id"
+    },
+    {
+      "from_screen": "SCR-04",
+      "to_screen": "SCR-03",
+      "trigger": "Tap bottom nav Home → /home"
+    },
+    {
+      "from_screen": "SCR-05",
+      "to_screen": "SCR-06",
+      "trigger": "Tap Add to cart → snackbar optional then user opens cart"
+    },
+    {
+      "from_screen": "SCR-05",
+      "to_screen": "SCR-07",
+      "trigger": "WishlistToggle on → item saved; user opens /wishlist from account"
+    },
+    {
+      "from_screen": "SCR-06",
+      "to_screen": "SCR-08",
+      "trigger": "Tap Checkout PrimaryButton when cart non-empty and stock valid → /checkout"
+    },
+    {
+      "from_screen": "SCR-06",
+      "to_screen": "SCR-01",
+      "trigger": "Tap Sign in to sync cart (optional CTA) → /auth"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap Forgot password TextLinkButton → /auth/password-reset"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-12",
+      "trigger": "Tap Privacy Policy or Terms TextLinkButton → push /legal?document=privacy|terms (LegalDocumentScreen implemented as route overlay using LegalDocumentBody; not counted as 13th shopper screen—content route shares SCR-11 legal links)"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "After successful reset tap Back to login → /auth"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Successful login/register → go_router redirect /home with cart merge"
+    },
+    {
+      "from_screen": "SCR-08",
+      "to_screen": "SCR-09",
+      "trigger": "Continue to payment on valid address and quote → /checkout/payment"
+    },
+    {
+      "from_screen": "SCR-08",
+      "to_screen": "SCR-06",
+      "trigger": "AppBar back → pop to /cart"
+    },
+    {
+      "from_screen": "SCR-09",
+      "to_screen": "SCR-10",
+      "trigger": "Mock payment success → replace with /checkout/confirmation/:orderId"
+    },
+    {
+      "from_screen": "SCR-09",
+      "to_screen": "SCR-08",
+      "trigger": "Cancel payment → pop to checkout review"
+    },
+    {
+      "from_screen": "SCR-10",
+      "to_screen": "SCR-12",
+      "trigger": "View orders → /orders (requires signed in)"
+    },
+    {
+      "from_screen": "SCR-10",
+      "to_screen": "SCR-03",
+      "trigger": "Continue shopping → /home"
+    },
+    {
+      "from_screen": "SCR-11",
+      "to_screen": "SCR-12",
+      "trigger": "Tap Order history row → /orders"
+    },
+    {
+      "from_screen": "SCR-11",
+      "to_screen": "SCR-07",
+      "trigger": "Tap Wishlist → /wishlist"
+    },
+    {
+      "from_screen": "SCR-11",
+      "to_screen": "SCR-01",
+      "trigger": "Guest tap Sign in → /auth"
+    },
+    {
+      "from_screen": "SCR-11",
+      "to_screen": "SCR-03",
+      "trigger": "Log out success → /home guest experience"
+    },
+    {
+      "from_screen": "SCR-12",
+      "to_screen": "SCR-01",
+      "trigger": "Guest opens /orders → redirect prompt Sign in → /auth"
+    },
+    {
+      "from_screen": "SCR-07",
+      "to_screen": "SCR-05",
+      "trigger": "Tap wishlist ProductCard → /products/:id"
+    },
+    {
+      "from_screen": "SCR-08",
+      "to_screen": "SCR-12",
+      "trigger": "Footer Terms/Privacy TextLinkButton → /legal?document=terms|privacy"
+    },
+    {
+      "from_screen": "SCR-11",
+      "to_screen": "SCR-12",
+      "trigger": "Support form submit success stays on account; orders link as above"
+    }
+  ],
+  "accessibility": [
+    "All tappable controls meet minimum 48×48 dp touch targets including IconButtons, chips, ProductCard hit areas, bottom nav items, and stepper controls.",
+    "text_primary on background and surface, and text_on_primary on primary, meet WCAG AA contrast ratio ≥4.5:1 for body text (16sp) and ≥3:1 for large text (price, headlines).",
+    "error, success, and availability badge colors pair with text labels—never convey stock or errors by color alone.",
+    "Every ProductImage, banner, and actionable icon includes a non-empty Semantics label or semanticLabel describing purpose (e.g. product name, Add to cart, Open cart, Remove from wishlist).",
+    "PriceText announces accessible currency strings derived from integer cents (e.g. 12 dollars and 99 cents) rather than raw API integers.",
+    "LoadingStateView, EmptyStateView, and ErrorStateView use Semantics liveRegion or assertive announcements when async state changes.",
+    "OrderStatusStepper exposes current step and step names to screen readers; TrackingInfoCard fields are focusable with copy action labeled.",
+    "Auth and AddressForm fields associate validation errors with fields via Semantics for error text.",
+    "SupportForm required fields announce errors on submit failure; success confirmation is announced.",
+    "Text scaling up to 200% must not clip primary CTAs on checkout and payment—use scrollable layouts and flexible line heights from typography tokens.",
+    "Mock payment screen states clearly in Semantics that no card entry is required and payment is demo-only.",
+    "go_router back navigation preserves logical focus order; AppBar back labeled Go back.",
+    "WishlistImportDialog and delete-account confirmation use modal Semantics with title and action buttons ≥48dp.",
+    "FilterBottomSheet traps focus while open and returns focus to Filters chip on close.",
+    "Minimum spacing scale uses 8dp and 16dp for readable tap gaps between dense list items."
+  ]
+}

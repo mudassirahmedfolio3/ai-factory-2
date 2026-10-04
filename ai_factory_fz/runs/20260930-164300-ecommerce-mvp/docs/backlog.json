@@ -1,0 +1,1909 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Authentication and Account Management",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-016"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Product Catalog and Discovery",
+      "story_ids": [
+        "US-004",
+        "US-005",
+        "US-006"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Shopping Cart",
+      "story_ids": [
+        "US-007",
+        "US-008"
+      ]
+    },
+    {
+      "id": "E-04",
+      "title": "Checkout and Payment",
+      "story_ids": [
+        "US-009",
+        "US-010",
+        "US-011"
+      ]
+    },
+    {
+      "id": "E-05",
+      "title": "Order Confirmation and History",
+      "story_ids": [
+        "US-012",
+        "US-013",
+        "US-014"
+      ]
+    },
+    {
+      "id": "E-06",
+      "title": "Customer Support and Policy",
+      "story_ids": [
+        "US-015"
+      ]
+    },
+    {
+      "id": "E-07",
+      "title": "Analytics and Tracking",
+      "story_ids": [
+        "US-017"
+      ]
+    },
+    {
+      "id": "E-08",
+      "title": "Admin Product Management",
+      "story_ids": [
+        "US-019",
+        "US-020"
+      ]
+    },
+    {
+      "id": "E-09",
+      "title": "Admin Stock Management",
+      "story_ids": [
+        "US-021"
+      ]
+    },
+    {
+      "id": "E-10",
+      "title": "Admin Order Management",
+      "story_ids": [
+        "US-022",
+        "US-023",
+        "US-024",
+        "US-025"
+      ]
+    },
+    {
+      "id": "E-11",
+      "title": "Admin Configuration",
+      "story_ids": [
+        "US-026"
+      ]
+    },
+    {
+      "id": "E-12",
+      "title": "Admin Authentication",
+      "story_ids": [
+        "US-018"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Set up project infrastructure, CI/CD, and database",
+      "description": "Initialize NestJS backend, Flutter mobile app, PostgreSQL database, Docker Compose for staging, GitHub Actions pipelines for Android and iOS builds, environment configuration for test and staging.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Design and implement shared domain models and error handling",
+      "description": "Define shared data structures for products, variants, orders, payments, users across backend and frontend; establish error codes and validation rules for money (integer cents, EUR), stock, and order states.",
+      "epic_id": "E-01",
+      "component": "shared",
+      "story_ids": [],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Implement database schema for users, products, variants, orders, and audit logs",
+      "description": "Create Prisma schema with tables for user accounts, product catalog, variants with stock tracking, orders with line items, payment intents, stock reservations, admin accounts, and audit logs. Set up indexes for performance.",
+      "epic_id": "E-02",
+      "component": "backend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Implement password hashing, JWT tokens, and session management backend",
+      "description": "Set up bcrypt/argon2 for password hashing, generate and validate JWT access and refresh tokens with appropriate expiry, implement session storage and device tracking for US-002.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Implement user sign-up and input validation backend API",
+      "description": "Create POST /auth/sign-up endpoint with email uniqueness check, password validation (min 8 chars), account creation in database with hashed password, return success and auth tokens. Include request validation and error handling.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-006",
+      "title": "Implement user sign-in backend API",
+      "description": "Create POST /auth/sign-in endpoint validating email and password against stored hash, generic error message on failure, return JWT tokens and user info on success, implement rate limiting on failed attempts.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-007",
+      "title": "Implement password reset email flow backend API",
+      "description": "Create POST /auth/password-reset-request to generate single-use 60-minute reset token, send reset email with link only if account exists (same message either way), create POST /auth/password-reset to validate token and update password.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-008",
+      "title": "Implement account deletion with data anonymization backend API",
+      "description": "Create DELETE /users/me endpoint that deletes user profile, cart, addresses, and anonymizes personal data on past orders while retaining order records for accounting. Handle pending_payment orders and release their stock.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-016"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-009",
+      "title": "Implement transactional email service integration",
+      "description": "Integrate transactional email provider (SendGrid, Mailgun, or AWS SES) with configuration, implement email templates for sign-up confirmation, password reset, order confirmation, status updates (shipped, delivered, cancelled, refunded) with proper error handling and retry logic.",
+      "epic_id": "E-05",
+      "component": "backend",
+      "story_ids": [
+        "US-003",
+        "US-012",
+        "US-014"
+      ],
+      "depends_on": [
+        "WI-005"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-010",
+      "title": "Create OpenAPI specification and API documentation",
+      "description": "Define OpenAPI 3.0 spec for all endpoints (auth, catalog, cart, checkout, orders, admin), maintain swagger documentation with examples, keep current as implementation progresses.",
+      "epic_id": "E-02",
+      "component": "shared",
+      "story_ids": [],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-011",
+      "title": "Implement product catalog schema and CRUD backend API",
+      "description": "Create product model with name, description, category, active flag, photos. Create POST/GET/PATCH /products endpoints for admin with validation, store prices as integer cents with EUR, reject invalid prices.",
+      "epic_id": "E-08",
+      "component": "backend",
+      "story_ids": [
+        "US-019"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-012",
+      "title": "Implement variant management with stock tracking backend API",
+      "description": "Create variant model (product_id, size, color, price_cents, available_stock, reserved_stock). Implement POST/PATCH /products/{id}/variants endpoints with stock validation, prevent negative stock.",
+      "epic_id": "E-08",
+      "component": "backend",
+      "story_ids": [
+        "US-019"
+      ],
+      "depends_on": [
+        "WI-011"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-013",
+      "title": "Implement product photo upload and storage backend",
+      "description": "Create endpoint for uploading product photos with file type and size validation, store in cloud storage (S3 or similar), generate and serve optimized image sizes, validate unsupported types and size limits per US-019.",
+      "epic_id": "E-08",
+      "component": "backend",
+      "story_ids": [
+        "US-019"
+      ],
+      "depends_on": [
+        "WI-011"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-014",
+      "title": "Implement CSV product catalog import backend API",
+      "description": "Create POST /admin/products/import endpoint accepting CSV with product id, name, description, category, variant size, color, price, stock. Validate each row, import valid rows, report errors by row number, handle duplicates by updating, convert prices to cents.",
+      "epic_id": "E-08",
+      "component": "backend",
+      "story_ids": [
+        "US-020"
+      ],
+      "depends_on": [
+        "WI-012"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-015",
+      "title": "Implement stock spreadsheet import backend API",
+      "description": "Create POST /admin/stock/import endpoint accepting variant_id and quantity, update matching variants, handle active reservations correctly (imported quantity is physical stock, reservations still respected), report unmatched rows, reject negative/non-integer quantities.",
+      "epic_id": "E-09",
+      "component": "backend",
+      "story_ids": [
+        "US-021"
+      ],
+      "depends_on": [
+        "WI-012"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-016",
+      "title": "Implement GET products catalog endpoint with pagination and filtering",
+      "description": "Create GET /products with optional category filter, search keyword, pagination (page size 20), return active products with main photo, name, price in EUR, out-of-stock status. Support lazy loading on scroll.",
+      "epic_id": "E-02",
+      "component": "backend",
+      "story_ids": [
+        "US-004",
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-012"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-017",
+      "title": "Implement GET product detail endpoint with variants and stock",
+      "description": "Create GET /products/{id} returning all photos, name, description, price, available variants with size, color, stock status. Variants with zero stock marked out of stock.",
+      "epic_id": "E-02",
+      "component": "backend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-012"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-018",
+      "title": "Implement analytics events logging backend API",
+      "description": "Create POST /analytics/events endpoint accepting event type (app_open, sign_up, sign_in, search, category_view, product_view, add_to_cart, remove_from_cart, checkout_started, payment_success, payment_failed, order_placed), timestamp, pseudonymous user_id, no sensitive data. Store events for analysis.",
+      "epic_id": "E-07",
+      "component": "backend",
+      "story_ids": [
+        "US-017"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-019",
+      "title": "Implement cart storage and retrieval backend API",
+      "description": "Create POST/GET /cart endpoints for signed-in users storing cart as user association with product variants and quantities. Cart persists across sessions and devices. Include cart total calculation.",
+      "epic_id": "E-03",
+      "component": "backend",
+      "story_ids": [
+        "US-007",
+        "US-008"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-020",
+      "title": "Implement add to cart backend API with quantity management",
+      "description": "Create POST /cart/items endpoint accepting variant_id and quantity, increment quantity if variant already in cart, validate quantity against available stock, return updated cart with confirmation.",
+      "epic_id": "E-03",
+      "component": "backend",
+      "story_ids": [
+        "US-007"
+      ],
+      "depends_on": [
+        "WI-019"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-021",
+      "title": "Implement cart item removal and update backend API",
+      "description": "Create DELETE /cart/items/{variant_id} and PATCH /cart/items/{variant_id} endpoints, update quantities and totals, validate against current stock, recalculate subtotal, log removal events.",
+      "epic_id": "E-03",
+      "component": "backend",
+      "story_ids": [
+        "US-008"
+      ],
+      "depends_on": [
+        "WI-019"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-022",
+      "title": "Implement order creation with stock reservation backend API",
+      "description": "Create POST /orders endpoint from valid cart, attempt to reserve stock for all items (30 minute expiry), create order in pending_payment status with copied product names and prices, validate all items in stock before creating any order, return error if any item unavailable.",
+      "epic_id": "E-04",
+      "component": "backend",
+      "story_ids": [
+        "US-010"
+      ],
+      "depends_on": [
+        "WI-020"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-023",
+      "title": "Implement delivery address and shipping option selection backend API",
+      "description": "Create PATCH /orders/{id}/delivery endpoint accepting full name, street, house number, postal code, city, phone (optional), shipping_option (standard/express). Validate required fields, country fixed to Germany. Calculate shipping cost based on cart subtotal and free shipping threshold (EUR 60).",
+      "epic_id": "E-04",
+      "component": "backend",
+      "story_ids": [
+        "US-009"
+      ],
+      "depends_on": [
+        "WI-022"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-024",
+      "title": "Implement Stripe PaymentIntent creation backend API",
+      "description": "Create POST /orders/{id}/payment-intent endpoint that creates Stripe PaymentIntent in test mode for order total in integer cents EUR, returns client_secret for app confirmation, store intent_id in order.",
+      "epic_id": "E-04",
+      "component": "backend",
+      "story_ids": [
+        "US-011"
+      ],
+      "depends_on": [
+        "WI-023"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-025",
+      "title": "Implement Stripe webhook handler for payment success",
+      "description": "Create POST /webhooks/stripe endpoint validating webhook signature, listening for payment_intent.succeeded event, marking order as paid, converting stock reservation to permanent reduction, clearing user cart, sending order confirmation email. Handle duplicate webhook deliveries idempotently.",
+      "epic_id": "E-04",
+      "component": "backend",
+      "story_ids": [
+        "US-011",
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-024"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-026",
+      "title": "Implement order expiry job for releasing reserved stock",
+      "description": "Create scheduled job running every minute checking for orders in pending_payment status with created_at > 30 minutes, cancel them, release their stock reservations, send cancellation emails.",
+      "epic_id": "E-04",
+      "component": "backend",
+      "story_ids": [
+        "US-010"
+      ],
+      "depends_on": [
+        "WI-022"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-027",
+      "title": "Implement order confirmation email backend",
+      "description": "Create email template and sender for order confirmation showing order number, status, item names and prices copied from order, VAT amount, shipping, total, delivery address. Send on webhook success.",
+      "epic_id": "E-05",
+      "component": "backend",
+      "story_ids": [
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-025"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-028",
+      "title": "Implement order history endpoint backend API",
+      "description": "Create GET /orders endpoint returning signed-in user's orders newest first with order number, date, total. Include GET /orders/{id} for detail with lines, subtotal, shipping, VAT, total, delivery address, status.",
+      "epic_id": "E-05",
+      "component": "backend",
+      "story_ids": [
+        "US-013"
+      ],
+      "depends_on": [
+        "WI-022"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-029",
+      "title": "Implement customer-facing order status mapping backend",
+      "description": "Map internal status (pending_payment, paid, fulfilled, delivered, cancelled, refunded) to customer-facing status (Placed, Processing, Shipped, Delivered, Cancelled, Refunded). Processing = paid and admin started preparing (picked_up_by_admin flag).",
+      "epic_id": "E-05",
+      "component": "backend",
+      "story_ids": [
+        "US-013"
+      ],
+      "depends_on": [
+        "WI-028"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-030",
+      "title": "Implement order status update emails backend",
+      "description": "Send branded emails on status changes: Shipped (fulfilled), Delivered (delivered), Cancelled (cancelled), Refunded (refunded). Each email shows order number and status, sent within 1 minute of status change.",
+      "epic_id": "E-05",
+      "component": "backend",
+      "story_ids": [
+        "US-014"
+      ],
+      "depends_on": [
+        "WI-009"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-031",
+      "title": "Implement admin sign-in backend API",
+      "description": "Create POST /admin/auth/sign-in endpoint for admin accounts only (separate from user accounts), validate credentials, return JWT tokens, implement rate limiting on failed attempts, reject shopper accounts.",
+      "epic_id": "E-12",
+      "component": "backend",
+      "story_ids": [
+        "US-018"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-032",
+      "title": "Implement admin order list and filter backend API",
+      "description": "Create GET /admin/orders with filters by status (pending_payment, paid, processing, fulfilled, delivered, cancelled, refunded), return order number, customer, date, total, internal status. Admin-only endpoint.",
+      "epic_id": "E-10",
+      "component": "backend",
+      "story_ids": [
+        "US-022"
+      ],
+      "depends_on": [
+        "WI-028"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-033",
+      "title": "Implement admin order status update backend API",
+      "description": "Create PATCH /admin/orders/{id}/status endpoint accepting new status (only valid transitions: paid->processing, processing/paid->fulfilled, fulfilled->delivered, pending_payment/paid/processing->cancelled, any paid->refunded). Update status, create audit log entry.",
+      "epic_id": "E-10",
+      "component": "backend",
+      "story_ids": [
+        "US-022",
+        "US-023",
+        "US-024"
+      ],
+      "depends_on": [
+        "WI-032"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-034",
+      "title": "Implement admin order cancellation with stock release backend API",
+      "description": "Extend PATCH /admin/orders/{id}/status to handle cancellation: only allowed before fulfilled, release any reserved or committed stock back to variants, send cancellation email.",
+      "epic_id": "E-10",
+      "component": "backend",
+      "story_ids": [
+        "US-023"
+      ],
+      "depends_on": [
+        "WI-033"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-035",
+      "title": "Implement admin refund recording backend API",
+      "description": "Extend PATCH /admin/orders/{id}/status to handle refunded status, accept optional refund_note, require paid status, create audit log with admin and timestamp.",
+      "epic_id": "E-10",
+      "component": "backend",
+      "story_ids": [
+        "US-024"
+      ],
+      "depends_on": [
+        "WI-033"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-036",
+      "title": "Implement late payment handling for expired orders backend API",
+      "description": "On Stripe webhook for a cancelled (expired) order, flag it 'late_payment_needs_review', create admin alert. GET /admin/orders can filter for flagged orders. Admin can review stock availability and reinstate as paid (reducing stock) or cancel and refund manually.",
+      "epic_id": "E-10",
+      "component": "backend",
+      "story_ids": [
+        "US-025"
+      ],
+      "depends_on": [
+        "WI-025"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-037",
+      "title": "Implement admin shipping configuration backend API",
+      "description": "Create GET/PATCH /admin/config/shipping endpoints for standard_price_cents, express_price_cents, free_shipping_threshold_cents. Validate non-negative integers. New checkouts use new values immediately. Store in database.",
+      "epic_id": "E-11",
+      "component": "backend",
+      "story_ids": [
+        "US-026"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-038",
+      "title": "Implement audit logging for all admin actions",
+      "description": "Log all admin actions (product changes, status changes, refunds, config changes) with admin id, action type, previous and new values, timestamp. Create GET /admin/audit-log endpoint for review.",
+      "epic_id": "E-10",
+      "component": "backend",
+      "story_ids": [
+        "US-022",
+        "US-024"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-039",
+      "title": "Implement backend request validation and error handling",
+      "description": "Add input validation middleware for all endpoints, validate data types, ranges, formats (email, phone, postal code), return standardized error responses with field-level errors, log server errors without sensitive data.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-040",
+      "title": "Implement backend authorization checks for user data access",
+      "description": "Add middleware ensuring users can only read/modify their own cart, orders, addresses, and analytics can only be sent by the same user. Admin endpoints only accessible with admin auth. Prevent cross-user data access.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-041",
+      "title": "Set up crash reporting and error monitoring backend",
+      "description": "Integrate Sentry or similar for server error logging and monitoring, excluding sensitive data and card information, set up alerts for critical errors, failed payments, failed emails.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-042",
+      "title": "Implement Flutter project structure and navigation setup",
+      "description": "Set up Flutter project with Riverpod for state management, go_router for navigation, define app navigation graph (sign-out -> sign-in/sign-up -> home -> categories/search/cart/orders/settings), configure Android and iOS build settings.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-043",
+      "title": "Generate Dart API client from OpenAPI specification",
+      "description": "Use OpenAPI code generator for Dart with dio to auto-generate API client from spec, ensuring type safety and consistency with backend API changes.",
+      "epic_id": "E-02",
+      "component": "shared",
+      "story_ids": [],
+      "depends_on": [
+        "WI-010"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-044",
+      "title": "Implement shared Dart models and freezed serialization",
+      "description": "Define Dart models for User, Product, Variant, Order, OrderLine, Cart with freezed and json_serializable for JSON serialization/deserialization, matching domain models.",
+      "epic_id": "E-02",
+      "component": "shared",
+      "story_ids": [],
+      "depends_on": [
+        "WI-043"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-045",
+      "title": "Implement analytics consent screen and storage mobile",
+      "description": "Show consent screen on first app open, allow accept/decline analytics, store preference in device secure storage, load consent state on app start, disable event sending if declined.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-017"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-046",
+      "title": "Implement analytics event tracking mobile",
+      "description": "Create Analytics service with methods for app_open, sign_up, sign_in, search, category_view, product_view, add_to_cart, remove_from_cart, checkout_started, payment_success, payment_failed, order_placed. Send to backend only if consent given and not signing in.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-017"
+      ],
+      "depends_on": [
+        "WI-018"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-047",
+      "title": "Implement sign-up screen and form validation mobile",
+      "description": "Create sign-up screen with email and password fields, show validation errors inline (invalid email, password < 8 chars), disable submit until valid, show loading state, handle sign-up errors with user messaging.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-048",
+      "title": "Implement sign-up logic and token storage mobile",
+      "description": "Call sign-up API, validate response, store JWT tokens securely (platform-specific secure storage), update auth state via Riverpod provider, navigate to home screen, log analytics sign_up event.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-005"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-049",
+      "title": "Implement sign-in screen and form validation mobile",
+      "description": "Create sign-in screen with email and password fields, show generic error on wrong credentials, show loading state, link to password reset screen, disable submit until valid.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-050",
+      "title": "Implement sign-in logic and session persistence mobile",
+      "description": "Call sign-in API, store tokens securely, refresh token on app restart, auto-sign-in if tokens valid, handle token expiry and redirect to sign-in, log analytics sign_in event.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-006"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-051",
+      "title": "Implement sign-out functionality mobile",
+      "description": "Create sign-out option in settings menu, clear tokens from storage, clear cached user data, navigate to sign-in screen.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-050"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-052",
+      "title": "Implement password reset request screen mobile",
+      "description": "Create password reset screen with email field, show confirmation message on submit (same message whether account exists or not), link back to sign-in.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-053",
+      "title": "Implement password reset completion from email link mobile",
+      "description": "Handle deep link from password reset email, extract token from URL, show new password form, validate password, call reset API, show success and redirect to sign-in, show error if link invalid or expired.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-007"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-054",
+      "title": "Implement account deletion flow mobile",
+      "description": "Create delete account screen with password confirmation, show warning about pending orders, call delete API, clear all local data and tokens, navigate to sign-in, show confirmation message.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-016"
+      ],
+      "depends_on": [
+        "WI-050"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-055",
+      "title": "Implement home screen and category list mobile",
+      "description": "Create home screen showing all active categories with icons/images, implement category selection triggering product list loading, handle empty categories with message.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-004"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-056",
+      "title": "Implement product list screen with pagination and search mobile",
+      "description": "Create product list screen displaying products in grid with photo, name, price (EUR including VAT), out-of-stock status. Implement infinite scroll loading on demand. Add search field filtering by keyword.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-004",
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-016"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-057",
+      "title": "Implement search analytics event mobile",
+      "description": "Log search event with keyword when user submits search, respect analytics consent.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-046"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-058",
+      "title": "Implement product detail screen mobile",
+      "description": "Create product detail screen showing photos (swipeable), name, description, price in EUR with VAT, size selector, color selector, stock status per variant, add to cart button (enabled only for in-stock variants).",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-017"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-059",
+      "title": "Implement product view analytics event mobile",
+      "description": "Log product_view event when product detail screen loads, include product_id, respect analytics consent.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-046"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-060",
+      "title": "Implement image loading and optimization mobile",
+      "description": "Use cached_network_image or similar to load product photos with placeholders, implement lazy loading, resize images for mobile screens, handle missing images gracefully.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-004",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-061",
+      "title": "Implement cart state management with Riverpod mobile",
+      "description": "Create Riverpod providers for cart state (items, subtotal, total), handle cart updates from API, sync across screens, persist cart count in badge on navigation.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-007",
+        "US-008"
+      ],
+      "depends_on": [
+        "WI-044"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-062",
+      "title": "Implement add to cart with quantity selection mobile",
+      "description": "Create add to cart sheet/dialog allowing user to select quantity (up to available stock), validate quantity against stock, show error if insufficient stock, call add to cart API, update cart state and badge.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-007"
+      ],
+      "depends_on": [
+        "WI-020"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-063",
+      "title": "Implement add to cart analytics event mobile",
+      "description": "Log add_to_cart event with variant_id and quantity when item added, respect analytics consent.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-007"
+      ],
+      "depends_on": [
+        "WI-046"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-064",
+      "title": "Implement cart screen with item management mobile",
+      "description": "Create cart screen showing cart items (photo, name, size, color, unit price, quantity, line total), subtotal, empty-state message. Allow quantity change and item removal with confirmation.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-008"
+      ],
+      "depends_on": [
+        "WI-061"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-065",
+      "title": "Implement remove from cart analytics event mobile",
+      "description": "Log remove_from_cart event when item removed from cart, respect analytics consent.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-008"
+      ],
+      "depends_on": [
+        "WI-046"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-066",
+      "title": "Implement stock status warning in cart mobile",
+      "description": "When cart screen loads, check current stock status for each item, flag out-of-stock or changed-price items, require user to adjust or remove before checkout.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-008"
+      ],
+      "depends_on": [
+        "WI-064"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-067",
+      "title": "Implement checkout flow entry and cart validation mobile",
+      "description": "Add 'Proceed to Checkout' button on cart screen, validate cart is not empty, handle unauthenticated users by showing sign-in/sign-up prompt, navigate to delivery screen on success.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-009"
+      ],
+      "depends_on": [
+        "WI-062"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-068",
+      "title": "Implement delivery address entry screen mobile",
+      "description": "Create delivery step screen with fields for full name, street, house number, postal code, city, phone (optional), country fixed to Germany. Validate required fields and formats before proceeding.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-009"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-069",
+      "title": "Implement shipping option selection and cost calculation mobile",
+      "description": "Create shipping step screen showing Standard (EUR 4.90, 3-5 days) and Express (EUR 9.90, 1-2 days) options with prices. Calculate cost based on cart subtotal: free standard if >= EUR 60, express always EUR 9.90. Display selected option with calculated cost.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-009"
+      ],
+      "depends_on": [
+        "WI-068"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-070",
+      "title": "Implement order summary review screen mobile",
+      "description": "Create review step showing items (name, size, color, price, qty), subtotal, shipping cost, VAT amount as separate line, total in EUR. Allow editing delivery/shipping by navigating back.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-009"
+      ],
+      "depends_on": [
+        "WI-069"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-071",
+      "title": "Implement checkout stock reservation mobile",
+      "description": "Call order creation API when user confirms checkout, handle reservation response (success or insufficient stock error with details). On success, proceed to payment. On error, show message and allow cart adjustment.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-010"
+      ],
+      "depends_on": [
+        "WI-022"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-072",
+      "title": "Implement checkout analytics event mobile",
+      "description": "Log checkout_started event when order is successfully created with reservation, respect analytics consent.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-010"
+      ],
+      "depends_on": [
+        "WI-046"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-073",
+      "title": "Integrate Stripe SDK and PaymentIntent confirmation mobile",
+      "description": "Add flutter_stripe package, implement Stripe SDK initialization, create payment sheet for confirming PaymentIntent, handle card confirmation with user interaction, show loading and error states.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-011"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-074",
+      "title": "Implement payment flow and intent creation mobile",
+      "description": "On payment screen, call create PaymentIntent API, receive client_secret, present Stripe payment sheet for confirmation, show 'confirming payment' state while waiting for webhook, poll order status until paid or failed.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-011"
+      ],
+      "depends_on": [
+        "WI-024"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-075",
+      "title": "Implement payment success analytics event mobile",
+      "description": "Log payment_success event when payment confirmed and order marked paid, respect analytics consent.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-011"
+      ],
+      "depends_on": [
+        "WI-046"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-076",
+      "title": "Implement payment failure handling mobile",
+      "description": "Show error message on payment failure, log payment_failed analytics event with consent, allow user to retry payment or return to cart.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-011"
+      ],
+      "depends_on": [
+        "WI-074"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-077",
+      "title": "Implement order confirmation screen mobile",
+      "description": "Create confirmation screen showing order number, items, delivery address, delivery option, total. Include option to view order history or continue shopping.",
+      "epic_id": "E-05",
+      "component": "frontend",
+      "story_ids": [
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-074"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-078",
+      "title": "Implement order placed analytics event mobile",
+      "description": "Log order_placed event when confirmation screen shown, include order_id, respect analytics consent.",
+      "epic_id": "E-07",
+      "component": "frontend",
+      "story_ids": [
+        "US-012"
+      ],
+      "depends_on": [
+        "WI-046"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-079",
+      "title": "Implement order history screen mobile",
+      "description": "Create order history screen showing signed-in user's orders newest first with order number, date, total, customer-facing status. Implement list view or grid view of orders.",
+      "epic_id": "E-05",
+      "component": "frontend",
+      "story_ids": [
+        "US-013"
+      ],
+      "depends_on": [
+        "WI-028"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-080",
+      "title": "Implement order detail screen mobile",
+      "description": "Create order detail screen showing order number, date, customer-facing status, order lines (name, size, color, unit price, qty), subtotal, shipping, VAT amount, total, delivery address, delivery option. Include menu to view returns policy or contact support.",
+      "epic_id": "E-05",
+      "component": "frontend",
+      "story_ids": [
+        "US-013"
+      ],
+      "depends_on": [
+        "WI-029"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-081",
+      "title": "Implement returns policy static page mobile",
+      "description": "Create returns policy screen with static policy text (unworn within 30 days, full refund, return shipping paid by customer unless faulty) and support email address. Link from order detail and settings menu.",
+      "epic_id": "E-06",
+      "component": "frontend",
+      "story_ids": [
+        "US-015"
+      ],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-082",
+      "title": "Implement settings menu and account management mobile",
+      "description": "Create settings screen with sign-out, account deletion, analytics consent toggle, returns policy link, privacy policy link, support email link. Implement account deletion with password confirmation.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-016"
+      ],
+      "depends_on": [
+        "WI-050"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-083",
+      "title": "Implement privacy policy and legal pages mobile",
+      "description": "Create static screens for privacy policy, terms of service, and imprint (to be provided by customer). Make accessible from settings and app footer.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-082"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-084",
+      "title": "Implement Android build configuration and signing",
+      "description": "Configure Android app build.gradle with package name, signing config, release keystore, configure Android 8.0+ minimum SDK, test on Android emulator.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-085",
+      "title": "Implement iOS build configuration and signing",
+      "description": "Configure iOS project with provisioning profile, signing identity, bundle ID, deployment target iOS 14+, test on iOS simulator.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-042"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-086",
+      "title": "Configure staging environment with test database and Stripe test keys",
+      "description": "Set up staging PostgreSQL database, configure backend staging URLs, configure Stripe test API keys for staging, set up docker-compose for local staging, test full flow end-to-end.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-087",
+      "title": "Set up GitHub Actions CI/CD for Android build and release",
+      "description": "Create GitHub Actions workflow for Android: run tests, build APK, sign with release keystore, upload to artifact storage or Play Store beta channel.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-084"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-088",
+      "title": "Set up GitHub Actions CI/CD for iOS build and release",
+      "description": "Create GitHub Actions workflow for iOS: run tests, build IPA, sign with provisioning, upload to TestFlight or App Store.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-085"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-089",
+      "title": "Implement backend unit and integration tests for core flows",
+      "description": "Write Jest tests for sign-up, sign-in, password reset, cart operations, order creation, payment webhook, order status changes, covering happy path and error cases.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-025"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-090",
+      "title": "Implement mobile unit and widget tests for screens and logic",
+      "description": "Write flutter_test tests for sign-up, sign-in, cart, checkout screens, Riverpod providers, form validation, covering happy path and error cases.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-074"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-091",
+      "title": "Implement mobile integration tests for end-to-end checkout flow",
+      "description": "Write integration_test tests for sign-up, browse catalog, add to cart, checkout with payment (Stripe test card), confirm order, view order history, covering Android and iOS.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-086"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-092",
+      "title": "Implement admin web back-office home and product management UI",
+      "description": "Create admin back-office web app (Vue/React) with dashboard, product list, create/edit product forms, photo upload, variant management, deactivate product, test on desktop browsers.",
+      "epic_id": "E-08",
+      "component": "frontend",
+      "story_ids": [
+        "US-019"
+      ],
+      "depends_on": [
+        "WI-011"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-093",
+      "title": "Implement admin CSV product import UI and flow",
+      "description": "Create CSV upload form in back-office, display import results (summary of created/updated/failed rows), show validation errors by row, download CSV template.",
+      "epic_id": "E-08",
+      "component": "frontend",
+      "story_ids": [
+        "US-020"
+      ],
+      "depends_on": [
+        "WI-014"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-094",
+      "title": "Implement admin stock import UI and flow",
+      "description": "Create stock file upload form in back-office, display import results, show unmatched rows and errors, show import history with timestamp and who ran it.",
+      "epic_id": "E-09",
+      "component": "frontend",
+      "story_ids": [
+        "US-021"
+      ],
+      "depends_on": [
+        "WI-015"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-095",
+      "title": "Implement admin order management UI with filtering and status updates",
+      "description": "Create admin order list with filters by status, search by order number/customer, display order details, show internal status mapping, implement status update buttons with confirmation dialogs.",
+      "epic_id": "E-10",
+      "component": "frontend",
+      "story_ids": [
+        "US-022",
+        "US-023"
+      ],
+      "depends_on": [
+        "WI-032"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-096",
+      "title": "Implement admin audit log UI",
+      "description": "Create audit log view in admin back-office showing admin actions (product changes, order status, refunds) with admin name, action, timestamp, previous and new values.",
+      "epic_id": "E-10",
+      "component": "frontend",
+      "story_ids": [
+        "US-022"
+      ],
+      "depends_on": [
+        "WI-038"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-097",
+      "title": "Implement admin shipping configuration UI",
+      "description": "Create settings page in admin back-office for standard shipping price, express shipping price, free shipping threshold, allow editing and saving with validation.",
+      "epic_id": "E-11",
+      "component": "frontend",
+      "story_ids": [
+        "US-026"
+      ],
+      "depends_on": [
+        "WI-037"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-098",
+      "title": "Implement admin sign-in page and authentication UI",
+      "description": "Create admin login page with email/password form, error messaging, rate limiting feedback, redirect to dashboard on success.",
+      "epic_id": "E-12",
+      "component": "frontend",
+      "story_ids": [
+        "US-018"
+      ],
+      "depends_on": [
+        "WI-031"
+      ],
+      "estimate_points": 1,
+      "status": "todo"
+    },
+    {
+      "id": "WI-099",
+      "title": "Performance testing and optimization for mobile app",
+      "description": "Profile mobile app on mid-range device, optimize app startup time to < 3 seconds, ensure catalog/search/product screens load content within 2 seconds at p90, implement lazy loading and caching.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-091"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-100",
+      "title": "Performance testing and optimization for backend API",
+      "description": "Load test backend API, ensure responses < 500ms at p95 for catalog of few hundred products, optimize database queries, add indexes, implement caching where appropriate.",
+      "epic_id": "E-02",
+      "component": "backend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-089"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-101",
+      "title": "Security hardening and OWASP compliance review",
+      "description": "Review backend for OWASP Top 10 risks, implement input validation, output encoding, CSRF protection, SQL injection prevention, add rate limiting, implement secure headers, conduct security testing.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-039"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-102",
+      "title": "Accessibility testing and improvements (WCAG 2.1 AA)",
+      "description": "Test mobile app with VoiceOver (iOS) and TalkBack (Android), ensure 44x44 touch targets, sufficient color contrast, screen reader labels on all interactive elements and images, test with system font scaling.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-091"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-103",
+      "title": "Set up production PostgreSQL database with backups and monitoring",
+      "description": "Provision production-grade PostgreSQL 16 with automatic backups, replication, monitoring for performance and errors, set up database connection pooling.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-104",
+      "title": "Set up production backend deployment with monitoring and logging",
+      "description": "Configure Docker image for NestJS backend, set up production deployment pipeline (Kubernetes, Cloud Run, or similar), implement health checks, structured logging, error monitoring with Sentry.",
+      "epic_id": "E-02",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-041"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-105",
+      "title": "Prepare for production Stripe configuration",
+      "description": "Document Stripe live mode setup process, create runbooks for switching from test to live keys, implement feature flag or config-only switch for live mode, plan go-live checklist after full testing.",
+      "epic_id": "E-04",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [
+        "WI-024"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-106",
+      "title": "Staging acceptance testing and bug fixes",
+      "description": "Execute test plan on staging with Stripe test mode, verify all user flows, test admin operations, test edge cases (stock expiry, payment failures, network errors), document issues and fixes.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-091"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Infrastructure and Backend Foundation",
+      "goal": "Set up development infrastructure, database schema, backend project structure, authentication and authorization, API documentation.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-010",
+        "WI-039",
+        "WI-040",
+        "WI-041"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "User Authentication and Account Management (Backend)",
+      "goal": "Implement user sign-up, sign-in, password reset, account deletion, session management with tests.",
+      "work_item_ids": [
+        "WI-005",
+        "WI-006",
+        "WI-007",
+        "WI-008",
+        "WI-009"
+      ]
+    },
+    {
+      "id": "M3",
+      "name": "Product Catalog and Discovery APIs (Backend)",
+      "goal": "Implement product and variant management, stock tracking, catalog browsing and search endpoints.",
+      "work_item_ids": [
+        "WI-011",
+        "WI-012",
+        "WI-013",
+        "WI-014",
+        "WI-015",
+        "WI-016",
+        "WI-017",
+        "WI-037"
+      ]
+    },
+    {
+      "id": "M4",
+      "name": "Analytics Logging and Consent (Backend)",
+      "goal": "Implement analytics event logging endpoint and event types for tracking.",
+      "work_item_ids": [
+        "WI-018"
+      ]
+    },
+    {
+      "id": "M5",
+      "name": "Cart Management APIs (Backend)",
+      "goal": "Implement cart storage, add to cart, remove from cart, quantity management endpoints.",
+      "work_item_ids": [
+        "WI-019",
+        "WI-020",
+        "WI-021"
+      ]
+    },
+    {
+      "id": "M6",
+      "name": "Checkout and Stock Reservation (Backend)",
+      "goal": "Implement order creation with stock reservation, delivery address and shipping option selection, expiry job for releasing stock.",
+      "work_item_ids": [
+        "WI-022",
+        "WI-023",
+        "WI-026"
+      ]
+    },
+    {
+      "id": "M7",
+      "name": "Payment Processing with Stripe (Backend)",
+      "goal": "Implement Stripe PaymentIntent creation and webhook handler for marking orders paid, idempotent payment processing.",
+      "work_item_ids": [
+        "WI-024",
+        "WI-025"
+      ]
+    },
+    {
+      "id": "M8",
+      "name": "Order Confirmation and History (Backend)",
+      "goal": "Implement order confirmation emails, order history endpoint, customer-facing status mapping, order detail retrieval.",
+      "work_item_ids": [
+        "WI-027",
+        "WI-028",
+        "WI-029",
+        "WI-030"
+      ]
+    },
+    {
+      "id": "M9",
+      "name": "Admin Authentication and Order Management (Backend)",
+      "goal": "Implement admin sign-in, order list with filtering, status updates, cancellation, refund recording, audit logging.",
+      "work_item_ids": [
+        "WI-031",
+        "WI-032",
+        "WI-033",
+        "WI-034",
+        "WI-035",
+        "WI-036",
+        "WI-038"
+      ]
+    },
+    {
+      "id": "M10",
+      "name": "Backend Testing and Quality Assurance",
+      "goal": "Implement comprehensive unit and integration tests for all core flows, security review, performance optimization.",
+      "work_item_ids": [
+        "WI-089",
+        "WI-100",
+        "WI-101"
+      ]
+    },
+    {
+      "id": "M11",
+      "name": "Mobile App Setup and Navigation (Frontend)",
+      "goal": "Set up Flutter project, navigation structure, shared models, API client generation, analytics consent and tracking.",
+      "work_item_ids": [
+        "WI-042",
+        "WI-043",
+        "WI-044",
+        "WI-045",
+        "WI-046"
+      ]
+    },
+    {
+      "id": "M12",
+      "name": "User Authentication UI and Screens (Mobile)",
+      "goal": "Implement sign-up, sign-in, password reset, account deletion, sign-out, session persistence on mobile.",
+      "work_item_ids": [
+        "WI-047",
+        "WI-048",
+        "WI-049",
+        "WI-050",
+        "WI-051",
+        "WI-052",
+        "WI-053",
+        "WI-054"
+      ]
+    },
+    {
+      "id": "M13",
+      "name": "Product Catalog and Discovery UI (Mobile)",
+      "goal": "Implement home screen, category browsing, product list with search, product detail screen with image loading.",
+      "work_item_ids": [
+        "WI-055",
+        "WI-056",
+        "WI-057",
+        "WI-058",
+        "WI-059",
+        "WI-060"
+      ]
+    },
+    {
+      "id": "M14",
+      "name": "Shopping Cart UI (Mobile)",
+      "goal": "Implement cart state management, add to cart flow, cart screen with item management, stock warnings.",
+      "work_item_ids": [
+        "WI-061",
+        "WI-062",
+        "WI-063",
+        "WI-064",
+        "WI-065",
+        "WI-066"
+      ]
+    },
+    {
+      "id": "M15",
+      "name": "Checkout and Delivery (Mobile)",
+      "goal": "Implement checkout flow entry, delivery address entry, shipping option selection, order summary review.",
+      "work_item_ids": [
+        "WI-067",
+        "WI-068",
+        "WI-069",
+        "WI-070"
+      ]
+    },
+    {
+      "id": "M16",
+      "name": "Payment and Order Confirmation (Mobile)",
+      "goal": "Implement stock reservation, Stripe payment integration, payment flow, confirmation screen, order history and detail.",
+      "work_item_ids": [
+        "WI-071",
+        "WI-072",
+        "WI-073",
+        "WI-074",
+        "WI-075",
+        "WI-076",
+        "WI-077",
+        "WI-078",
+        "WI-079",
+        "WI-080"
+      ]
+    },
+    {
+      "id": "M17",
+      "name": "Customer Support and Settings (Mobile)",
+      "goal": "Implement returns policy, settings menu, account management, legal pages, analytics consent management.",
+      "work_item_ids": [
+        "WI-081",
+        "WI-082",
+        "WI-083"
+      ]
+    },
+    {
+      "id": "M18",
+      "name": "Mobile Build Configuration and Testing",
+      "goal": "Configure Android and iOS builds, set up mobile unit and integration tests, performance and accessibility optimization.",
+      "work_item_ids": [
+        "WI-084",
+        "WI-085",
+        "WI-087",
+        "WI-088",
+        "WI-090",
+        "WI-091",
+        "WI-099",
+        "WI-102"
+      ]
+    },
+    {
+      "id": "M19",
+      "name": "Admin Web Back-office Product Management",
+      "goal": "Implement admin authentication, product CRUD, photo upload, CSV import, stock import, shipping configuration.",
+      "work_item_ids": [
+        "WI-092",
+        "WI-093",
+        "WI-094",
+        "WI-097",
+        "WI-098"
+      ]
+    },
+    {
+      "id": "M20",
+      "name": "Admin Web Back-office Order and Audit Management",
+      "goal": "Implement admin order list, status updates, cancellation, refund recording, audit log viewing.",
+      "work_item_ids": [
+        "WI-095",
+        "WI-096"
+      ]
+    },
+    {
+      "id": "M21",
+      "name": "Production Deployment and Go-Live Preparation",
+      "goal": "Set up production database, deployment pipeline, monitoring, logging, Stripe live configuration, staging acceptance testing.",
+      "work_item_ids": [
+        "WI-086",
+        "WI-103",
+        "WI-104",
+        "WI-105",
+        "WI-106"
+      ]
+    }
+  ]
+}

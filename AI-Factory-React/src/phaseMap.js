@@ -1,7 +1,7 @@
 /** Maps 11 UI stages (react-base) to backend pipeline step IDs. */
 export const UI_STAGE_BACKEND_IDS = [
   ['discovery'], // Customer
-  ['discovery'], // Spec Writer
+  ['discovery'], // Business Developer
   ['design'], // Architect
   ['design'], // UI/UX Designer
   ['sprint'], // Project Manager
@@ -105,6 +105,10 @@ export function stageProgress(statusMap, uiIndex) {
 
 /** Active UI stage index from pipeline state. */
 export function activeUiStage(runState) {
+  if (typeof runState?.ui_active_stage === 'number' && !Number.isNaN(runState.ui_active_stage)) {
+    return Math.max(0, Math.min(UI_STAGE_COUNT - 1, runState.ui_active_stage));
+  }
+
   const statusMap = stepStatusMap(runState?.pipeline_steps);
 
   for (let i = 0; i < UI_STAGE_COUNT; i++) {
@@ -222,13 +226,18 @@ export function runStateToDashboard(runState) {
     error: runState?.error || null,
     approval: runState?.approvals?.release || runState?.approvals?.prd || 'pending',
     browserReady: previewReadyFromState(runState),
-    projectName: runState?.project_name || 'Project',
+    projectName: runDisplayName(runState),
     runId: runState?.run_id || null,
     phase: runState?.phase || '',
     overall: overallProgressFromState(runState),
     checks: runState?.checks || {},
     releaseNumber: runState?.release_number || 1,
   };
+}
+
+/** App title for UI (ShopEase, Lighting retail …), not the intake slug. */
+export function runDisplayName(runState, fallback = 'Project') {
+  return runState?.product_name || runState?.project_name || fallback;
 }
 
 export function slugProjectName(text) {

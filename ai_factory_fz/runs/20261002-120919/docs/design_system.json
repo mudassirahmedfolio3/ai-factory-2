@@ -1,0 +1,298 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#7A9E8E",
+      "dark": "#9BB8AA"
+    },
+    {
+      "name": "primary_variant",
+      "light": "#5F8273",
+      "dark": "#B5CDBF"
+    },
+    {
+      "name": "background",
+      "light": "#F7F3EB",
+      "dark": "#1C1F1D"
+    },
+    {
+      "name": "surface",
+      "light": "#FFFCF7",
+      "dark": "#2A2E2B"
+    },
+    {
+      "name": "surface_variant",
+      "light": "#EFE9DF",
+      "dark": "#353A37"
+    },
+    {
+      "name": "text_primary",
+      "light": "#2C2C2C",
+      "dark": "#F2EDE4"
+    },
+    {
+      "name": "text_secondary",
+      "light": "#5A5A5A",
+      "dark": "#C4BEB4"
+    },
+    {
+      "name": "text_on_primary",
+      "light": "#FFFFFF",
+      "dark": "#1C1F1D"
+    },
+    {
+      "name": "border",
+      "light": "#D9D2C6",
+      "dark": "#4A504C"
+    },
+    {
+      "name": "error",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "success",
+      "light": "#4A7C59",
+      "dark": "#8FBC9A"
+    },
+    {
+      "name": "disabled",
+      "light": "#B8B2A8",
+      "dark": "#6B716D"
+    },
+    {
+      "name": "scrim",
+      "light": "#00000066",
+      "dark": "#00000099"
+    },
+    {
+      "name": "image_placeholder",
+      "light": "#E4DED3",
+      "dark": "#3F4541"
+    }
+  ],
+  "typography": [
+    {
+      "name": "display",
+      "size": 28.0,
+      "weight": 600,
+      "line_height": 36.0
+    },
+    {
+      "name": "headline",
+      "size": 22.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "title",
+      "size": 18.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "body",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "body_emphasis",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "label",
+      "size": 14.0,
+      "weight": 500,
+      "line_height": 20.0
+    },
+    {
+      "name": "caption",
+      "size": 12.0,
+      "weight": 400,
+      "line_height": 16.0
+    },
+    {
+      "name": "price",
+      "size": 20.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "button",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 24.0
+    }
+  ],
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ],
+  "corner_radii": [
+    8,
+    12,
+    16,
+    24
+  ],
+  "shared_widgets": [
+    {
+      "name": "SoftAuraAppBar",
+      "description": "Top app bar with SoftAura brand title or screen title, charcoal text on warm ivory (dark: light text on surface), optional trailing cart icon button with ≥48dp hit area and semantic label Cart."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Browse list card showing rounded product image (radius 16), product name (title), formatted USD price from integer cents (e.g. 1299 → $12.99), and category chip (Body Wash | Cleansers | Moisturizers | Face Care). Entire card tappable ≥48dp tall; sage accent on chip/border; Semantics label includes name, category, and price."
+    },
+    {
+      "name": "ProductImage",
+      "description": "Rounded product imagery (corner radius 16–24) with warm ivory/surface_variant placeholder, BoxFit.cover, and required semanticLabel describing the product."
+    },
+    {
+      "name": "PriceText",
+      "description": "Displays money from integer minor units (cents) + ISO 4217 USD as $X.XX without floating-point arithmetic; uses price type style and charcoal/primary contrast."
+    },
+    {
+      "name": "CategoryChip",
+      "description": "Compact label for one of Body Wash, Cleansers, Moisturizers, Face Care; sage primary fill or outline on ivory; min height 32 with parent ensuring 48dp touch if interactive."
+    },
+    {
+      "name": "PrimaryButton",
+      "description": "Filled sage (#7A9E8E) button with text_on_primary label, min height/width 48dp, used for Add to cart and Retry actions."
+    },
+    {
+      "name": "LoadingStateView",
+      "description": "Centered CircularProgressIndicator using primary accent with optional caption Loading SoftAura products; used while AsyncValue is loading."
+    },
+    {
+      "name": "EmptyStateView",
+      "description": "Centered illustration/placeholder, headline and body copy when catalog or cart has zero items, optional PrimaryButton CTA."
+    },
+    {
+      "name": "ErrorStateView",
+      "description": "Error message with Retry PrimaryButton (≥48dp); shown when catalog load fails; charcoal text on ivory, error color for icon."
+    },
+    {
+      "name": "CartLineItem",
+      "description": "Cart row with product name and unit price snapshot (cents + USD copied at add time); 48dp min row height; Semantics for name and price."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "ProductListScreen",
+      "route": "/products",
+      "purpose": "Scrollable SoftAura Skin Care browse screen showing all 24 seeded mock SKUs as product cards with name, USD price from integer cents, rounded imagery, and category membership on warm ivory with sage accent and charcoal text.",
+      "components": [
+        "SoftAuraAppBar",
+        "ProductCard",
+        "ProductImage",
+        "PriceText",
+        "CategoryChip",
+        "LoadingStateView",
+        "EmptyStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "success"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "ProductDetailScreen",
+      "route": "/products/:id",
+      "purpose": "Product detail for a single catalog SKU: name, brand, category, unit price (cents → $X.XX USD), description, and rounded product image with SoftAura styling; optional Add to cart (≥48dp); Android back returns to list with catalog still visible.",
+      "components": [
+        "SoftAuraAppBar",
+        "ProductImage",
+        "PriceText",
+        "CategoryChip",
+        "PrimaryButton",
+        "LoadingStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "success"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Optional M1 in-memory session cart listing line items with product name and unit price snapshot (cents + USD) copied at add time; contents survive list/detail navigation within the same process and clear on process kill; no auth, payment, or persistence.",
+      "components": [
+        "SoftAuraAppBar",
+        "CartLineItem",
+        "PriceText",
+        "EmptyStateView",
+        "PrimaryButton"
+      ],
+      "states": [
+        "empty",
+        "success"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap ProductCard → go_router push /products/:id"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "Android system back or AppBar back → pop to /products with catalog state retained"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Tap AppBar cart icon → go_router push /cart"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Tap AppBar cart icon or after Add to cart feedback → go_router push /cart"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-01",
+      "trigger": "Android system back or AppBar back → pop; cart Notifier state remains for session"
+    }
+  ],
+  "accessibility": [
+    "All interactive controls meet minimum 48×48 dp touch targets (ProductCard, PrimaryButton, AppBar back/cart icons, Retry).",
+    "Charcoal text (#2C2C2C) on warm ivory (#F7F3EB) and light text (#F2EDE4) on dark surface (#2A2E2B) meet WCAG AA contrast (≥4.5:1 for body text).",
+    "Sage primary (#7A9E8E) on white/ivory button label uses text_on_primary (#FFFFFF) meeting AA for large/button text.",
+    "Every ProductImage and icon includes a non-empty Semantics / semanticLabel (product name or action, e.g. Add to cart, Go back, Open cart).",
+    "PriceText announces formatted currency (e.g. 12 dollars 99 cents) via Semantics, never raw cents alone.",
+    "ProductCard Semantics merges name, category, and price into one focusable announcement.",
+    "Navigation supports standard Android back behavior from detail and cart to prior screen without trapping focus.",
+    "Loading, empty, and error states expose liveRegion / Semantics announcements so screen readers hear status changes.",
+    "CategoryChip text remains readable at 14sp with sufficient contrast against sage outline or soft sage fill.",
+    "Do not rely on color alone: category chips include text labels; error state includes icon plus Retry label."
+  ]
+}

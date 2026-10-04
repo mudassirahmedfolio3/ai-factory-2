@@ -1,0 +1,5 @@
+{
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "Error: EPERM: operation not permitted, rename 'C:\\Users\\muhammadtaimour\\.cursor\\cli-config.json.25448.84c3357e-45b3-4f9f-a509-772f9b0c9055.tmp' -> 'C:\\Users\\muhammadtaimour\\.cursor\\cli-config.json'\n"
+}

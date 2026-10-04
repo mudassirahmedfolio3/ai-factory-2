@@ -1,0 +1,367 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#0B5FFF",
+      "dark": "#5B9BFF"
+    },
+    {
+      "name": "primary_container",
+      "light": "#E8F0FF",
+      "dark": "#12325F"
+    },
+    {
+      "name": "on_primary",
+      "light": "#FFFFFF",
+      "dark": "#001A40"
+    },
+    {
+      "name": "secondary",
+      "light": "#1F6B4A",
+      "dark": "#6FDBA8"
+    },
+    {
+      "name": "secondary_container",
+      "light": "#E3F6EC",
+      "dark": "#0F3A28"
+    },
+    {
+      "name": "background",
+      "light": "#F5F7FA",
+      "dark": "#0E1116"
+    },
+    {
+      "name": "surface",
+      "light": "#FFFFFF",
+      "dark": "#1A1F27"
+    },
+    {
+      "name": "surface_variant",
+      "light": "#EEF2F7",
+      "dark": "#262C36"
+    },
+    {
+      "name": "on_surface",
+      "light": "#12171F",
+      "dark": "#E8ECF2"
+    },
+    {
+      "name": "on_surface_variant",
+      "light": "#5A6575",
+      "dark": "#A8B0BD"
+    },
+    {
+      "name": "outline",
+      "light": "#C5CDD8",
+      "dark": "#3E4654"
+    },
+    {
+      "name": "error",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "error_container",
+      "light": "#F9DEDC",
+      "dark": "#8C1D18"
+    },
+    {
+      "name": "success",
+      "light": "#1B7A3D",
+      "dark": "#81C995"
+    },
+    {
+      "name": "warning",
+      "light": "#9A6700",
+      "dark": "#F5C518"
+    },
+    {
+      "name": "price",
+      "light": "#0A3D91",
+      "dark": "#8AB4F8"
+    },
+    {
+      "name": "cart_badge",
+      "light": "#D93025",
+      "dark": "#F28B82"
+    },
+    {
+      "name": "scrim",
+      "light": "#00000066",
+      "dark": "#00000099"
+    },
+    {
+      "name": "image_placeholder",
+      "light": "#D8DEE8",
+      "dark": "#2F3642"
+    }
+  ],
+  "typography": [
+    {
+      "name": "display_small",
+      "size": 28.0,
+      "weight": 700,
+      "line_height": 36.0
+    },
+    {
+      "name": "headline_medium",
+      "size": 22.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "title_large",
+      "size": 18.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "title_medium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 22.0
+    },
+    {
+      "name": "body_large",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "body_medium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "label_large",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "label_medium",
+      "size": 12.0,
+      "weight": 500,
+      "line_height": 16.0
+    },
+    {
+      "name": "price_large",
+      "size": 24.0,
+      "weight": 700,
+      "line_height": 32.0
+    },
+    {
+      "name": "price_medium",
+      "size": 16.0,
+      "weight": 700,
+      "line_height": 22.0
+    }
+  ],
+  "spacing": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64
+  ],
+  "corner_radii": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    24
+  ],
+  "shared_widgets": [
+    {
+      "name": "AppTopBar",
+      "description": "Top app bar with screen title, optional back affordance (≥48dp), and CartBadgeButton. Uses surface/on_surface tokens; semantics announce screen name."
+    },
+    {
+      "name": "CartBadgeButton",
+      "description": "Icon button (≥48dp) navigating to /cart; shows item-count badge when CartNotifier total quantity > 0. Semantic label: Cart, N items."
+    },
+    {
+      "name": "SearchField",
+      "description": "Full-width search TextField (≥48dp height) filtering ProductListNotifier by name/brand query. Clear button and semantics label Search laptops."
+    },
+    {
+      "name": "BrandFilterChips",
+      "description": "Horizontal chip row for Dell, Apple, HP, Lenovo (multi-select). Min height 48dp; selected state uses primary_container. Updates brand filter on ProductListNotifier."
+    },
+    {
+      "name": "PriceRangeFilter",
+      "description": "Min/max price filter controls in cents displayed as USD (e.g. $0–$3000). Applies minPriceCents/maxPriceCents to ProductListNotifier; touch targets ≥48dp."
+    },
+    {
+      "name": "ProductCard",
+      "description": "List tile/card: product image or ImagePlaceholder, name (title_medium), brand (label_medium), PriceText from priceCents+USD. Entire card tappable ≥48dp; semantic label includes name and formatted price."
+    },
+    {
+      "name": "PriceText",
+      "description": "Formats integer minor units (cents) + ISO 4217 USD as $X,XXX.XX (e.g. 149999 → $1,499.99). Never uses floating-point money types. Uses price_medium or price_large style and price color token."
+    },
+    {
+      "name": "ImagePlaceholder",
+      "description": "Degraded image fallback when asset missing; surface_variant background with laptop icon and semantic label Product image unavailable."
+    },
+    {
+      "name": "PrimaryButton",
+      "description": "Filled CTA (primary/on_primary), min height 48dp, corner radius 12. Used for Add to cart and Retry. Disabled when out of stock."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Minus / quantity / plus controls each ≥48dp. Decrease to 0 removes line. Semantic labels Decrease quantity, Quantity N, Increase quantity."
+    },
+    {
+      "name": "LoadingStateView",
+      "description": "Centered CircularProgressIndicator with optional body_medium message Loading catalog… / Loading product…. Blocks interaction until AsyncValue resolves."
+    },
+    {
+      "name": "EmptyStateView",
+      "description": "Centered message + optional illustration for empty catalog or no search/filter matches. Includes Clear filters action when filters active."
+    },
+    {
+      "name": "ErrorStateView",
+      "description": "Error icon, message, and Retry PrimaryButton (≥48dp). Used when LocalCatalogDataSource fails or product id missing."
+    },
+    {
+      "name": "CartLineItem",
+      "description": "Cart row: name, PriceText unit snapshot (cents+USD), QuantityStepper, line subtotal. Remove when quantity reaches 0. Semantics include name and quantity."
+    },
+    {
+      "name": "CartSummaryBar",
+      "description": "Bottom bar showing item count and PriceText cart total from in-memory CartState. Demo-only; no checkout CTA in M1."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "ProductListScreen",
+      "route": "/products",
+      "purpose": "Browse the seeded local mock laptop catalog (12–15 SKUs across Dell, Apple, HP, Lenovo) with client-side search and brand/price-range filters; show name and USD price from integer cents; entry point for the demo.",
+      "components": [
+        "AppTopBar",
+        "CartBadgeButton",
+        "SearchField",
+        "BrandFilterChips",
+        "PriceRangeFilter",
+        "ProductCard",
+        "PriceText",
+        "ImagePlaceholder",
+        "LoadingStateView",
+        "EmptyStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "empty_filtered",
+        "error",
+        "success"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "ProductDetailScreen",
+      "route": "/products/:id",
+      "purpose": "Show a single laptop’s name, brand, unit price (cents+USD), short description/specs summary, and image or placeholder; allow add-to-cart for in-stock demo SKUs; back returns to list with browse context preserved. Flagship New DELL XPS 13 9300 Laptop must show $1,499.99 from 149999 cents USD.",
+      "components": [
+        "AppTopBar",
+        "CartBadgeButton",
+        "PriceText",
+        "ImagePlaceholder",
+        "PrimaryButton",
+        "LoadingStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "error",
+        "success",
+        "out_of_stock"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Manage the session-only in-memory cart: line items with name, unit price snapshot (cents+USD), quantity steppers (≥48dp), remove at quantity 0; totals update immediately with no backend. Cart may be empty after process restart.",
+      "components": [
+        "AppTopBar",
+        "CartLineItem",
+        "QuantityStepper",
+        "PriceText",
+        "CartSummaryBar",
+        "EmptyStateView",
+        "ImagePlaceholder"
+      ],
+      "states": [
+        "empty",
+        "success"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap ProductCard for a laptop SKU → go_router push /products/:id"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "Back / AppTopBar leading → pop; ProductListNotifier browse query/filters preserved"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Tap CartBadgeButton → go_router push /cart"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Tap CartBadgeButton or after Add to cart success affordance → push /cart"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-01",
+      "trigger": "Back from cart or Continue browsing empty-state action → pop/go /products"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-02",
+      "trigger": "Optional tap on CartLineItem name → push /products/:id for that line’s productId"
+    }
+  ],
+  "accessibility": [
+    "Minimum touch target 48×48dp for ProductCard, SearchField clear, BrandFilterChips, PriceRangeFilter controls, PrimaryButton, QuantityStepper buttons, CartBadgeButton, Retry, and Back.",
+    "Text contrast ≥ WCAG AA: on_surface on background/surface and on_primary on primary in light and dark themes.",
+    "All images and icons provide Semantics/semanticLabel (product name image, Cart, Search laptops, Increase/Decrease quantity, Retry, Back).",
+    "PriceText announces formatted currency for screen readers (e.g. 1499 dollars and 99 cents) from integer cents + USD.",
+    "ProductCard semantics combine name, brand, and price; exclude decorative placeholders from focus when ImagePlaceholder is used.",
+    "LoadingStateView and ErrorStateView announce status via Semantics liveRegion / AnnounceSemanticsEvents.",
+    "Empty filtered results: EmptyStateView with Clear filters action labeled and focusable.",
+    "Focus order: AppTopBar → search/filters → product list/detail content → primary CTA / cart summary; no horizontal scroll of primary content on phone viewports.",
+    "Cart badge badge count included in CartBadgeButton semantic label (Cart, N items).",
+    "Do not rely on color alone for error/out-of-stock; pair with text labels."
+  ]
+}

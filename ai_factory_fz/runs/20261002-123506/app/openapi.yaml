@@ -1,0 +1,473 @@
+openapi: 3.1.0
+info:
+  title: Womens Jewellery API
+  version: 1.0.0
+  description: |
+    Womens Jewellery e-commerce API contract for the M1 Speed Demo and later milestones.
+    M1 Flutter app uses local mock data only and does not call this API.
+    This document covers must-have catalog stories (US-001 browse, US-002 detail):
+    health probe plus two public catalog read operations. Cart is in-memory on
+    the client in M1 (US-003) and has no API operations here. Auth, payments,
+    checkout, and orders are deferred. Reviews are read-only on product detail;
+    verified-purchase write path is deferred.
+  contact:
+    name: Womens Jewellery Engineering
+    email: support@womensjewellery.demo
+servers:
+  - url: http://10.0.2.2:3000/api/v1
+    description: Android emulator → local staging
+  - url: https://api.staging.womensjewellery.example/api/v1
+    description: Staging
+  - url: https://api.womensjewellery.example/api/v1
+    description: Production
+tags:
+  - name: Health
+    description: Service health checks
+  - name: Catalog
+    description: Jewellery product browse and detail (public)
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: getHealth
+      summary: Health check
+      description: Returns 200 when the service and database are reachable.
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable (database unreachable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products:
+    get:
+      tags:
+        - Catalog
+      operationId: listProducts
+      summary: List jewellery products
+      description: |
+        Paginated jewellery listing with optional text search, price range,
+        category, metal, and occasion filters. Supports US-001 browse requirements.
+        Public endpoint; no authentication required. Prices are integer minor
+        units with ISO 4217 currency USD.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: q
+          in: query
+          description: Case-insensitive search against product name and searchable text
+          schema:
+            type: string
+            maxLength: 100
+            example: Tropical
+        - name: category
+          in: query
+          description: Filter by jewellery category slug
+          schema:
+            $ref: '#/components/schemas/JewelleryCategorySlug'
+        - name: metal
+          in: query
+          description: Filter by metal tone
+          schema:
+            $ref: '#/components/schemas/MetalTone'
+        - name: occasion
+          in: query
+          description: Filter by occasion
+          schema:
+            $ref: '#/components/schemas/Occasion'
+        - name: minPriceCents
+          in: query
+          description: Minimum display price in USD cents (inclusive)
+          schema:
+            type: integer
+            minimum: 0
+            example: 1000
+        - name: maxPriceCents
+          in: query
+          description: Maximum display price in USD cents (inclusive)
+          schema:
+            type: integer
+            minimum: 0
+            example: 3000
+        - name: sort
+          in: query
+          description: Sort order for results
+          schema:
+            type: string
+            enum:
+              - priceAsc
+              - priceDesc
+              - nameAsc
+              - newest
+            default: newest
+      responses:
+        '200':
+          description: Paginated product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{productId}:
+    get:
+      tags:
+        - Catalog
+      operationId: getProductById
+      summary: Get jewellery product detail
+      description: |
+        Returns full product detail including category, metal, occasion, description,
+        active variants with per-variant stock, averageRating, and reviews.
+        Supports US-002. Public endpoint. Flagship demo SKU Tropical Earring must
+        return price 1999 cents USD.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token (15-minute TTL). Declared for M2+ protected endpoints.
+        Catalog and health operations in this document do not require a bearer token.
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: 1-based page number
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Product UUID
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - degraded
+        database:
+          type: string
+          enum:
+            - up
+            - down
+        timestamp:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example: Invalid query parameter pageSize
+    Money:
+      type: object
+      additionalProperties: false
+      required:
+        - amountCents
+        - currency
+      properties:
+        amountCents:
+          type: integer
+          description: Amount in minor units (cents)
+          minimum: 0
+          example: 1999
+        currency:
+          type: string
+          description: ISO 4217 currency code
+          pattern: '^[A-Z]{3}$'
+          example: USD
+    JewelleryCategorySlug:
+      type: string
+      description: Jewellery category slug used for browse filters
+      enum:
+        - earrings
+        - necklaces
+        - bracelets
+        - rings
+    MetalTone:
+      type: string
+      description: Metal finish used for browse filters and detail display
+      enum:
+        - gold-tone
+        - silver-tone
+        - rose-gold
+    Occasion:
+      type: string
+      description: Occasion tag used for browse filters and detail display
+      enum:
+        - everyday
+        - work
+        - gift
+        - party
+    Category:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - slug
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Earrings
+        slug:
+          $ref: '#/components/schemas/JewelleryCategorySlug'
+    ProductSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - category
+        - metal
+        - occasion
+        - price
+        - primaryImageUrl
+        - inStock
+        - averageRating
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Tropical Earring
+        category:
+          $ref: '#/components/schemas/Category'
+        metal:
+          $ref: '#/components/schemas/MetalTone'
+        occasion:
+          $ref: '#/components/schemas/Occasion'
+        price:
+          allOf:
+            - $ref: '#/components/schemas/Money'
+          description: Display price (default or lowest active variant); 1999 cents USD for Tropical Earring
+        primaryImageUrl:
+          type: string
+          format: uri
+          description: Primary product image URL or placeholder asset URI
+        inStock:
+          type: boolean
+          description: True when at least one active variant has stockQuantity > 0
+        averageRating:
+          type: number
+          minimum: 0
+          maximum: 5
+          description: Aggregate star rating on a 1–5 scale; 0 when no reviews
+          example: 4.5
+    ProductListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+    ProductVariant:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - sku
+        - name
+        - price
+        - stockQuantity
+        - isDefault
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+          example: WJ-TROPICAL-EARRING-GT
+        name:
+          type: string
+          description: Variant label (e.g. finish or size)
+          example: Gold-tone
+        price:
+          $ref: '#/components/schemas/Money'
+        stockQuantity:
+          type: integer
+          minimum: 0
+          description: Available stock for this variant (static in M1 mock)
+        imageUrl:
+          type: string
+          format: uri
+        isDefault:
+          type: boolean
+          description: Default variant used for list/detail price and availability
+    Review:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - starRating
+        - body
+      properties:
+        id:
+          type: string
+          format: uuid
+        starRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Star rating on a 1–5 scale
+          example: 5
+        body:
+          type: string
+          description: Review text from mock data in M1
+          example: Perfect everyday earrings — light and gift-ready.
+        authorDisplayName:
+          type: string
+          description: Optional display name for mock or future signed-in reviewers
+          example: Maya
+        createdAt:
+          type: string
+          format: date-time
+    ProductDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - category
+        - metal
+        - occasion
+        - price
+        - primaryImageUrl
+        - inStock
+        - averageRating
+        - reviews
+        - variants
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Tropical Earring
+        description:
+          type: string
+          description: Longer listing copy for the product detail screen
+        category:
+          $ref: '#/components/schemas/Category'
+        metal:
+          $ref: '#/components/schemas/MetalTone'
+        occasion:
+          $ref: '#/components/schemas/Occasion'
+        price:
+          allOf:
+            - $ref: '#/components/schemas/Money'
+          description: Display price from default variant (1999 cents USD for Tropical Earring)
+        primaryImageUrl:
+          type: string
+          format: uri
+        inStock:
+          type: boolean
+        averageRating:
+          type: number
+          minimum: 0
+          maximum: 5
+          description: Aggregate star rating; 0 when reviews is empty
+        reviews:
+          type: array
+          description: Mock reviews in M1; empty array triggers empty-reviews UI state
+          items:
+            $ref: '#/components/schemas/Review'
+        variants:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+        returnsPolicyText:
+          type: string
+          description: Optional returns policy for later checkout UI
+          example: |
+            Contact support@womensjewellery.demo for returns guidance.
+            Earrings are final sale for hygiene reasons.

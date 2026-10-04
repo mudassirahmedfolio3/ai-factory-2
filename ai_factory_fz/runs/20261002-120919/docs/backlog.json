@@ -1,0 +1,224 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "SoftAura catalog browse and detail",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "SoftAura session cart preview",
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "SoftAura OpenAPI contract and NestJS catalog stubs",
+      "description": "Author the M1 OpenAPI 3.1 contract and NestJS backend stubs that implement getHealth (GET /health), listProducts (GET /products), and getProductById (GET /products/{productId}) with in-memory SoftAura seed shaped like Category, Product, ProductVariant responses; include Prisma-shaped stubs for deferred User, RefreshToken, Address, Cart, CartItem, Order, OrderItem, Payment. Flutter M1 still uses local mock DTOs matching this surface; full Prisma/PostgreSQL deferred so the emulator demo is not blocked.",
+      "epic_id": "E-01",
+      "feature": "Catalog API",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [],
+      "modules": [
+        "health",
+        "catalog"
+      ],
+      "api_operations": [
+        "getHealth",
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [
+        "User",
+        "RefreshToken",
+        "Address",
+        "Category",
+        "Product",
+        "ProductVariant",
+        "Cart",
+        "CartItem",
+        "Order",
+        "OrderItem",
+        "Payment"
+      ],
+      "screens": [],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Three stub ops plus OpenAPI and model stubs; no full Prisma/Postgres runtime required for M1. | backend_developer: OpenAPI 3.1 for three ops plus eleven model schemas, Nest health/catalog stubs with 24-SKU in-memory seed (pagination/search/category filter), Prisma-shaped deferred models, and Jest/Supertest to green is roughly a full focused day—not a half-day stub.; concerns: listProducts filters and pagination make this more than bare stubs; health-vs-no-Postgres for M1 is ambiguous; Flutter assets/data/catalog.json and generated client must stay byte-compatible with the OpenAPI Product/Category/ProductVariant shapes or M1 demo drifts.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 5,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-002",
+      "title": "Flutter scaffold SoftAura theme and go_router",
+      "description": "Create Flutter 3.x Android-first app with Riverpod, SoftAura tokens in lib/core/theme (sage #7A9E8E, warm ivory, charcoal, rounded imagery), and go_router routes /products, /products/:id, /cart. Offline mock only in debug; no live HTTP. App launches on emulator as coding start.",
+      "epic_id": "E-01",
+      "feature": "App shell",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "modules": [],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 4,
+      "complexity": "low",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Standard Flutter scaffold plus theme tokens and three named routes. | frontend_developer: Flutter 3.x Android-first bootstrap with Riverpod, SoftAura token theme, three go_router routes, debug-only offline mock wiring, and emulator launch verification including cleartext prep for 10.0.2.2.; concerns: First green emulator run and dep/toolchain friction on Windows can eat half a day even when the code itself is small; WI-001 theme/OpenAPI inputs must be stable before tokens and route names are locked.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-003",
+      "title": "Local catalog seed and ProductListScreen",
+      "description": "Add assets/data/catalog.json with 24 SKUs across Body Wash, Cleansers, Moisturizers, Face Care (including ~1299 cents USD body-wash style), LocalCatalogDataSource and CatalogRepository mirroring listProducts responses, ProductListNotifier, and SCR-01 ProductListScreen with name, cents→USD price helper (no floats), rounded imagery, category, loading/empty/error. flutter_test for price formatting and list smoke.",
+      "epic_id": "E-01",
+      "feature": "Product list",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "listProducts"
+      ],
+      "data_models": [
+        "Category",
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-01"
+      ],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "24-SKU seed, repository/notifier, list UI states, and cents price formatting tests. | frontend_developer: 24-SKU catalog.json, models shaped like listProducts, LocalCatalogDataSource/CatalogRepository, ProductListNotifier, SCR-01 with loading/empty/error, integer-cents USD helper, and flutter_test coverage for price formatting plus list smoke.; concerns: Seed and domain models must mirror the OpenAPI Product/Category/ProductVariant shapes closely enough that M2 can swap to generated CatalogApi without rewriting the UI layer.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 5,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-004",
+      "title": "ProductDetailScreen and list-detail navigation",
+      "description": "Build SCR-02 ProductDetailScreen (/products/:id) with ProductDetailNotifier loading one product shaped like getProductById: name, brand, category, unit price from integer cents + USD, description, rounded image, SoftAura styling. Tap from SCR-01 navigates; Android back returns to list with catalog still visible. flutter_test for list→detail navigation.",
+      "epic_id": "E-01",
+      "feature": "Product detail",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-003"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "getProductById"
+      ],
+      "data_models": [
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-02"
+      ],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Single detail screen plus go_router param and navigation test on existing catalog models. | frontend_developer: SCR-02 ProductDetailNotifier and detail UI for getProductById-shaped data, go_router /products/:id param, SoftAura styling, and a flutter_test for list→detail with Android-back preserving list state.; concerns: go_router widget-test harness and AsyncNotifier pump timing are the main effort drivers; catalog must stay in memory across pop so list does not reload empty.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 3,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-005",
+      "title": "In-memory CartNotifier and CartScreen",
+      "description": "Optional M1 cart: CartNotifier session-only CartState; Add to cart on SCR-02 (≥48dp) snapshots product name and unit price (cents + currency) into Cart/CartItem; SCR-03 CartScreen (/cart) shows line items; contents survive list/detail navigation until process kill. No persistence, auth, payment, or backend sync.",
+      "epic_id": "E-02",
+      "feature": "Cart screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "modules": [
+        "cart"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Cart",
+        "CartItem"
+      ],
+      "screens": [
+        "SCR-03"
+      ],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "In-memory notifier plus one cart screen and snapshot-on-add from detail. | frontend_developer: Session-only CartNotifier/CartState, ≥48dp Add to cart on SCR-02 snapshotting name and cents+currency into CartItem, SCR-03 line-item CartScreen, and tests that cart survives list/detail navigation until process kill.; concerns: No persistence/auth/payment is intentional for M1—avoid sneaking in secure storage or API sync; Cart/CartItem shapes should stay snapshot-friendly for a later server cart without blocking this item.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 3,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "SoftAura Flutter speed demo",
+      "goal": "Runnable SoftAura Flutter MVP on Android emulator: browse 24 local mock SKUs, open product detail with cents-based USD prices and SoftAura styling, optional in-memory cart; NestJS stubs implement getHealth/listProducts/getProductById for the frozen OpenAPI contract—no auth, payments, or live backend required for the demo path.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ],
+  "estimation_reviewed": true
+}

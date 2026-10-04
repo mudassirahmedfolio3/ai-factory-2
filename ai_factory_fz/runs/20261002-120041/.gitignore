@@ -1,0 +1,14 @@
+state.json
+.env
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.sdlc/
+.gradle/
+.android/

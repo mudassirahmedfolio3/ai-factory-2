@@ -1,0 +1,402 @@
+openapi: 3.1.0
+info:
+  title: ShirtStack API
+  version: 1.0.0
+  description: |
+    ShirtStack men's shirts e-commerce API.
+    M1 mobile app uses local mock data only and does not call this API.
+    This contract covers M1 must-have stories (US-001 browse, US-002 detail):
+    health probe plus two public catalog read operations. Auth, cart, orders,
+    and payments are deferred to later milestones.
+  contact:
+    name: ShirtStack Engineering
+servers:
+  - url: http://10.0.2.2:3000/api/v1
+    description: Android emulator → local staging
+  - url: https://api.staging.shirtstack.example/api/v1
+    description: Staging
+  - url: https://api.shirtstack.example/api/v1
+    description: Production
+tags:
+  - name: Health
+    description: Service health checks
+  - name: Catalog
+    description: Product browse and detail (public)
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: getHealth
+      summary: Health check
+      description: Returns 200 when the service and database are reachable.
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable (database unreachable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products:
+    get:
+      tags:
+        - Catalog
+      operationId: listProducts
+      summary: List men's shirts
+      description: |
+        Paginated product listing with optional filters and search.
+        Supports US-001 browse requirements. Public endpoint; no authentication required.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: q
+          in: query
+          description: Case-insensitive search against product title and description
+          schema:
+            type: string
+            maxLength: 100
+        - name: size
+          in: query
+          description: Filter to products with at least one variant in this size
+          schema:
+            $ref: '#/components/schemas/ShirtSize'
+        - name: color
+          in: query
+          description: Filter to products with at least one variant in this color
+          schema:
+            type: string
+            maxLength: 50
+            example: Navy
+        - name: shirtType
+          in: query
+          description: Filter by shirt type/category style
+          schema:
+            $ref: '#/components/schemas/ShirtType'
+        - name: minPriceCents
+          in: query
+          description: Minimum variant price in USD cents (inclusive)
+          schema:
+            type: integer
+            minimum: 0
+            example: 2000
+        - name: maxPriceCents
+          in: query
+          description: Maximum variant price in USD cents (inclusive)
+          schema:
+            type: integer
+            minimum: 0
+            example: 4500
+        - name: sort
+          in: query
+          description: Sort order for results
+          schema:
+            type: string
+            enum:
+              - priceAsc
+              - priceDesc
+              - titleAsc
+              - newest
+            default: newest
+      responses:
+        '200':
+          description: Paginated product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{productId}:
+    get:
+      tags:
+        - Catalog
+      operationId: getProductById
+      summary: Get product detail
+      description: |
+        Returns full product detail including all active variants.
+        Supports US-002 product detail requirements. Public endpoint.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token (15-minute TTL). Declared for M2+ protected endpoints.
+        Catalog and health operations in this document do not require a bearer token.
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: 1-based page number
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Product UUID
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - degraded
+        database:
+          type: string
+          enum:
+            - up
+            - down
+        timestamp:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example: Invalid query parameter minPriceCents
+    Money:
+      type: object
+      required:
+        - amountCents
+        - currency
+      properties:
+        amountCents:
+          type: integer
+          description: Amount in minor units (USD cents)
+          minimum: 0
+          example: 2799
+        currency:
+          type: string
+          description: ISO 4217 currency code
+          pattern: '^[A-Z]{3}$'
+          example: USD
+    ShirtSize:
+      type: string
+      enum:
+        - XS
+        - S
+        - M
+        - L
+        - XL
+        - XXL
+    ShirtType:
+      type: string
+      enum:
+        - check
+        - plain
+        - formal
+    FitType:
+      type: string
+      enum:
+        - slim
+        - regular
+        - relaxed
+    ProductSummary:
+      type: object
+      required:
+        - id
+        - title
+        - shirtType
+        - fitType
+        - price
+        - primaryImageUrl
+        - availableSizes
+        - availableColors
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Men Check Shirt
+        shirtType:
+          $ref: '#/components/schemas/ShirtType'
+        fitType:
+          $ref: '#/components/schemas/FitType'
+        price:
+          $ref: '#/components/schemas/Money'
+          description: Lowest active variant price for display
+        primaryImageUrl:
+          type: string
+          format: uri
+        availableSizes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShirtSize'
+        availableColors:
+          type: array
+          items:
+            type: string
+        averageRating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+          description: Present post-M1 when reviews exist; omitted in M1 mock
+    ProductListResponse:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+    ProductVariant:
+      type: object
+      required:
+        - id
+        - sku
+        - size
+        - color
+        - price
+        - stockQuantity
+        - imageUrl
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+          example: SS-CHK-NVY-M
+        size:
+          $ref: '#/components/schemas/ShirtSize'
+        color:
+          type: string
+          example: Navy
+        price:
+          $ref: '#/components/schemas/Money'
+        stockQuantity:
+          type: integer
+          minimum: 0
+          description: Stock tracked per variant (enforced M2+)
+        imageUrl:
+          type: string
+          format: uri
+    ProductDetail:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - shirtType
+        - fitType
+        - price
+        - primaryImageUrl
+        - variants
+        - returnsPolicyText
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        shirtType:
+          $ref: '#/components/schemas/ShirtType'
+        fitType:
+          $ref: '#/components/schemas/FitType'
+        price:
+          $ref: '#/components/schemas/Money'
+          description: Default display price (lowest variant)
+        primaryImageUrl:
+          type: string
+          format: uri
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+        returnsPolicyText:
+          type: string
+          description: 30-day returns policy for display on detail screen
+          example: |
+            30-day returns on unworn items with original tags attached.
+            Refunds to original payment method after inspection.
+            Exchanges handled as return plus new order.
+            Contact returns@shirtstack.example to initiate.
+        averageRating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+        reviewCount:
+          type: integer
+          minimum: 0

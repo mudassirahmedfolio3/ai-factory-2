@@ -1,0 +1,9 @@
+generatorName: dart-dio
+inputSpec: openapi.yaml
+outputDir: packages/api_client
+additionalProperties:
+  pubName: api_client
+  pubVersion: 1.0.0
+  pubDescription: OpenAPI API client for the Demo Retail Catalog API (M2 slice)
+  nullableFields: true
+  useEnumExtension: true

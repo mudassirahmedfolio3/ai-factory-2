@@ -1,0 +1,11 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Wrap parse failures in CheckedFromJsonException with the key name.
+          checked: true
+          # Nested models serialise to plain maps (jsonEncode-safe).
+          explicit_to_json: true
+          # OpenAPI schemas use additionalProperties: false.
+          disallow_unrecognized_keys: true

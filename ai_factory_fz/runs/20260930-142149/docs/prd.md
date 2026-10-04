@@ -1,0 +1,85 @@
+# Lighting E-Commerce Mobile App: Speed Demo MVP (Browse, Product Detail, In-Memory Cart)
+
+Speed demo of the lighting shopping app: the smallest runnable Flutter app that launches on an Android emulator with a local/mock catalog and no backend, auth, payments or checkout. Customers can browse a paginated-style list of lighting products, open a product detail screen showing lighting specifications and variants, and optionally add items to a simple in-memory cart. Prices are stored as integer cents with currency code USD (no floats) and displayed tax-exclusive. All other brief features (auth, checkout, Stripe card payments, orders, admin area, wishlist, reviews, notifications, coupons, analytics) are deferred. Scope limits for this run: at most 3 user stories, 3 app screens, 1 milestone, 5 work items, 4 API operations (none required because the catalog is local; the health check is an infrastructure endpoint and is not part of the app). Style tokens are chosen by the delivery team without waiting for any approval.
+
+## Personas
+### Homeowner shopper
+A homeowner or renter who wants to find lighting (ceiling lights, pendants, lamps, bulbs, smart lighting) for their home on a mobile phone.
+- Quickly browse available lighting products
+- See price, rating, stock status and key specifications at a glance
+- Open a product to view its details, variants and lighting specifications
+- Collect items in a cart to review what they intend to buy
+
+### Project buyer (decorator or contractor)
+An interior decorator, small contractor or renovation customer who compares specifications such as wattage, lumens, voltage and IP rating across products.
+- View structured lighting specifications on the product detail screen
+- Switch variants and see the updated price, image, SKU and availability
+
+## User stories
+### US-001 Browse the lighting product list (must)
+As a Homeowner shopper, I want to see a scrollable list of lighting products loaded from a local mock catalog when the app opens, so that I can quickly find lighting that interests me without signing in.
+
+- **Given** the app is installed on an Android emulator with no network connection and no backend running **when** I launch the app **then** the product list screen is shown within 3 seconds with products from the bundled mock catalog and no sign-in prompt
+- **Given** the product list is displayed **when** I look at a product row **then** I see the product image, name, price formatted in USD from integer cents (for example 12999 cents shown as $129.99), and a stock status of In stock, Low stock (5 units or fewer) or Out of stock
+- **Given** a product has a sale price **when** it appears in the list **then** the sale price and the original price are both shown, with the original price visually struck through
+- **Given** the mock catalog contains more products than fit on one screen **when** I scroll the list **then** the list scrolls smoothly, images load lazily as rows come into view, and a loading placeholder is shown until each image is ready
+- **Given** the product list is displayed **when** I tap a product row **then** the product detail screen for that product opens
+
+### US-002 View product details and variants (must)
+As a Project buyer (decorator or contractor), I want to open a product and see its images, description, lighting specifications and variants, so that I can compare specifications and choose the right variant.
+
+- **Given** I opened a product from the list **when** the detail screen loads **then** I see the product name, brand, SKU, price, description, availability and a specifications section that shows only the specifications applicable to that product type (for example wattage, lumens, color temperature, dimmable and bulb type for a bulb; material, finish, dimensions and IP rating for a fixture)
+- **Given** a product has multiple variants such as color, finish, wattage or color temperature **when** I select a different variant **then** the displayed price, image, SKU and availability update to match the selected variant
+- **Given** the selected variant has zero stock **when** the detail screen shows the variant **then** the availability reads Out of stock and the Add to cart control is disabled
+- **Given** I am on the product detail screen **when** I use the back control **then** I return to the product list at the same scroll position
+
+### US-003 Add products to a simple in-memory cart (could)
+As a Homeowner shopper, I want to add a selected variant to a cart and review it, change quantities and remove items, so that I can see what I plan to buy and the subtotal, tax and shipping estimate.
+
+- **Given** I am viewing an in-stock variant on the product detail screen **when** I choose a quantity and tap Add to cart **then** the variant is added to the in-memory cart with that quantity, the cart badge count updates, and quantity cannot exceed the variant's available stock
+- **Given** the cart contains items **when** I open the cart screen and change a quantity or remove an item **then** the line total, subtotal, tax, shipping and order total recalculate using integer cents, with shipping of $9.99 that becomes free when the subtotal is $150.00 or more and a flat sales tax rate held as a configurable constant
+- **Given** the cart contains items **when** I fully close and relaunch the app **then** the cart is empty because it is held in memory only, and no sign-in, checkout or payment option is offered
+
+## Non-functional requirements
+- Platforms: Android is the first target (runs on an Android emulator); built as a single Flutter 3.x codebase so iOS can follow without rework
+- Performance: cold start to first product list render within 3 seconds on an emulator; product images lazy-loaded; list scrolling remains smooth with the mock catalog; loading indicators shown while images load
+- Performance: the list must be built so pagination can be applied when the catalog moves to a backend API
+- Data correctness: all prices, sale prices, taxes and shipping amounts are integer minor units (cents) with ISO 4217 currency code USD; floating-point money is never used
+- Data model: catalog items carry variant-level stock, price, image and SKU so stock checks and variant switching work the same way when a backend replaces the mock catalog
+- Security: the demo contains no authentication, no payment data and no personal data; no raw card data is ever handled; any future network traffic must use HTTPS
+- Privacy: no analytics or tracking is included in this demo, so no consent prompt is needed yet
+- Accessibility: tap targets at least 48x48 dp, text respects system font scaling, images have accessible labels, and sufficient color contrast in the agent-chosen style tokens
+- Error handling: missing or failed image loads show a placeholder instead of crashing; empty cart shows an empty-state message
+- Testing: core logic (price formatting, variant switching, cart totals, free-shipping threshold) is covered by flutter_test unit/widget tests
+- Maintainability: state management with Riverpod and navigation with go_router so the mock catalog can be swapped for an API client later; no hard-coded assumptions that block adding auth or admin roles later
+- Delivery: style tokens (colors, typography, spacing) are chosen by the delivery team without waiting for any approval; the work starts with coding in the first build item
+
+## Out of scope
+- Registration, login, logout, password reset and any other authentication (guest-only demo, no sign-in)
+- Payments of any kind, including Stripe PaymentIntents, cash on delivery and bank transfer
+- Checkout, order placement, order confirmation, order history and order tracking
+- Stock reservation and release, since there is no checkout in this run
+- Backend API work (NestJS, Prisma, PostgreSQL); the demo uses a bundled local/mock catalog
+- Search, search suggestions, recent searches and product filters
+- Sorting options and category navigation screens
+- Home screen with banners, featured products and new arrivals
+- Wishlist, reviews and ratings submission, notifications and push notifications, coupons, customer support and FAQ screens
+- Analytics and consent prompt
+- Admin web area for products, inventory, promotions and orders, including refunds and cancellations
+- Guest carts persisted across sessions, cart persistence, and guest checkout and guest order tracking
+- Account deletion and profile or shipping address management
+- Multi-currency, multi-language and region-specific tax or shipping rules
+- Return policy page, CSV catalog import, social login, installation services, trade pricing and compatibility guidance
+- iOS release, store submission, CI/CD and staging deployment
+
+## Assumptions
+- The demo runs on an Android emulator first; iOS is not validated in this run
+- The mock catalog is bundled as local data (for example a JSON asset or Dart constants) with roughly 10 to 20 sample products across a few lighting categories, including at least one product with variants, one on sale, one low stock and one out of stock
+- Product images are bundled assets or placeholder images so the app runs offline
+- The currency is USD only, displayed tax-exclusive, with one flat sales tax rate held as a configurable constant
+- Shipping is a flat $9.99 per order, free on subtotals of $150.00 or more (US only); the low-stock threshold is 5 units per variant
+- US-003 (simple cart) is optional and will be dropped first if it slows delivery of US-001 and US-002
+- No human approval, stakeholder sign-off or style approval is required at any point; the delivery team chooses style tokens
+- At most 3 app screens are built: product list, product detail and cart
+- No API operations are required because the catalog is local; if a backend is added later the health check endpoint will be included in the contract
+- The full brief (auth, Stripe card payments, order flow Pending, Confirmed, Processing, Shipped, Delivered plus Cancelled and Refunded, admin area, P1 features) remains the roadmap after this demo

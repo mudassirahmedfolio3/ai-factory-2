@@ -1,0 +1,32 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    # Generated sources (freezed / json_serializable).
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    # The generated dart-dio client is a separate package with its own
+    # pubspec and analysis_options. It is analysed and built on its own once
+    # catalog endpoints exist (ADR-004); M1 makes no HTTP calls.
+    - packages/**
+
+linter:
+  rules:
+    - prefer_single_quotes
+    - avoid_print
+    - prefer_const_constructors
+    - prefer_final_locals
+    - require_trailing_commas
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options

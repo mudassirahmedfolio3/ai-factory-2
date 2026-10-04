@@ -1,0 +1,1265 @@
+openapi: 3.1.0
+info:
+  title: ShopEase API
+  version: 2.0.0
+  description: |
+    ShopEase Release 2 (M3) contract. Extends M2 catalog with auth, home merchandising,
+    cart, wishlist, checkout quotes, orders, mock payment, coupons, and support.
+    Global prefix /api/v1. Money is integer minor units (cents) with ISO 4217 currency.
+    Counted operations: 24 (health excluded from cap).
+servers:
+  - url: http://10.0.2.2:3000/api/v1
+    description: Android emulator to local staging
+  - url: https://api.staging.shopease.example/api/v1
+    description: Staging
+tags:
+  - name: Health
+  - name: Auth
+  - name: Users
+  - name: Catalog
+  - name: Home
+  - name: Cart
+  - name: Wishlist
+  - name: Checkout
+  - name: Orders
+  - name: Support
+paths:
+  /health:
+    get:
+      tags: [Health]
+      operationId: getHealth
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Database unreachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/register:
+    post:
+      tags: [Auth]
+      operationId: register
+      summary: Register a new shopper account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: login
+      summary: Log in with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logout
+      summary: Log out and revoke refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      operationId: refreshTokens
+      summary: Exchange refresh token for new access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: New tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      operationId: forgotPassword
+      summary: Mock forgot-password (always 200 for privacy)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Instructions acknowledged (demo may include demoResetToken when account exists)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForgotPasswordResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      operationId: resetPassword
+      summary: Mock reset password with demo token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /users/me:
+    delete:
+      tags: [Users]
+      operationId: deleteAccount
+      summary: Delete the signed-in account
+      responses:
+        '204':
+          description: Account deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /categories:
+    get:
+      tags: [Catalog]
+      operationId: listCategories
+      summary: List product categories
+      security: []
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products:
+    get:
+      tags: [Catalog]
+      operationId: listProducts
+      summary: List and search products
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: q
+          in: query
+          schema:
+            type: string
+            maxLength: 100
+        - name: category
+          in: query
+          schema:
+            type: string
+            description: Category slug
+        - name: brand
+          in: query
+          schema:
+            type: string
+        - name: minPriceCents
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: maxPriceCents
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+        - name: availability
+          in: query
+          schema:
+            $ref: '#/components/schemas/AvailabilityFilter'
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [priceAsc, priceDesc, newest]
+            default: newest
+      responses:
+        '200':
+          description: Paginated products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{productId}:
+    get:
+      tags: [Catalog]
+      operationId: getProductById
+      summary: Get product detail
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /home:
+    get:
+      tags: [Home]
+      operationId: getHome
+      summary: Merchandised home content
+      security: []
+      responses:
+        '200':
+          description: Home payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomeResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /cart:
+    get:
+      tags: [Cart]
+      operationId: getCart
+      summary: Get signed-in user cart
+      responses:
+        '200':
+          description: Cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags: [Cart]
+      operationId: replaceCart
+      summary: Replace cart items (full sync)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplaceCartRequest'
+      responses:
+        '200':
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          description: Invalid items or insufficient stock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /cart/merge:
+    post:
+      tags: [Cart]
+      operationId: mergeCart
+      summary: Merge guest cart lines into account cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MergeCartRequest'
+      responses:
+        '200':
+          description: Merged cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /wishlist:
+    get:
+      tags: [Wishlist]
+      operationId: getWishlist
+      summary: Get signed-in wishlist
+      responses:
+        '200':
+          description: Wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags: [Wishlist]
+      operationId: replaceWishlist
+      summary: Replace wishlist product IDs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplaceWishlistRequest'
+      responses:
+        '200':
+          description: Updated wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /wishlist/import:
+    post:
+      tags: [Wishlist]
+      operationId: importWishlist
+      summary: Import local guest wishlist product IDs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportWishlistRequest'
+      responses:
+        '200':
+          description: Merged wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /checkout/quote:
+    post:
+      tags: [Checkout]
+      operationId: createCheckoutQuote
+      summary: Compute shipping, tax, coupon, and totals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckoutQuoteRequest'
+      responses:
+        '200':
+          description: Quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutQuoteResponse'
+        '400':
+          description: Invalid address or coupon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized when using server cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /orders:
+    post:
+      tags: [Orders]
+      operationId: createOrder
+      summary: Place order (pending_payment, reserves stock)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '400':
+          description: Stock or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags: [Orders]
+      operationId: listOrders
+      summary: List my orders
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /orders/{orderId}:
+    get:
+      tags: [Orders]
+      operationId: getOrderById
+      summary: Get order detail
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /orders/{orderId}/complete-mock-payment:
+    post:
+      tags: [Orders]
+      operationId: completeMockPayment
+      summary: Demo pay-now (marks order paid, no Stripe)
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Payment succeeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '409':
+          description: Order not payable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      operationId: cancelOrder
+      summary: Cancel pending_payment order and release stock
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Cancelled order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetail'
+        '409':
+          description: Not cancellable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /support/messages:
+    post:
+      tags: [Support]
+      operationId: submitSupportMessage
+      summary: Submit support form (simulated send)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupportMessageRequest'
+      responses:
+        '201':
+          description: Message recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportMessageResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 24
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [statusCode, error, message]
+      properties:
+        statusCode:
+          type: integer
+        error:
+          type: string
+        message:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+    HealthResponse:
+      type: object
+      required: [status, database, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        database:
+          type: string
+          enum: [up, down]
+        timestamp:
+          type: string
+          format: date-time
+    Money:
+      type: object
+      required: [amountCents, currency]
+      properties:
+        amountCents:
+          type: integer
+          minimum: 0
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: USD
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          description: At least one letter and one number
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    LogoutRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+    AuthResponse:
+      type: object
+      required: [accessToken, refreshToken, expiresInSeconds, user]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresInSeconds:
+          type: integer
+          example: 900
+        user:
+          $ref: '#/components/schemas/UserSummary'
+    UserSummary:
+      type: object
+      required: [id, email]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+    ForgotPasswordRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+    ForgotPasswordResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        demoResetToken:
+          type: string
+          description: Present in demo builds when account exists; production would email a link instead
+    ResetPasswordRequest:
+      type: object
+      required: [email, resetToken, newPassword]
+      properties:
+        email:
+          type: string
+          format: email
+        resetToken:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
+    Category:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+    CategoryListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+    AvailabilityFilter:
+      type: string
+      enum: [in_stock, low_stock, out_of_stock]
+    AvailabilityStatus:
+      type: string
+      enum: [in_stock, low_stock, out_of_stock]
+    ProductSummary:
+      type: object
+      required: [id, name, brand, category, price, primaryImageUrl, availability]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        brand:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        price:
+          $ref: '#/components/schemas/Money'
+        primaryImageUrl:
+          type: string
+          format: uri
+        availability:
+          $ref: '#/components/schemas/AvailabilityStatus'
+    ProductListResponse:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    ProductVariant:
+      type: object
+      required: [id, sku, name, price, stockAvailable, isDefault]
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        name:
+          type: string
+        price:
+          $ref: '#/components/schemas/Money'
+        stockAvailable:
+          type: integer
+          minimum: 0
+        imageUrl:
+          type: string
+          format: uri
+        isDefault:
+          type: boolean
+    ProductDetail:
+      type: object
+      required: [id, name, brand, description, category, price, primaryImageUrl, availability, variants]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        brand:
+          type: string
+        description:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        price:
+          $ref: '#/components/schemas/Money'
+        primaryImageUrl:
+          type: string
+          format: uri
+        availability:
+          $ref: '#/components/schemas/AvailabilityStatus'
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+    HomeBanner:
+      type: object
+      required: [id, title, imageUrl]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        subtitle:
+          type: string
+        imageUrl:
+          type: string
+          format: uri
+        ctaLabel:
+          type: string
+        categorySlug:
+          type: string
+    HomeResponse:
+      type: object
+      required: [banners, featured, newArrivals, categories]
+      properties:
+        banners:
+          type: array
+          items:
+            $ref: '#/components/schemas/HomeBanner'
+        featured:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        newArrivals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+    CartLineInput:
+      type: object
+      required: [variantId, quantity]
+      properties:
+        variantId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+    CartItem:
+      type: object
+      required: [id, variantId, productId, productName, variantName, quantity, unitPrice, lineTotal]
+      properties:
+        id:
+          type: string
+          format: uuid
+        variantId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        variantName:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        lineTotal:
+          $ref: '#/components/schemas/Money'
+    CartResponse:
+      type: object
+      required: [items, subtotal]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        subtotal:
+          $ref: '#/components/schemas/Money'
+    ReplaceCartRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartLineInput'
+    MergeCartRequest:
+      type: object
+      required: [guestItems]
+      properties:
+        guestItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartLineInput'
+        strategy:
+          type: string
+          enum: [merge, guest_wins]
+          default: merge
+    WishlistItem:
+      type: object
+      required: [productId, addedAt]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        addedAt:
+          type: string
+          format: date-time
+    WishlistResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WishlistItem'
+    ReplaceWishlistRequest:
+      type: object
+      required: [productIds]
+      properties:
+        productIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    ImportWishlistRequest:
+      type: object
+      required: [productIds]
+      properties:
+        productIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    ShippingAddress:
+      type: object
+      required: [fullName, line1, city, region, postalCode, country]
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        line1:
+          type: string
+        line2:
+          type: string
+        city:
+          type: string
+        region:
+          type: string
+          description: US state code
+        postalCode:
+          type: string
+        country:
+          type: string
+          enum: [US]
+    CouponValidation:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+        code:
+          type: string
+        rejectionReason:
+          type: string
+          enum: [invalid, expired, minimum_not_met, excluded_items, already_applied]
+        discount:
+          $ref: '#/components/schemas/Money'
+    CheckoutQuoteRequest:
+      type: object
+      required: [shippingAddress]
+      properties:
+        useServerCart:
+          type: boolean
+          default: true
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartLineInput'
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        couponCode:
+          type: string
+    CheckoutQuoteResponse:
+      type: object
+      required: [lines, subtotal, discount, shipping, tax, total, coupon]
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        subtotal:
+          $ref: '#/components/schemas/Money'
+        discount:
+          $ref: '#/components/schemas/Money'
+        shipping:
+          $ref: '#/components/schemas/Money'
+        tax:
+          $ref: '#/components/schemas/Money'
+        total:
+          $ref: '#/components/schemas/Money'
+        coupon:
+          $ref: '#/components/schemas/CouponValidation'
+        taxDisclaimer:
+          type: string
+    CreateOrderRequest:
+      type: object
+      required: [shippingAddress, idempotencyKey]
+      properties:
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        couponCode:
+          type: string
+        useServerCart:
+          type: boolean
+          default: true
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartLineInput'
+        idempotencyKey:
+          type: string
+          maxLength: 64
+    ShopperOrderStatus:
+      type: string
+      enum: [awaiting_payment, processing, shipped, delivered, cancelled, refunded]
+    OrderSummary:
+      type: object
+      required: [id, orderNumber, createdAt, total, shopperStatus]
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderNumber:
+          type: string
+          example: SE-20261004-A1B2C3
+        createdAt:
+          type: string
+          format: date-time
+        total:
+          $ref: '#/components/schemas/Money'
+        shopperStatus:
+          $ref: '#/components/schemas/ShopperOrderStatus'
+    OrderListResponse:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderSummary'
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+    OrderLineItem:
+      type: object
+      required: [productName, variantName, sku, quantity, unitPrice, lineTotal]
+      properties:
+        productName:
+          type: string
+        variantName:
+          type: string
+        sku:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        lineTotal:
+          $ref: '#/components/schemas/Money'
+    OrderDetail:
+      type: object
+      required: [id, orderNumber, createdAt, shopperStatus, backendStatus, lines, subtotal, discount, shipping, tax, total, shippingAddress]
+      properties:
+        id:
+          type: string
+          format: uuid
+        orderNumber:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        shopperStatus:
+          $ref: '#/components/schemas/ShopperOrderStatus'
+        backendStatus:
+          type: string
+          enum: [pending_payment, paid, fulfilled, delivered, cancelled, refunded]
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineItem'
+        subtotal:
+          $ref: '#/components/schemas/Money'
+        discount:
+          $ref: '#/components/schemas/Money'
+        shipping:
+          $ref: '#/components/schemas/Money'
+        tax:
+          $ref: '#/components/schemas/Money'
+        total:
+          $ref: '#/components/schemas/Money'
+        couponCode:
+          type: string
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddress'
+        carrierName:
+          type: string
+        trackingNumber:
+          type: string
+    SupportMessageRequest:
+      type: object
+      required: [email, subject, body]
+      properties:
+        email:
+          type: string
+          format: email
+        subject:
+          type: string
+          maxLength: 120
+        body:
+          type: string
+          maxLength: 2000
+        orderNumber:
+          type: string
+    SupportMessageResponse:
+      type: object
+      required: [id, message]
+      properties:
+        id:
+          type: string
+          format: uuid
+        message:
+          type: string
+security:
+  - bearerAuth: []

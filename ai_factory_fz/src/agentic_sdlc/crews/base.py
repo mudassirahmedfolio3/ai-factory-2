@@ -82,10 +82,17 @@ def artifact_guardrail(model: type[T], check: Callable[[T], list[str]]) -> Guard
 
 
 class TaskRunner:
-    def __init__(self, agents: AgentRegistry, tasks: dict[str, dict[str, Any]] | None = None, verbose: bool = False):
+    def __init__(
+        self,
+        agents: AgentRegistry,
+        tasks: dict[str, dict[str, Any]] | None = None,
+        verbose: bool = False,
+        workspace: Any | None = None,
+    ):
         self.agents = agents
         self.tasks = tasks if tasks is not None else load_config("tasks")
         self.verbose = verbose
+        self.workspace = workspace
 
     def run(
         self,
@@ -130,6 +137,29 @@ class TaskRunner:
             duration_ms = int((time.perf_counter() - t0) * 1000)
             artifact = out.pydantic or output_model.model_validate_json(out.raw)
             usage = out.token_usage
+            if self.workspace is not None:
+                try:
+                    from agentic_sdlc.build.transcript_log import append_transcript
+
+                    raw = getattr(out, "raw", "") or ""
+                    append_transcript(
+                        self.workspace.root,
+                        started_at=started.isoformat(),
+                        ended_at=ended.isoformat(),
+                        duration_ms=duration_ms,
+                        phase=phase,
+                        agent_key=agent_key,
+                        task_key=task_key,
+                        model=model,
+                        workdir=".",
+                        success=True,
+                        exit_code=0,
+                        prompt=description,
+                        data={"result": raw, "structured_output": artifact.model_dump(mode="json")},
+                        stdout=raw,
+                    )
+                except OSError:
+                    pass
             return TaskResult(
                 artifact=artifact,
                 usage=UsageRecord(

@@ -20,7 +20,8 @@ def _bootstrap_paths() -> Path:
     root = api_dir.parents[1]
     fz_root = Path(os.environ.get("AI_FACTORY_FZ_ROOT", root / "ai_factory_fz")).resolve()
     os.environ["SDLC_HOME"] = str(fz_root)
-    os.environ.setdefault("PYTHONUTF8", "1")
+    os.environ["PYTHONUTF8"] = "1"
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
     sys.path.insert(0, str(fz_root / "src"))
     sys.path.insert(0, str(api_dir))
     os.chdir(fz_root)
@@ -41,16 +42,22 @@ def _publish_from_disk(run_id: str, project_name: str, complexity: str, checkpoi
 
 def _watch_state(run_id: str, project_name: str, complexity: str, stop: threading.Event) -> None:
     last_mtime = 0.0
+    last_heartbeat = 0.0
     while not stop.is_set():
         try:
             from agentic_sdlc.settings import RUNS_DIR
 
             state_path = RUNS_DIR / run_id / "state.json"
+            now = time.time()
             if state_path.is_file():
                 mtime = state_path.stat().st_mtime
                 if mtime != last_mtime:
                     last_mtime = mtime
                     _publish_from_disk(run_id, project_name, complexity, checkpoint_msg="Checkpoint")
+                elif now - last_heartbeat >= 120:
+                    # Keep run_state.updated_at fresh during long agent steps (avoids false "stale").
+                    last_heartbeat = now
+                    _publish_from_disk(run_id, project_name, complexity, checkpoint_msg="Worker active")
         except Exception as exc:
             print(f"state watch error: {exc}", file=sys.stderr)
         stop.wait(2.0)
@@ -65,8 +72,17 @@ def main() -> int:
     from fz_run_manager import _ensure_fz_env, _resolve_brief, _resolve_milestones
 
     fz_root = _bootstrap_paths()
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except (OSError, ValueError):
+                pass
     load_dotenv(fz_root / ".env", override=True)
     _ensure_fz_env()
+    from agentic_sdlc.env_toolchain import apply_toolchain_path
+
+    apply_toolchain_path()
 
     if len(sys.argv) < 2:
         print("Usage: python fz_worker.py '<json>'", file=sys.stderr)
@@ -77,6 +93,9 @@ def main() -> int:
     project_name = payload["project_name"]
     client_brief = payload.get("client_brief", "")
     complexity = payload.get("complexity", "standard")
+    pipeline = (payload.get("pipeline") or os.environ.get("SDLC_PIPELINE", "pipeline.ui")).strip()
+    if pipeline.endswith(".yaml"):
+        pipeline = pipeline[:-5]
 
     milestones = _resolve_milestones(complexity)
     if milestones:
@@ -86,7 +105,6 @@ def main() -> int:
 
     brief = _resolve_brief(client_brief, project_name)
     profile = "flutter_nestjs_ecommerce"
-    pipeline = "pipeline.ui"
 
     seed = ProjectState(
         run_id=run_id,
@@ -109,8 +127,15 @@ def main() -> int:
 
     try:
         # Must use plain SDLCFlow — subclassing breaks CrewAI flow method discovery.
-        flow = SDLCFlow()
-        flow.kickoff(inputs={"run_id": run_id, "profile": profile, "brief": brief, "pipeline": pipeline})
+        if payload.get("resume"):
+            from agentic_sdlc.workspace import Workspace
+
+            restore_json = Workspace.open(run_id).load_state_json()
+            flow = SDLCFlow(restore_json=restore_json)
+            flow.kickoff(inputs={"run_id": run_id})
+        else:
+            flow = SDLCFlow()
+            flow.kickoff(inputs={"run_id": run_id, "profile": profile, "brief": brief, "pipeline": pipeline})
 
         publish_fz_run_state(flow.state, project_name=project_name, complexity=complexity, checkpoint_msg="Finished")
         archive_fz_run(flow.state, project_name, complexity)
