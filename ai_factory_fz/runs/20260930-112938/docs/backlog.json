@@ -1,0 +1,213 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Design system, style approval and asset management",
+      "story_ids": [
+        "US-006"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Catalog loading and product browse",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Product detail and add to cart",
+      "story_ids": [
+        "US-003",
+        "US-004"
+      ]
+    },
+    {
+      "id": "E-04",
+      "title": "Cart management and demo readiness",
+      "story_ids": [
+        "US-005",
+        "US-006"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Propose and get style approval (colors, typography, logo, imagery guidelines)",
+      "description": "Work with business to define a clean, premium, beauty-oriented design system. Create a style guide document with approved colors, typography, logo placement and imagery guidelines. Obtain written approval before development begins.",
+      "epic_id": "E-01",
+      "component": "shared",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Set up Flutter project, build system and dependencies",
+      "description": "Initialize Flutter 3.x project with Riverpod, go_router, dio, freezed, json_serializable and flutter_test. Configure Android and iOS build targets. Set up GitHub repository and basic CI/CD pipeline for testing.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Load bundled catalog JSON and define product data model",
+      "description": "Create product data model (ID, name, brand, category, price in integer cents, description, ingredients, image asset reference). Load bundled catalog JSON file on app startup. Handle parse errors and show retry UI. Implement Freezed data classes and serialization.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Build Browse screen with grid layout and image loading",
+      "description": "Create Browse screen with a scrollable grid of product tiles. Each tile displays product image, name, brand and price formatted as USD. Implement image loading with placeholder support and error handling. Ensure grid scrolls smoothly without jank.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Implement category filter on Browse screen",
+      "description": "Add category filter controls (All, Skincare, Makeup, Haircare, Fragrance) to Browse screen. Make All the default selection. Filter product grid based on selected category. Persist category selection when navigating away and returning to Browse. Ensure selected category is visually highlighted.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-006",
+      "title": "Build Product Detail screen with navigation",
+      "description": "Create Product Detail screen showing large product image, name, brand, price in USD, short description and key ingredients or usage notes. Implement back navigation with go_router that returns to Browse at same scroll position and category filter. Add Product Detail route to navigation graph.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-005"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-007",
+      "title": "Implement quantity selector and Add to Cart logic",
+      "description": "Add quantity selector to Product Detail screen (min 1, max 10). Implement add-to-cart logic that creates a new cart line or merges into existing line if product already in cart, capping at 10 units. Show confirmation feedback and update cart item count indicator. Manage cart state with Riverpod.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-004"
+      ],
+      "depends_on": [
+        "WI-006"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-008",
+      "title": "Build Cart screen with line management and totals",
+      "description": "Create Cart screen displaying cart lines (product image, name, brand, unit price in cents, quantity, line subtotal). Implement quantity adjust controls (min 1, max 10 per line). Implement remove line action. Calculate and display overall total in USD. Show empty cart message when cart is empty.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-007"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-009",
+      "title": "Accessibility and styling pass (contrast, text scale, touch targets)",
+      "description": "Apply approved style guide to all screens. Verify body text is at least 14 sp, text/background contrast is at least 4.5:1, touch targets are at least 48x48 dp. Test at 150% system text scale on both iOS and Android. Add semantic labels for screen readers. Ensure no layout overflow or clipping.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-008"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-010",
+      "title": "Integration test and demo build verification",
+      "description": "Write integration test covering the full journey: Browse, Filter by category, Open Product Detail, Add to Cart, View Cart. Verify performance: cold start within 3 seconds, grid scroll at 60 fps, add/remove actions within 100 ms. Build and verify demo on a recent iPhone and a recent mid-range Android phone. Document any OS version recommendations.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-009"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Style approval, catalog loading, Browse and Product Detail",
+      "goal": "Deliver a working Browse screen with category filter, Product Detail screen, and project foundation. Obtain business style approval and prove the catalog loads, images display with placeholders, and product details are accessible. End state: stakeholders can browse and view product details in the approved style on both iOS and Android.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005",
+        "WI-006"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Cart, polish, accessibility and demo readiness",
+      "goal": "Complete the shopping demo with a fully functional in-session cart, accessibility compliance, performance verification and demo builds. End state: a polished, premium demo app running smoothly on iOS and Android that stakeholders and investors can walk through Browse, Detail, and Cart without errors.",
+      "work_item_ids": [
+        "WI-007",
+        "WI-008",
+        "WI-009",
+        "WI-010"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "ShirtStack M1 Flutter catalog browse and in-memory cart",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Flutter app scaffold, theme tokens, and go_router routes",
+      "description": "Create the Flutter 3.x project with Riverpod, AppTheme design tokens from lib/core/theme, and go_router routes for /products, /products/:id, and /cart. No network client in M1 debug builds (offline-first mock). Enables immediate coding on Android emulator.",
+      "epic_id": "E-01",
+      "feature": "App shell",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [],
+      "modules": [
+        "core"
+      ],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 4,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Standard Flutter+Riverpod+go_router scaffold and theme wiring with three routes | frontend_developer: Flutter 3.x scaffold plus Riverpod, design-token AppTheme, go_router for three routes, feature-first folders, Android debug cleartext for 10.0.2.2, and smoke/widget harness to green.; concerns: Design-token source and visual spec must exist before theme wiring; M1 explicitly skips generated API client, so folder stubs must not pull dio networking into debug builds.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-002",
+      "title": "OpenAPI contract, Prisma domain schema, and NestJS catalog/health stubs",
+      "description": "Author M1 OpenAPI for getHealth, listProducts, and getProductById. Implement NestJS stub handlers for those three operations (seed-backed). Add Prisma schema for Category, Product, ProductVariant plus deferred models User, RefreshToken, Address, Cart, CartItem, Order, OrderItem, Payment, PromoCode, Review (schema-only for deferred modules). Flutter M1 still uses LocalCatalogDataSource shaped like these responses.",
+      "epic_id": "E-01",
+      "feature": "Catalog API contract",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [],
+      "modules": [
+        "health",
+        "catalog",
+        "auth",
+        "users",
+        "cart",
+        "orders",
+        "payments"
+      ],
+      "api_operations": [
+        "getHealth",
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [
+        "Category",
+        "Product",
+        "ProductVariant",
+        "User",
+        "RefreshToken",
+        "Address",
+        "Cart",
+        "CartItem",
+        "Order",
+        "OrderItem",
+        "Payment",
+        "PromoCode",
+        "Review"
+      ],
+      "screens": [],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "OpenAPI + NestJS stubs for 3 ops and Prisma schema covering 13 domain models including deferred entities | backend_developer: OpenAPI for three ops, NestJS seed-backed health/catalog stubs with Jest coverage, and a full Prisma schema for 13 related models drive a solid day-plus of focused work—not a max-sized item.; concerns: Response shapes must match Flutter LocalCatalogDataSource exactly; deferred Prisma relations (cart/orders/payments) need correct FKs now or later migrations hurt; health ‘DB reachable’ vs seed stubs may need a real Prisma ping earlier than planned.",
+      "status": "todo",
+      "pm_points": 8,
+      "dev_points": 6,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-003",
+      "title": "Local mock catalog and product list browse screen",
+      "description": "Embed LocalCatalogDataSource JSON (~20–40 men's shirt SKUs) matching listProducts response shape; prices as integer cents + USD. Build SCR-01 ProductListScreen (/products) with ProductListNotifier: grid/list (title, formatted USD price, primary image, sizes, color, fit type); client-side filters (size, color, price range, shirt type); real-time search; empty state. CatalogRepository reads local seed only (offline).",
+      "epic_id": "E-01",
+      "feature": "Product list screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "listProducts"
+      ],
+      "data_models": [
+        "Product",
+        "ProductVariant",
+        "Category"
+      ],
+      "screens": [
+        "SCR-01"
+      ],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "20–40 SKU seed plus list UI, four filters, live search, empty state, 60fps scroll | frontend_developer: Seed 20–40 shirt SKUs matching listProducts shape (cents/USD), CatalogRepository + ProductListNotifier, grid/list UI, four client filters, live search, empty state, and widget tests with 60fps scroll expectations.; concerns: Depends on WI-002 which is not in this batch—models/OpenAPI response shape must be locked or seed JSON will churn; filter/search combinations and empty-state coverage drive more test surface than PM implied.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-004",
+      "title": "Product detail screen with variant selectors and sticky add-to-cart",
+      "description": "Build SCR-02 ProductDetailScreen (/products/:id) with ProductDetailNotifier: title, description, USD price from cents, primary image, size/color selectors, fit type, 30-day returns policy section, sticky add-to-cart bar (≥48dp). Loads single product via getProductById-shaped local CatalogRepository.",
+      "epic_id": "E-01",
+      "feature": "Product detail screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-002"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "getProductById"
+      ],
+      "data_models": [
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-02"
+      ],
+      "estimate_points": 4,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Detail layout, size/color variant selection, sticky CTA, and returns policy section | frontend_developer: ProductDetailScreen with getProductById-shaped local load, size/color selectors bound to variants, returns section, sticky ≥48dp add-to-cart bar, and screen widget tests.; concerns: Variant availability matrix (missing size/color combos) and shared cart handoff to WI-005 need a clear contract; sticky bar + SafeArea/keyboard behavior often needs an extra layout pass on emulator.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-005",
+      "title": "In-memory cart notifier and cart screen",
+      "description": "Implement CartNotifier (in-memory Cart/CartItem; clears on restart). Add-to-cart from SCR-02 with SnackBar confirmation. Build SCR-03 CartScreen (/cart): line items with name, unit price cents copied at add, size/color, quantity, subtotal; decrement-to-zero or remove updates subtotal.",
+      "epic_id": "E-01",
+      "feature": "In-memory cart",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-004"
+      ],
+      "modules": [
+        "cart"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Cart",
+        "CartItem"
+      ],
+      "screens": [
+        "SCR-03"
+      ],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Simple in-memory Notifier plus cart list UI with quantity/remove and subtotal | frontend_developer: In-memory CartNotifier with cents snapshot on add, SnackBar from SCR-02, CartScreen line items with qty/remove/subtotal, and widget tests including decrement-to-zero.; concerns: Cart models are out of M1 OpenAPI scope—local Cart/CartItem must stay replaceable for M2 server cart without rewriting SCR-02/SCR-03 call sites.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 3,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Speed demo — offline Flutter catalog MVP",
+      "goal": "Runnable Flutter app on Android emulator with local mock catalog: browse (SCR-01), product detail (SCR-02), optional in-memory cart (SCR-03); OpenAPI+NestJS stubs for getHealth/listProducts/getProductById and full Prisma domain schema; no auth, payments, or checkout required for the demo.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ],
+  "estimation_reviewed": true
+}

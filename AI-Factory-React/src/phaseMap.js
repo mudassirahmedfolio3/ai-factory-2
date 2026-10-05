@@ -1,7 +1,7 @@
 /** Maps 11 UI stages (react-base) to backend pipeline step IDs. */
 export const UI_STAGE_BACKEND_IDS = [
   ['discovery'], // Customer
-  ['discovery'], // Spec Writer
+  ['discovery'], // Business Developer
   ['design'], // Architect
   ['design'], // UI/UX Designer
   ['sprint'], // Project Manager
@@ -105,6 +105,10 @@ export function stageProgress(statusMap, uiIndex) {
 
 /** Active UI stage index from pipeline state. */
 export function activeUiStage(runState) {
+  if (typeof runState?.ui_active_stage === 'number' && !Number.isNaN(runState.ui_active_stage)) {
+    return Math.max(0, Math.min(UI_STAGE_COUNT - 1, runState.ui_active_stage));
+  }
+
   const statusMap = stepStatusMap(runState?.pipeline_steps);
 
   for (let i = 0; i < UI_STAGE_COUNT; i++) {
@@ -222,13 +226,18 @@ export function runStateToDashboard(runState) {
     error: runState?.error || null,
     approval: runState?.approvals?.release || runState?.approvals?.prd || 'pending',
     browserReady: previewReadyFromState(runState),
-    projectName: runState?.project_name || 'Project',
+    projectName: runDisplayName(runState),
     runId: runState?.run_id || null,
     phase: runState?.phase || '',
     overall: overallProgressFromState(runState),
     checks: runState?.checks || {},
     releaseNumber: runState?.release_number || 1,
   };
+}
+
+/** App title for UI (ShopEase, Lighting retail …), not the intake slug. */
+export function runDisplayName(runState, fallback = 'Project') {
+  return runState?.product_name || runState?.project_name || fallback;
 }
 
 export function slugProjectName(text) {
@@ -240,6 +249,88 @@ export function slugProjectName(text) {
     .replace(/^-|-$/g, '')
     .slice(0, 48);
   return slug || 'ecommerce-app';
+}
+
+/** Human-readable FZ pipeline phase (discovery, build, qa, …). */
+export function formatFzPhase(phase) {
+  const raw = String(phase || '').trim();
+  if (!raw) return '';
+  return raw.replace(/_/g, ' ');
+}
+
+/** Footer line: work items done/remaining for FZ runs; fallback to estimate for legacy runs. */
+export function buildProgressFooterLine(runState, project) {
+  const bp = runState?.build_progress;
+  if (bp && typeof bp.total === 'number' && bp.total > 0) {
+    const done = bp.done ?? 0;
+    const remaining = bp.remaining ?? Math.max(0, bp.total - done);
+    if (remaining === 0 || runState?.status === 'completed') {
+      const ms = (bp.milestones || [])
+        .map((m) => `${m.id} ${m.done}/${m.total}`)
+        .join(', ');
+      return ms
+        ? `Work items ${done}/${bp.total} complete · ${ms}`
+        : `Work items ${done}/${bp.total} complete`;
+    }
+    return `Work items ${done}/${bp.total} done · ${remaining} left`;
+  }
+  if (
+    runState?.factory_engine === 'fz' &&
+    runState?.phase &&
+    runState.phase !== 'complete' &&
+    runState?.status !== 'completed'
+  ) {
+    return `Phase: ${formatFzPhase(runState.phase)}`;
+  }
+  if (project?.estimatedMinutes) {
+    return `~${project.estimatedMinutes} min`;
+  }
+  return '';
+}
+
+/** Label for agent context "currently working on" from live FZ state. */
+export function fzCurrentWorkLabel(runState) {
+  const bp = runState?.build_progress;
+  if (!bp) return null;
+  if (bp.qa_in_progress) {
+    const ms = (bp.milestones || []).find((m) => m.status !== 'done');
+    return ms ? `Milestone QA · ${ms.id} (${ms.done}/${ms.total} items built)` : 'Milestone QA review';
+  }
+  if (bp.active_work_item_id) {
+    const title = bp.active_work_item_title;
+    return title && title !== bp.active_work_item_id
+      ? `${bp.active_work_item_id}: ${title}`
+      : bp.active_work_item_id;
+  }
+  if (runState?.checkpoint) {
+    return runState.checkpoint;
+  }
+  return null;
+}
+
+/** Subtitle under app name in the studio panel. */
+export function fzStudioSubtitle(runState, stage, stageIndex, lastStage, done) {
+  const bp = runState?.build_progress;
+  const phaseBit =
+    runState?.factory_engine === 'fz' && runState?.phase
+      ? formatFzPhase(runState.phase)
+      : '';
+  let task = '';
+  if (bp?.total > 0) {
+    task = `${bp.done}/${bp.total} work items complete`;
+    if (bp.active_work_item_id && !done) {
+      task += ` · now ${bp.active_work_item_id}`;
+    } else if (bp.qa_in_progress) {
+      task += ' · QA milestone';
+    }
+  } else if (runState?.checkpoint) {
+    task = runState.checkpoint;
+  }
+  const stageLine =
+    stageIndex === lastStage && !done
+      ? 'Packaging the application for delivery'
+      : stage.right;
+  return [stage.key, phaseBit, task || stageLine].filter(Boolean).join(' · ');
 }
 
 export function buildClientBrief(text, files) {

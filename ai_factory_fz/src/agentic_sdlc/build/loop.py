@@ -29,9 +29,22 @@ from agentic_sdlc.registry.profiles import Component, Profile
 from agentic_sdlc.state import ProjectState
 from agentic_sdlc.tools.sandbox_exec import SandboxRunner
 from agentic_sdlc.workspace import Workspace
+from agentic_sdlc.workspace_layout import component_workdir
 
 log = logging.getLogger(__name__)
 PHASE = "build"
+
+_SANDBOX_BLOCK_MARKERS = (
+    "command execution is blocked",
+    "shell/sandbox command invocations are rejected",
+    "could not be run to verify",
+)
+
+
+def _agent_sandbox_block_is_retryable(reason: str) -> bool:
+    """CrewAI + Cursor cannot run sandbox_exec; the pipeline still runs component checks."""
+    text = (reason or "").lower()
+    return any(m in text for m in _SANDBOX_BLOCK_MARKERS)
 
 
 @dataclass
@@ -104,6 +117,13 @@ class Builder:
             pending.remove(nxt)
         return [self.items[w] for w in done]
 
+    def _milestone_has_pending_items(self, m: Milestone) -> bool:
+        return any(
+            self.s.build.item(wid).status != "done"
+            for wid in m.work_item_ids
+            if wid in self.items
+        )
+
     # ---------- run ----------
 
     def run(self) -> None:
@@ -111,8 +131,11 @@ class Builder:
         self.prepare_toolchains(milestones)
         for m in milestones:
             mp = self.s.build.milestone(m.id)
-            if mp.status == "done":
+            if mp.status == "done" and not self._milestone_has_pending_items(m):
                 continue
+            if mp.status == "done" and self._milestone_has_pending_items(m):
+                mp.status = "todo"
+                log.info("Reopened milestone %s for incomplete work items", m.id)
             # A partial milestone is retried: blocked/failed items get another go, since the
             # cause (a missing toolchain, a setup error) may have been fixed since.
             newly_done = False
@@ -145,6 +168,13 @@ class Builder:
         if comp is None:
             raise ValueError(f"Profile has no component '{item.component}' (needed by {item.id})")
         return comp
+
+    def effective_component(self, item: WorkItem) -> Component:
+        comp = self.component(item)
+        wd = component_workdir(self.ws, comp)
+        if wd == comp.workdir:
+            return comp
+        return comp.model_copy(update={"workdir": wd})
 
     def block_reason(self, item: WorkItem) -> str | None:
         for dep in item.depends_on:
@@ -225,8 +255,8 @@ class Builder:
         p = self.s.build.item(item.id)
         if p.status == "done":
             return
-        comp = self.component(item)
-        reason = self.block_reason(item) or self.ensure_scaffold(item.component, comp)
+        comp = self.effective_component(item)
+        reason = self.block_reason(item) or self.ensure_scaffold(item.component, self.component(item))
         if reason:
             p.status, p.reason = "blocked", reason
             self.checkpoint(f"Build: {item.id} blocked")
@@ -258,9 +288,20 @@ class Builder:
                 code_guardrails.discard_changes(self.ws, comp.workdir)
                 return "failed", None, "the developer agent failed (see reports/agent_failures and logs)"
             if result.blocked:
-                return "blocked", result, result.blocked_reason or "agent reported blocked"
+                if _agent_sandbox_block_is_retryable(result.blocked_reason):
+                    log.warning(
+                        "Ignoring agent-reported sandbox/shell block for %s; pipeline will run checks",
+                        item.id,
+                    )
+                    result.blocked = False
+                    result.blocked_reason = ""
+                else:
+                    return "blocked", result, result.blocked_reason or "agent reported blocked"
             task_key = "fix_work_item"
-            violations = code_guardrails.check_changes(self.ws, comp, self.profile, code_rules) if code_rules else []
+            profile_comp = self.component(item)
+            violations = (
+                code_guardrails.check_changes(self.ws, profile_comp, self.profile, code_rules) if code_rules else []
+            )
             if violations:
                 output = "\n".join(violations)
                 problems = f"Guardrails rejected your change. Fix all of these:\n{output}"

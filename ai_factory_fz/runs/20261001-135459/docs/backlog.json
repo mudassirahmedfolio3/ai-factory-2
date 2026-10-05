@@ -1,0 +1,228 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "M1 Flutter catalog browse and in-memory cart",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Flutter app scaffold, theme, routing, and offline core",
+      "description": "Create the Flutter 3.x Android project with Riverpod, go_router routes /products, /products/:id, /cart, and design tokens in lib/core/theme. No live HTTP in M1 debug builds; offline mock only. Style tokens chosen by the agent without approval gates. Debug Android cleartext reserved for 10.0.2.2 when backend arrives later.",
+      "epic_id": "E-01",
+      "feature": "App core",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [],
+      "modules": [],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 4,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Standard Flutter scaffold plus go_router and theme tokens with no network runtime. | frontend_developer: Flutter 3.x Android scaffold with Riverpod, go_router (/products, /products/:id, /cart), design-token theme, debug cleartext for 10.0.2.2 only, offline-only core, and a green widget-test harness.; concerns: Conventions expect packages/api_client and flutter_secure_storage, but M1 is offline-mock with no auth—need a stub client package or deferred generation so the scaffold does not block later HTTP wiring.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-002",
+      "title": "OpenAPI contract and Prisma schema for catalog health and deferred entities",
+      "description": "Deliver the shared OpenAPI contract implementing getHealth, listCategories, listProducts, and getProductById for NestJS ownership, plus Prisma models for Category, Product, ProductVariant and deferred User, RefreshToken, Address, Cart, CartItem, Order, OrderItem, Payment. NestJS runtime handlers stay deferred; Flutter M1 continues on local mock shaped like these responses.",
+      "epic_id": "E-01",
+      "feature": "Catalog API contract",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "modules": [
+        "health",
+        "catalog",
+        "auth",
+        "users",
+        "cart",
+        "orders",
+        "payments"
+      ],
+      "api_operations": [
+        "getHealth",
+        "listCategories",
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [
+        "User",
+        "RefreshToken",
+        "Address",
+        "Category",
+        "Product",
+        "ProductVariant",
+        "Cart",
+        "CartItem",
+        "Order",
+        "OrderItem",
+        "Payment"
+      ],
+      "screens": [],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Four catalog/health operationIds plus full Prisma entity set including deferred auth cart order payment models. | backend_developer: Four catalog/health OpenAPI operations with pagination, search, category filter, and variant-aware product detail plus an 11-model Prisma schema (core catalog and deferred auth/cart/order/payment relations) including generate/validate and green checks.; concerns: Must lock /api/v1 path prefix, Money cents+currency, and Order/Payment enums so Flutter M1 mocks and later Nest handlers match; WI-001 gaps would force contract rework.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 5,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-003",
+      "title": "Local mock catalog, repository, and ProductListScreen",
+      "description": "Add assets/data/catalog.json shaped like listCategories, listProducts, and getProductById with integer cents + USD and per-variant stock. Implement LocalCatalogDataSource, CatalogRepository, ProductListNotifier, and SCR-01 ProductListScreen with cards, category filter, name search, empty/error states, and cart badge hook.",
+      "epic_id": "E-01",
+      "feature": "Product list screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "listCategories",
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [
+        "Category",
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-01"
+      ],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Mock JSON across categories plus repository and list UI with filter search and empty error states. | frontend_developer: catalog.json shaped like listCategories/listProducts/getProductById, freezed-style models, LocalCatalogDataSource + CatalogRepository, ProductListNotifier with category/search, SCR-01 cards/empty/error/cart-badge hook, and widget tests.; concerns: Depends on WI-002 which is missing from this batch—unclear whether Category/Product/ProductVariant come from OpenAPI codegen or hand-authored freezed models; cart badge hook also needs CartNotifier (WI-005) available or stubbed early.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-004",
+      "title": "ProductDetailScreen with stock-aware add-to-cart affordance",
+      "description": "Build SCR-02 ProductDetailScreen (/products/:id) with ProductDetailNotifier loading one product by id via CatalogRepository. Show name, tax-inclusive price (cents + currency), image, description, category, and default-variant stock. Disable or block add-to-cart when out of stock. Back navigation preserves list filter/search state.",
+      "epic_id": "E-01",
+      "feature": "Product detail screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "modules": [
+        "catalog",
+        "cart"
+      ],
+      "api_operations": [
+        "getProductById"
+      ],
+      "data_models": [
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-02"
+      ],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Single-product load plus availability UX with back-stack filter state already held by list notifier. | frontend_developer: ProductDetailNotifier + SCR-02 load-by-id via CatalogRepository, tax-inclusive cents/USD display, stock-gated add-to-cart, back preserving list filter/search, and screen widget tests.; concerns: Add-to-cart requires CartNotifier from WI-005 before this screen is fully testable end-to-end; default-variant stock rules must match mock JSON exactly to avoid false out-of-stock UX.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 3,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-005",
+      "title": "In-memory CartNotifier and CartScreen",
+      "description": "Implement CartNotifier (Notifier<CartState>) session-only in memory and SCR-03 CartScreen (/cart). Lines snapshot product name and unit price in cents + currency; quantity controls never go below 1 unless line removed; cannot exceed mock stock. Cart badge on list/detail; clears on full process restart. No persistence, auth, checkout, or API.",
+      "epic_id": "E-01",
+      "feature": "Cart screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "modules": [
+        "cart"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Cart",
+        "CartItem"
+      ],
+      "screens": [
+        "SCR-03"
+      ],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Stock-capped quantity mutations plus price snapshot lines and badge sync across three routes. | frontend_developer: In-memory CartNotifier with name/price snapshots, stock-capped quantity controls, CartScreen, badge sync on list/detail, and widget tests covering mutations and empty cart.; concerns: Badge and add-to-cart must share a root-scoped provider across three routes or count will desync; stock caps depend on catalog mock variant data staying the single source of truth with no persistence edge cases documented beyond process restart.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 5,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Speed demo Flutter MVP",
+      "goal": "Runnable Android emulator demo: browse mock catalog, open product detail, and manage an optional in-memory cart, with OpenAPI/Prisma contract ownership for health and catalog ops and no auth, payments, checkout, or live NestJS runtime.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ],
+  "estimation_reviewed": true
+}

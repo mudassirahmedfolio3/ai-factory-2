@@ -199,3 +199,17 @@ def test_failing_design_goes_back_to_the_architect(profile):
     guard = artifact_guardrail(ArchitectureDoc, g.checker(profile, {}))
     ok, feedback = guard(TaskOutput(description="", raw=bad.model_dump_json(), agent="architect", pydantic=bad))
     assert not ok and "B2: the contract has no GET /health" in feedback
+
+
+def test_passing_guardrail_returns_canonical_json():
+    from crewai.tasks.task_output import TaskOutput
+
+    from agentic_sdlc.crews.base import artifact_guardrail
+    from pydantic import BaseModel
+
+    class M(BaseModel):
+        x: int
+
+    guard = artifact_guardrail(M, lambda m: [] if m.x else ["need x"])
+    ok, payload = guard(TaskOutput(description="", raw='{"x": 1}', agent="a", pydantic=None))
+    assert ok and payload == '{"x":1}'

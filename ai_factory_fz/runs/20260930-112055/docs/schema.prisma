@@ -1,0 +1,98 @@
+// beauty-mvp catalog schema (PostgreSQL 16).
+// Phase 1 ships no backend; this schema backs the future NestJS catalog module
+// that serves openapi.yaml. Users, carts, orders and payments are added with
+// accounts and checkout in a later phase.
+//
+// Additional constraints applied in the initial SQL migration:
+//   ALTER TABLE products ADD CONSTRAINT products_price_non_negative CHECK (price_amount_minor >= 0);
+//   ALTER TABLE products ADD CONSTRAINT products_currency_iso4217 CHECK (currency ~ '^[A-Z]{3}$');
+//   ALTER TABLE product_variants ADD CONSTRAINT product_variants_swatch_hex CHECK (swatch_hex IS NULL OR swatch_hex ~ '^#[0-9A-Fa-f]{6}$');
+//   CREATE UNIQUE INDEX product_variants_one_default ON product_variants (product_id) WHERE is_default;
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VariantType {
+  NONE  @map("none")
+  SIZE  @map("size")
+  SHADE @map("shade")
+
+  @@map("variant_type")
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  slug      String    @unique @db.VarChar(32)
+  name      String    @db.VarChar(60)
+  sortOrder Int       @default(0) @map("sort_order")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  products  Product[]
+
+  @@index([sortOrder])
+  @@map("categories")
+}
+
+model Product {
+  id               String           @id @default(uuid()) @db.Uuid
+  categoryId       String           @map("category_id") @db.Uuid
+  name             String           @db.VarChar(120)
+  brand            String           @db.VarChar(80)
+  description      String           @db.Text
+  /// Price in integer minor units (cents). Never a float.
+  priceAmountMinor Int              @map("price_amount_minor")
+  /// ISO 4217 currency code; USD only in this version.
+  currency         String           @default("USD") @db.Char(3)
+  variantType      VariantType      @default(NONE) @map("variant_type")
+  isActive         Boolean          @default(true) @map("is_active")
+  sortOrder        Int              @default(0) @map("sort_order")
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  category         Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images           ProductImage[]
+  variants         ProductVariant[]
+
+  @@index([categoryId, sortOrder])
+  @@index([isActive, sortOrder])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  /// Absolute https URL or relative reference resolved against the image base.
+  url       String   @db.VarChar(500)
+  altText   String   @map("alt_text") @db.VarChar(200)
+  width     Int?
+  height    Int?
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, sortOrder])
+  @@map("product_images")
+}
+
+model ProductVariant {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  /// Size or shade label, e.g. '50 ml' or 'Rose Nude'. The type comes from Product.variantType.
+  label     String   @db.VarChar(60)
+  /// Optional shade swatch color, e.g. '#C98A7D'.
+  swatchHex String?  @map("swatch_hex") @db.Char(7)
+  isDefault Boolean  @default(false) @map("is_default")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, label])
+  @@index([productId, sortOrder])
+  @@map("product_variants")
+}

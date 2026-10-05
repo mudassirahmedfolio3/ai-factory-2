@@ -1,0 +1,30 @@
+/** M3 Release 2 contract: 24 counted business operations plus getHealth. */
+export const M3_OPERATION_IDS = [
+  'getHealth',
+  'register',
+  'login',
+  'logout',
+  'refreshTokens',
+  'forgotPassword',
+  'resetPassword',
+  'deleteAccount',
+  'listCategories',
+  'listProducts',
+  'getProductById',
+  'getHome',
+  'getCart',
+  'replaceCart',
+  'mergeCart',
+  'getWishlist',
+  'replaceWishlist',
+  'importWishlist',
+  'createCheckoutQuote',
+  'createOrder',
+  'listOrders',
+  'getOrderById',
+  'completeMockPayment',
+  'cancelOrder',
+  'submitSupportMessage',
+] as const;
+
+export type M3OperationId = (typeof M3_OPERATION_IDS)[number];

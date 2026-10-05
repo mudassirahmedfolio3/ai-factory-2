@@ -1,73 +1,76 @@
-{
-  "run_id": "20260928-135016",
-  "project_name": "ecommerce-flutter-app",
-  "phase": "discovery",
-  "status": "running",
-  "release_number": 1,
-  "updated_at": "2026-09-28T13:50:44.848141+00:00",
-  "pipeline_steps": [
-    {
-      "id": "discovery",
-      "label": "Discovery",
-      "status": "active"
-    },
-    {
-      "id": "design",
-      "label": "Design",
-      "status": "pending"
-    },
-    {
-      "id": "sprint",
-      "label": "Sprint",
-      "status": "pending"
-    },
-    {
-      "id": "build",
-      "label": "Build",
-      "status": "pending"
-    },
-    {
-      "id": "code_review",
-      "label": "Code Review",
-      "status": "pending"
-    },
-    {
-      "id": "security",
-      "label": "Security",
-      "status": "pending"
-    },
-    {
-      "id": "qa",
-      "label": "QA",
-      "status": "pending"
-    },
-    {
-      "id": "release",
-      "label": "Release",
-      "status": "pending"
-    },
-    {
-      "id": "deploy",
-      "label": "Deploy",
-      "status": "pending"
-    },
-    {
-      "id": "client_review",
-      "label": "Client Review",
-      "status": "pending"
-    }
-  ],
-  "checks": {
-    "code_review_passed": false,
-    "security_passed": false,
-    "qa_passed": false,
-    "post_deploy_passed": false,
-    "deploy_approved": false
-  },
-  "approvals": {
-    "prd": null,
-    "release": null,
-    "deploy": null
-  },
-  "artifacts_index": []
+﻿{
+    "run_id":  "20260928-135016",
+    "project_name":  "ecommerce-flutter-app",
+    "phase":  "discovery",
+    "status":  "failed",
+    "release_number":  1,
+    "updated_at":  "2026-10-01T13:53:33.5598262Z",
+    "pipeline_steps":  [
+                           {
+                               "id":  "discovery",
+                               "label":  "Discovery",
+                               "status":  "active"
+                           },
+                           {
+                               "id":  "design",
+                               "label":  "Design",
+                               "status":  "pending"
+                           },
+                           {
+                               "id":  "sprint",
+                               "label":  "Sprint",
+                               "status":  "pending"
+                           },
+                           {
+                               "id":  "build",
+                               "label":  "Build",
+                               "status":  "pending"
+                           },
+                           {
+                               "id":  "code_review",
+                               "label":  "Code Review",
+                               "status":  "pending"
+                           },
+                           {
+                               "id":  "security",
+                               "label":  "Security",
+                               "status":  "pending"
+                           },
+                           {
+                               "id":  "qa",
+                               "label":  "QA",
+                               "status":  "pending"
+                           },
+                           {
+                               "id":  "release",
+                               "label":  "Release",
+                               "status":  "pending"
+                           },
+                           {
+                               "id":  "deploy",
+                               "label":  "Deploy",
+                               "status":  "pending"
+                           },
+                           {
+                               "id":  "client_review",
+                               "label":  "Client Review",
+                               "status":  "pending"
+                           }
+                       ],
+    "checks":  {
+                   "code_review_passed":  false,
+                   "security_passed":  false,
+                   "qa_passed":  false,
+                   "post_deploy_passed":  false,
+                   "deploy_approved":  false
+               },
+    "approvals":  {
+                      "prd":  null,
+                      "release":  null,
+                      "deploy":  null
+                  },
+    "artifacts_index":  [
+
+                        ],
+    "error":  "Run stopped by user"
 }

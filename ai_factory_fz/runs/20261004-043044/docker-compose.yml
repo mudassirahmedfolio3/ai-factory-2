@@ -1,0 +1,39 @@
+# Local development: API + PostgreSQL 16
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lighting}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lighting}
+      POSTGRES_DB: ${POSTGRES_DB:-lighting_retail}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lighting -d lighting_retail"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      PORT: "3000"
+      NODE_ENV: development
+      # Local-only placeholders (min 16 chars); override via env for shared hosts.
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-local-dev-jwt-access-secret-min-16-chars}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-local-dev-jwt-refresh-secret-min-16-chars}
+      RUN_DB_SEED: ${RUN_DB_SEED:-true}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

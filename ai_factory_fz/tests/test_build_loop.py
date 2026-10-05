@@ -144,6 +144,19 @@ def test_agent_reported_blocked(tmp_path, prd, profile):
     assert (s.build.item("WI-001").status, s.build.item("WI-001").reason) == ("blocked", "needs Postmark account")
 
 
+def test_agent_sandbox_shell_block_is_retried_with_pipeline_checks(tmp_path, prd, profile):
+    reason = (
+        "Command execution is blocked in this session (shell/sandbox command invocations are rejected), "
+        "so `flutter analyze` and `flutter test` could not be run to verify pass status."
+    )
+    worker = ScriptedWorker({
+        "implement_work_item": [WorkItemResult(summary="implemented splash", checks_passed=False, blocked=True, blocked_reason=reason)],
+    })
+    b, s, _, _ = make_builder(tmp_path, prd, profile, [item("WI-001")], [Milestone(id="M1", name="m", goal="g", work_item_ids=["WI-001"])], worker=worker)
+    b.run()
+    assert s.build.item("WI-001").status != "blocked"
+
+
 def test_qa_bugs_go_back_to_the_developer_then_pass(tmp_path, prd, profile):
     bug = Bug(id="BUG-001", work_item_id="WI-001", title="409 not returned", severity="major", steps="POST dup", expected="409", actual="500")
     worker = ScriptedWorker({"qa_milestone": [QAReport(milestone_id="M1", passed=False, bugs=[bug], summary="bug"), None]})
@@ -173,6 +186,18 @@ def test_minor_bugs_do_not_block(tmp_path, prd, profile):
     b, s, _, _ = make_builder(tmp_path, prd, profile, [item("WI-001")], [Milestone(id="M1", name="m", goal="g", work_item_ids=["WI-001"])], worker=worker)
     b.run()
     assert s.build.milestone("M1").status == "done"
+
+
+def test_done_milestone_with_new_todo_items_is_reopened(tmp_path, prd, profile):
+    items = [item("WI-001"), item("WI-002", deps=["WI-001"])]
+    ms = [Milestone(id="M1", name="a", goal="g", work_item_ids=["WI-001", "WI-002"])]
+    b, s, _, worker = make_builder(tmp_path, prd, profile, items, ms)
+    s.build.item("WI-001").status = "done"
+    s.build.item("WI-001").summary = "already shipped"
+    s.build.milestone("M1").status = "done"
+    b.run()
+    implemented = [j.inputs["item_id"] for j in worker.jobs if j.task_key == "implement_work_item"]
+    assert implemented == ["WI-002"]
 
 
 def test_only_selected_milestones_and_resume_skips_done(tmp_path, prd, profile):

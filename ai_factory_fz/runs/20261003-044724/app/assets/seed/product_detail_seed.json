@@ -1,0 +1,147 @@
+{
+  "products": [
+    {
+      "id": "seed-product-1",
+      "name": "Citrus Hand Soap",
+      "description": "A gentle citrus hand soap for everyday use, with a clean rinse and bright scent.",
+      "categorySlug": "personal-care",
+      "isAvailable": true,
+      "averageRating": 4.5,
+      "reviewCount": 2,
+      "images": [
+        {
+          "id": "seed-product-1-image-1",
+          "url": "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?auto=format&fit=crop&w=1000&q=80",
+          "altText": "Citrus hand soap bottle on countertop",
+          "position": 0
+        },
+        {
+          "id": "seed-product-1-image-2",
+          "url": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=1000&q=80",
+          "altText": "Citrus hand soap with folded towel",
+          "position": 1
+        }
+      ],
+      "variants": [
+        {
+          "id": "seed-product-1-variant-1",
+          "sku": "SHO-SOAP-300",
+          "name": "300 ml",
+          "price": {
+            "amountCents": 799,
+            "currency": "USD"
+          },
+          "inventoryCount": 16,
+          "isAvailable": true
+        },
+        {
+          "id": "seed-product-1-variant-2",
+          "sku": "SHO-SOAP-500",
+          "name": "500 ml",
+          "price": {
+            "amountCents": 1099,
+            "currency": "USD"
+          },
+          "inventoryCount": 8,
+          "isAvailable": true
+        }
+      ]
+    },
+    {
+      "id": "seed-product-2",
+      "name": "Aroma Candle",
+      "description": "A long-burning aroma candle designed to add a warm, relaxed mood at home.",
+      "categorySlug": "home-lifestyle",
+      "isAvailable": true,
+      "averageRating": 4.0,
+      "reviewCount": 1,
+      "images": [
+        {
+          "id": "seed-product-2-image-1",
+          "url": "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1000&q=80",
+          "altText": "Aroma candle in a glass jar",
+          "position": 0
+        }
+      ],
+      "variants": [
+        {
+          "id": "seed-product-2-variant-1",
+          "sku": "SHO-CAN-01",
+          "name": "Standard",
+          "price": {
+            "amountCents": 2499,
+            "currency": "USD"
+          },
+          "inventoryCount": 24,
+          "isAvailable": true
+        }
+      ]
+    },
+    {
+      "id": "seed-product-10",
+      "name": "Premium Scented Diffuser",
+      "description": "Premium diffuser with a refined scent profile for living spaces and offices.",
+      "categorySlug": "home-lifestyle",
+      "isAvailable": false,
+      "averageRating": 4.2,
+      "reviewCount": 1,
+      "images": [
+        {
+          "id": "seed-product-10-image-1",
+          "url": "https://images.unsplash.com/photo-1601506521937-0121fc6b9ee9?auto=format&fit=crop&w=1000&q=80",
+          "altText": "Premium diffuser on table",
+          "position": 0
+        }
+      ],
+      "variants": [
+        {
+          "id": "seed-product-10-variant-1",
+          "sku": "SHO-DIF-XL",
+          "name": "XL",
+          "price": {
+            "amountCents": 9999,
+            "currency": "USD"
+          },
+          "inventoryCount": 0,
+          "isAvailable": false
+        }
+      ]
+    }
+  ],
+  "reviews": {
+    "seed-product-1": [
+      {
+        "id": "seed-product-1-review-1",
+        "authorName": "Maya",
+        "rating": 5,
+        "comment": "Fresh scent and non-drying formula. Great for daily use.",
+        "createdAt": "2026-08-21T09:00:00.000Z"
+      },
+      {
+        "id": "seed-product-1-review-2",
+        "authorName": "Oliver",
+        "rating": 4,
+        "comment": "Nice quality and value. Pump is smooth and easy to use.",
+        "createdAt": "2026-08-10T14:15:00.000Z"
+      }
+    ],
+    "seed-product-2": [
+      {
+        "id": "seed-product-2-review-1",
+        "authorName": "Noor",
+        "rating": 4,
+        "comment": "Warm scent, good throw for a medium room.",
+        "createdAt": "2026-07-14T12:45:00.000Z"
+      }
+    ],
+    "seed-product-10": [
+      {
+        "id": "seed-product-10-review-1",
+        "authorName": "Jules",
+        "rating": 4,
+        "comment": "Lovely scent profile. Hoping it returns in stock soon.",
+        "createdAt": "2026-06-28T18:30:00.000Z"
+      }
+    ]
+  }
+}

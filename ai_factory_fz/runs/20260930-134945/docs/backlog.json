@@ -1,0 +1,116 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Browse Lighting Products",
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "View Product Details with Specifications",
+      "story_ids": [
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "In-Memory Shopping Cart",
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Set up Flutter project structure with Riverpod, go_router, freezed and testing",
+      "description": "Initialize a new Flutter 3.x project with Riverpod for state management, go_router for navigation, freezed for immutable data models, and flutter_test for unit and widget testing. Configure project layout, dependency injection with Riverpod, and routing configuration to support Product List, Product Detail and Cart screens.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Create mock product catalog asset and data model",
+      "description": "Define immutable Dart data models using freezed for Product (id, SKU, name, brand, category, price in pence, sale price, stock quantity, description, image reference, lighting specifications map). Hand-write a JSON or Dart asset containing 10-15 representative lighting products across categories (ceiling lights, pendants, wall lights, table/floor lamps, bulbs, outdoor, smart lighting). Bundle the catalog in the app so it loads offline immediately on startup.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Implement Product List screen with lazy image loading, price formatting and stock status",
+      "description": "Build the Product List screen using Riverpod to fetch and display the mock catalog. Each product card shows image (lazy loaded), name, price formatted in GBP from integer pence including VAT, and stock status label (In stock, Low stock ≤5 units, Out of stock). Include smooth scrolling, tappable cards leading to Product Detail, and sale price with strikethrough when applicable. Add empty state handling and semantic image labels for accessibility.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Implement Product Detail screen with specifications and quantity selector",
+      "description": "Build the Product Detail screen showing full product details: image, name, SKU, brand, price (and sale price if applicable), description, stock status, quantity selector (1 to available stock), and a dynamically rendered specifications section listing only applicable lighting specs (wattage, lumens, color temperature, voltage, light type, dimmable, material, finish, dimensions, weight, IP rating, bulb type, bulb included) as label-value pairs. Add back navigation to Product List at same scroll position, disable Add to cart button for out-of-stock products, and cap quantity at available stock with user-facing message.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Implement in-memory Cart screen and state management with price arithmetic",
+      "description": "Build Cart screen and Riverpod state management for in-memory cart. Support add to cart from Product Detail with confirmation, cart badge showing item count, cart line display (product name, unit price, quantity, line total), subtotal computation using integer pence arithmetic, quantity updates and removal with immediate recalculation, empty cart message, and stock-limited quantity capping. Ensure cart persists in memory for the session but is cleared on app restart. Add unit tests for price formatting (integer pence to GBP display) and cart arithmetic (line total, subtotal).",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Browse-to-Cart Journey Speed Demo",
+      "goal": "Deliver a runnable Flutter MVP on Android emulator showing the complete guest shopping journey: browse product list, view product detail with lighting specifications, add to in-memory cart and view cart with price computation, all offline with mock catalog. App launches within 3 seconds, list scrolls smoothly, prices computed and displayed correctly in GBP pence, and end-to-end journey testable on emulator.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ]
+}

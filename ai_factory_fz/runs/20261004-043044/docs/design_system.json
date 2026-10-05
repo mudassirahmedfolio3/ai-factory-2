@@ -1,0 +1,918 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#1B2838",
+      "dark": "#E8EDF3"
+    },
+    {
+      "name": "onPrimary",
+      "light": "#FFFFFF",
+      "dark": "#0E141C"
+    },
+    {
+      "name": "primaryContainer",
+      "light": "#DDE4EC",
+      "dark": "#2A3848"
+    },
+    {
+      "name": "onPrimaryContainer",
+      "light": "#1B2838",
+      "dark": "#E8EDF3"
+    },
+    {
+      "name": "secondary",
+      "light": "#734E00",
+      "dark": "#FFCC80"
+    },
+    {
+      "name": "onSecondary",
+      "light": "#FFFFFF",
+      "dark": "#251804"
+    },
+    {
+      "name": "secondaryContainer",
+      "light": "#FFF3D6",
+      "dark": "#5C3D00"
+    },
+    {
+      "name": "onSecondaryContainer",
+      "light": "#2A1F08",
+      "dark": "#FFECB3"
+    },
+    {
+      "name": "tertiary",
+      "light": "#3D5A80",
+      "dark": "#A8C7E7"
+    },
+    {
+      "name": "onTertiary",
+      "light": "#FFFFFF",
+      "dark": "#0F1A28"
+    },
+    {
+      "name": "surface",
+      "light": "#FAF8F5",
+      "dark": "#121820"
+    },
+    {
+      "name": "onSurface",
+      "light": "#1C1B18",
+      "dark": "#E8E6E3"
+    },
+    {
+      "name": "surfaceVariant",
+      "light": "#EDE8E0",
+      "dark": "#2A2F38"
+    },
+    {
+      "name": "onSurfaceVariant",
+      "light": "#4A453E",
+      "dark": "#C8C2B8"
+    },
+    {
+      "name": "background",
+      "light": "#FAF8F5",
+      "dark": "#0E1218"
+    },
+    {
+      "name": "onBackground",
+      "light": "#1C1B18",
+      "dark": "#E8E6E3"
+    },
+    {
+      "name": "outline",
+      "light": "#79766F",
+      "dark": "#938F88"
+    },
+    {
+      "name": "outlineVariant",
+      "light": "#C9C4BC",
+      "dark": "#4A4740"
+    },
+    {
+      "name": "error",
+      "light": "#BA1A1A",
+      "dark": "#FFB4AB"
+    },
+    {
+      "name": "onError",
+      "light": "#FFFFFF",
+      "dark": "#690005"
+    },
+    {
+      "name": "errorContainer",
+      "light": "#FFDAD6",
+      "dark": "#93000A"
+    },
+    {
+      "name": "onErrorContainer",
+      "light": "#410002",
+      "dark": "#FFDAD6"
+    },
+    {
+      "name": "success",
+      "light": "#1B6E3A",
+      "dark": "#8FD9A8"
+    },
+    {
+      "name": "onSuccess",
+      "light": "#FFFFFF",
+      "dark": "#0A2E18"
+    },
+    {
+      "name": "warning",
+      "light": "#734E00",
+      "dark": "#FFCC80"
+    },
+    {
+      "name": "onWarning",
+      "light": "#FFFFFF",
+      "dark": "#251804"
+    },
+    {
+      "name": "cartBadge",
+      "light": "#734E00",
+      "dark": "#FFCC80"
+    },
+    {
+      "name": "onCartBadge",
+      "light": "#FFFFFF",
+      "dark": "#251804"
+    },
+    {
+      "name": "scrim",
+      "light": "#1C1B18",
+      "dark": "#000000"
+    },
+    {
+      "name": "inverseSurface",
+      "light": "#31302C",
+      "dark": "#E8E6E3"
+    },
+    {
+      "name": "inverseOnSurface",
+      "light": "#F5F3F0",
+      "dark": "#1C1B18"
+    },
+    {
+      "name": "stockInStock",
+      "light": "#1B6E3A",
+      "dark": "#8FD9A8"
+    },
+    {
+      "name": "stockLowStock",
+      "light": "#734E00",
+      "dark": "#FFCC80"
+    },
+    {
+      "name": "stockOutOfStock",
+      "light": "#79766F",
+      "dark": "#938F88"
+    },
+    {
+      "name": "divider",
+      "light": "#E0DBD3",
+      "dark": "#3A3F48"
+    },
+    {
+      "name": "shadow",
+      "light": "#1C1B18",
+      "dark": "#000000"
+    }
+  ],
+  "typography": [
+    {
+      "name": "displayLarge",
+      "size": 32.0,
+      "weight": 700,
+      "line_height": 40.0
+    },
+    {
+      "name": "displayMedium",
+      "size": 28.0,
+      "weight": 700,
+      "line_height": 36.0
+    },
+    {
+      "name": "headlineLarge",
+      "size": 24.0,
+      "weight": 600,
+      "line_height": 32.0
+    },
+    {
+      "name": "headlineMedium",
+      "size": 20.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "titleLarge",
+      "size": 18.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "titleMedium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 22.0
+    },
+    {
+      "name": "bodyLarge",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "bodyMedium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "bodySmall",
+      "size": 12.0,
+      "weight": 400,
+      "line_height": 16.0
+    },
+    {
+      "name": "labelLarge",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "labelMedium",
+      "size": 12.0,
+      "weight": 600,
+      "line_height": 16.0
+    },
+    {
+      "name": "labelSmall",
+      "size": 11.0,
+      "weight": 500,
+      "line_height": 14.0
+    },
+    {
+      "name": "priceLarge",
+      "size": 22.0,
+      "weight": 700,
+      "line_height": 28.0
+    },
+    {
+      "name": "priceMedium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 22.0
+    },
+    {
+      "name": "caption",
+      "size": 12.0,
+      "weight": 400,
+      "line_height": 16.0
+    }
+  ],
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64
+  ],
+  "corner_radii": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    24,
+    999
+  ],
+  "shared_widgets": [
+    {
+      "name": "LumenAppBar",
+      "description": "Top app bar with Lumen wordmark, optional back, search icon (min 48dp), cart icon with CartBadgeChip showing item count from CartNotifier; semantic labels on all actions."
+    },
+    {
+      "name": "CartBadgeChip",
+      "description": "Circular 20dp min badge using cartBadge/onCartBadge tokens; hides when count zero; Semantics label includes item count."
+    },
+    {
+      "name": "PrimaryButton",
+      "description": "Filled button primary/onPrimary, min height 48dp, full-width on forms; loading shows inline CircularProgressIndicator."
+    },
+    {
+      "name": "SecondaryButton",
+      "description": "Filled secondary/onSecondary for accent CTAs (e.g. Apply coupon); min height 48dp."
+    },
+    {
+      "name": "OutlinedButton",
+      "description": "1dp outline border, onSurface text; used for secondary actions (Continue shopping, Retry)."
+    },
+    {
+      "name": "TextButton",
+      "description": "Text-only actions (Forgot password, View all); min tap target 48dp via padding."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Thumbnail 1:1 aspect, title (max 2 lines), price from pence via MoneyFormatter, optional OOS badge; tap navigates to product detail."
+    },
+    {
+      "name": "ProductGrid",
+      "description": "Responsive 2-column grid with spacing tokens; supports pull-to-refresh on listing screens."
+    },
+    {
+      "name": "HorizontalProductCarousel",
+      "description": "Snap carousel for featured/new arrivals on home; exposes Semantics header per section."
+    },
+    {
+      "name": "CategoryTile",
+      "description": "Square tile with image or icon, category name; min 48dp touch target."
+    },
+    {
+      "name": "SearchBarField",
+      "description": "Read-only tap opens Product Listing with focus; or embedded TextField on listing with debounced query to API."
+    },
+    {
+      "name": "FilterSortBar",
+      "description": "Chip row: Sort bottom sheet, Filters bottom sheet with active filter count badge."
+    },
+    {
+      "name": "FilterBottomSheet",
+      "description": "Multi-select filters: price range slider, brand, category, wattage, finish, availability; Apply/Clear actions."
+    },
+    {
+      "name": "SortBottomSheet",
+      "description": "Radio list: price asc/desc, newest, popularity (seed weight)."
+    },
+    {
+      "name": "VariantSelector",
+      "description": "Chip group for finish, wattage, color temperature; updates price, SKU, stock from selected variant."
+    },
+    {
+      "name": "SpecsTable",
+      "description": "Two-column key-value list for lighting attributes (wattage, lumens, CCT, IP, dimmable, dimensions)."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Minus/plus with 48dp targets; enforces max stock; shows inline error on oversell."
+    },
+    {
+      "name": "MoneyFormatter",
+      "description": "Formats integer GBP pence to major units with £ prefix and 2 decimals; used on all price surfaces."
+    },
+    {
+      "name": "OrderStatusTimeline",
+      "description": "Vertical stepper mapping paid→processing, fulfilled→shipped, delivered; cancelled/refunded as terminal states when seeded."
+    },
+    {
+      "name": "AddressFormUK",
+      "description": "Validated UK mainland fields: name, line1, line2 optional, city, postcode; copy notes standard domestic delivery only."
+    },
+    {
+      "name": "CouponField",
+      "description": "Text field + Apply using SecondaryButton; shows server validation errors; one coupon max."
+    },
+    {
+      "name": "CheckoutSummaryCard",
+      "description": "Line items snapshot, subtotal, shipping, discount, total in pence; matches server preview."
+    },
+    {
+      "name": "MockPaymentPanel",
+      "description": "Demo secure payment UI: no PAN/CVV fields; Pay now / Simulate failure buttons calling confirmMockPayment; explanatory copy."
+    },
+    {
+      "name": "EmptyStateView",
+      "description": "Illustration slot, title, body, optional CTA; used for empty cart, wishlist, orders, search."
+    },
+    {
+      "name": "ErrorStateView",
+      "description": "Icon, message, Retry action; distinguishes network vs validation errors."
+    },
+    {
+      "name": "LoadingSkeleton",
+      "description": "Shimmer placeholders for lists, detail, home carousels."
+    },
+    {
+      "name": "OfflineBanner",
+      "description": "Non-blocking banner when API health fails; home/catalog use local fallback catalog."
+    },
+    {
+      "name": "GuestSignedInBanner",
+      "description": "Inline note on cart/checkout indicating guest session or signed-in persistence."
+    },
+    {
+      "name": "WishlistToggleButton",
+      "description": "Heart icon on product detail/list; guests route to Auth; signed-in calls wishlist API."
+    },
+    {
+      "name": "BottomNavShell",
+      "description": "Optional shell with Home, Categories, Cart, Account tabs; badges on cart."
+    },
+    {
+      "name": "SecureWebView",
+      "description": "FAQ/support WebView with UK privacy-safe settings."
+    },
+    {
+      "name": "SnackbarHost",
+      "description": "App-wide snackbars for add-to-cart, merge cart, coupon applied."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "HomeScreen",
+      "route": "/",
+      "purpose": "API-backed merchandised entry with banners, featured and new-arrival carousels, category shortcuts, and search entry; falls back to local catalog when health fails.",
+      "components": [
+        "LumenAppBar",
+        "SearchBarField",
+        "HorizontalProductCarousel",
+        "CategoryTile",
+        "ProductCard",
+        "OfflineBanner",
+        "LoadingSkeleton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "error",
+        "offline_fallback"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-014"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "CategoriesScreen",
+      "route": "/categories",
+      "purpose": "Browse top-level lighting categories and subcategories; navigate to scoped product listing.",
+      "components": [
+        "LumenAppBar",
+        "CategoryTile",
+        "LoadingSkeleton",
+        "ErrorStateView",
+        "EmptyStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "empty",
+        "error"
+      ],
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "ProductListingScreen",
+      "route": "/products",
+      "purpose": "Search, filter, and sort catalog; shows OOS badges; query params: q, categoryId, subcategoryId, sort, filters.",
+      "components": [
+        "LumenAppBar",
+        "SearchBarField",
+        "FilterSortBar",
+        "FilterBottomSheet",
+        "SortBottomSheet",
+        "ProductGrid",
+        "ProductCard",
+        "LoadingSkeleton",
+        "EmptyStateView",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "empty",
+        "error"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-001",
+        "US-014"
+      ]
+    },
+    {
+      "id": "SCR-04",
+      "name": "ProductDetailScreen",
+      "route": "/products/:productId",
+      "purpose": "Gallery, variant selection, specs, reviews preview, add-to-cart, wishlist toggle; bundled product imagery.",
+      "components": [
+        "LumenAppBar",
+        "VariantSelector",
+        "SpecsTable",
+        "QuantityStepper",
+        "PrimaryButton",
+        "WishlistToggleButton",
+        "MoneyFormatter",
+        "LoadingSkeleton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "error",
+        "out_of_stock"
+      ],
+      "story_ids": [
+        "US-003",
+        "US-005",
+        "US-006",
+        "US-014"
+      ]
+    },
+    {
+      "id": "SCR-05",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Review server cart lines, update quantities, remove items, view subtotal; guest vs signed-in indicator.",
+      "components": [
+        "LumenAppBar",
+        "GuestSignedInBanner",
+        "QuantityStepper",
+        "MoneyFormatter",
+        "PrimaryButton",
+        "OutlinedButton",
+        "EmptyStateView",
+        "LoadingSkeleton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "empty",
+        "error",
+        "stock_validation_error"
+      ],
+      "story_ids": [
+        "US-005",
+        "US-004"
+      ]
+    },
+    {
+      "id": "SCR-06",
+      "name": "CheckoutScreen",
+      "route": "/checkout",
+      "purpose": "UK contact and shipping address, order review, coupon entry, shipping rules and free-delivery threshold copy.",
+      "components": [
+        "LumenAppBar",
+        "AddressFormUK",
+        "CheckoutSummaryCard",
+        "CouponField",
+        "SecondaryButton",
+        "PrimaryButton",
+        "MoneyFormatter",
+        "LoadingSkeleton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "error",
+        "validation_error"
+      ],
+      "story_ids": [
+        "US-007",
+        "US-009",
+        "US-005"
+      ]
+    },
+    {
+      "id": "SCR-07",
+      "name": "MockPaymentScreen",
+      "route": "/checkout/payment",
+      "purpose": "Mock secure payment step after checkout preview; stock reserved; retry on failure without duplicate paid orders.",
+      "components": [
+        "LumenAppBar",
+        "MockPaymentPanel",
+        "CheckoutSummaryCard",
+        "PrimaryButton",
+        "OutlinedButton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "ready",
+        "processing",
+        "success",
+        "error",
+        "cancelled"
+      ],
+      "story_ids": [
+        "US-008",
+        "US-007"
+      ]
+    },
+    {
+      "id": "SCR-08",
+      "name": "OrderConfirmationScreen",
+      "route": "/checkout/confirmation/:orderId",
+      "purpose": "Post-payment confirmation with order number, snapshotted lines, address, totals, estimated UK delivery copy.",
+      "components": [
+        "PrimaryButton",
+        "CheckoutSummaryCard",
+        "MoneyFormatter",
+        "OutlinedButton"
+      ],
+      "states": [
+        "success",
+        "error"
+      ],
+      "story_ids": [
+        "US-010",
+        "US-008"
+      ]
+    },
+    {
+      "id": "SCR-09",
+      "name": "AuthScreen",
+      "route": "/auth",
+      "purpose": "Combined login and register tabs; forgot-password request mode; reset-password mode via query token; triggers guest cart merge on success.",
+      "components": [
+        "PrimaryButton",
+        "TextButton",
+        "OutlinedButton",
+        "ErrorStateView",
+        "LoadingSkeleton"
+      ],
+      "states": [
+        "login",
+        "register",
+        "forgot_password",
+        "reset_password",
+        "loading",
+        "error",
+        "validation_error",
+        "success"
+      ],
+      "story_ids": [
+        "US-004",
+        "US-012"
+      ]
+    },
+    {
+      "id": "SCR-10",
+      "name": "AccountScreen",
+      "route": "/account",
+      "purpose": "Profile summary, order history entry, wishlist entry, support link, logout, delete account (GDPR).",
+      "components": [
+        "LumenAppBar",
+        "PrimaryButton",
+        "OutlinedButton",
+        "TextButton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "signed_in",
+        "signed_out",
+        "loading",
+        "error"
+      ],
+      "story_ids": [
+        "US-004",
+        "US-011",
+        "US-013",
+        "US-006"
+      ]
+    },
+    {
+      "id": "SCR-11",
+      "name": "OrderHistoryScreen",
+      "route": "/orders",
+      "purpose": "Paginated list of past orders for authenticated customers; guests redirected to auth.",
+      "components": [
+        "LumenAppBar",
+        "OrderStatusTimeline",
+        "MoneyFormatter",
+        "EmptyStateView",
+        "LoadingSkeleton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "empty",
+        "error",
+        "unauthenticated"
+      ],
+      "story_ids": [
+        "US-011"
+      ]
+    },
+    {
+      "id": "SCR-12",
+      "name": "OrderDetailScreen",
+      "route": "/orders/:orderId",
+      "purpose": "Order lines with purchase-time snapshots, status timeline, tracking when seeded, totals and shipping address.",
+      "components": [
+        "LumenAppBar",
+        "OrderStatusTimeline",
+        "CheckoutSummaryCard",
+        "MoneyFormatter",
+        "LoadingSkeleton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "error"
+      ],
+      "story_ids": [
+        "US-011",
+        "US-010"
+      ]
+    },
+    {
+      "id": "SCR-13",
+      "name": "WishlistScreen",
+      "route": "/wishlist",
+      "purpose": "Registered-user wishlist synced via API; add/remove; navigate to product detail.",
+      "components": [
+        "LumenAppBar",
+        "ProductGrid",
+        "ProductCard",
+        "WishlistToggleButton",
+        "EmptyStateView",
+        "LoadingSkeleton",
+        "ErrorStateView"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "empty",
+        "error",
+        "unauthenticated"
+      ],
+      "story_ids": [
+        "US-006"
+      ]
+    },
+    {
+      "id": "SCR-14",
+      "name": "SupportScreen",
+      "route": "/support",
+      "purpose": "UK customer support contact, hours, phone, email, FAQ WebView; demo catalog disclaimers.",
+      "components": [
+        "LumenAppBar",
+        "SecureWebView",
+        "PrimaryButton",
+        "TextButton"
+      ],
+      "states": [
+        "success"
+      ],
+      "story_ids": [
+        "US-013",
+        "US-014"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Tap search bar or submit query from home"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap Shop categories or category shortcut"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-04",
+      "trigger": "Tap product card or carousel item"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-05",
+      "trigger": "Tap cart icon in app bar"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Select category or subcategory"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-04",
+      "trigger": "Tap product card"
+    },
+    {
+      "from_screen": "SCR-04",
+      "to_screen": "SCR-05",
+      "trigger": "Add to cart success snackbar or cart icon"
+    },
+    {
+      "from_screen": "SCR-04",
+      "to_screen": "SCR-09",
+      "trigger": "Wishlist while guest"
+    },
+    {
+      "from_screen": "SCR-05",
+      "to_screen": "SCR-06",
+      "trigger": "Tap Proceed to checkout"
+    },
+    {
+      "from_screen": "SCR-05",
+      "to_screen": "SCR-03",
+      "trigger": "Continue shopping"
+    },
+    {
+      "from_screen": "SCR-06",
+      "to_screen": "SCR-07",
+      "trigger": "Place order / Continue to payment after valid preview"
+    },
+    {
+      "from_screen": "SCR-07",
+      "to_screen": "SCR-08",
+      "trigger": "Mock payment success"
+    },
+    {
+      "from_screen": "SCR-07",
+      "to_screen": "SCR-07",
+      "trigger": "Mock payment failure — show error and Retry"
+    },
+    {
+      "from_screen": "SCR-08",
+      "to_screen": "SCR-01",
+      "trigger": "Continue shopping"
+    },
+    {
+      "from_screen": "SCR-08",
+      "to_screen": "SCR-11",
+      "trigger": "View orders when signed in"
+    },
+    {
+      "from_screen": "SCR-09",
+      "to_screen": "SCR-05",
+      "trigger": "Login/register success after cart merge"
+    },
+    {
+      "from_screen": "SCR-10",
+      "to_screen": "SCR-09",
+      "trigger": "Sign in when signed out"
+    },
+    {
+      "from_screen": "SCR-10",
+      "to_screen": "SCR-11",
+      "trigger": "Order history menu item"
+    },
+    {
+      "from_screen": "SCR-10",
+      "to_screen": "SCR-13",
+      "trigger": "Wishlist menu item"
+    },
+    {
+      "from_screen": "SCR-10",
+      "to_screen": "SCR-14",
+      "trigger": "Customer support menu item"
+    },
+    {
+      "from_screen": "SCR-11",
+      "to_screen": "SCR-12",
+      "trigger": "Tap order row"
+    },
+    {
+      "from_screen": "SCR-11",
+      "to_screen": "SCR-09",
+      "trigger": "Guest/unauthenticated access attempt"
+    },
+    {
+      "from_screen": "SCR-13",
+      "to_screen": "SCR-09",
+      "trigger": "Guest access attempt"
+    },
+    {
+      "from_screen": "SCR-13",
+      "to_screen": "SCR-04",
+      "trigger": "Tap wishlist product"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-10",
+      "trigger": "Account tab or profile icon"
+    }
+  ],
+  "accessibility": [
+    "Minimum interactive touch target 48dp on all buttons, steppers, chips, nav icons, and list tiles (expand hit area with padding where visual size is smaller).",
+    "All product, category, and icon images include Semantics labels or excludeFromSemantics when decorative with adjacent text.",
+    "Color contrast at least WCAG 2.1 AA (4.5:1 normal text, 3:1 large text) for all semantic token pairs including secondary/onSecondary and cartBadge/onCartBadge in light and dark themes.",
+    "Support system text scaling up to 200%; layouts use scroll views and do not clip critical actions.",
+    "Focus order follows visual order on forms (checkout, auth, address).",
+    "Error and validation messages exposed to screen readers via live regions.",
+    "Mock payment screen states clearly that card data is not collected on-device or sent to Lumen servers.",
+    "Filter and sort sheets trap focus while open and restore focus on dismiss.",
+    "Order status timeline steps include combined Semantics labels (status name and date when present).",
+    "Cart quantity changes announce updated count and line subtotal."
+  ]
+}

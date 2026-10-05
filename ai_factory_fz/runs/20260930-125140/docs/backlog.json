@@ -1,0 +1,115 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Browse Product List (M1 Speed Demo)",
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "View Product Detail (M1 Speed Demo)",
+      "story_ids": [
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Simple In-Memory Cart (M1 Speed Demo)",
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Set up Flutter project structure, routing and style tokens",
+      "description": "Create a new Flutter 3.x project with go_router for navigation, Riverpod for state management, freezed/json_serializable for data models, and define style tokens (colors, typography, spacing) in code without waiting for approval. Set up the project to run on Android emulator (API 28+) with a single command after dependencies are installed. No backend required.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Create mock product catalog with variants, prices and stock",
+      "description": "Build a bundled local mock catalog of 12-20 products with size and color variants, prices stored as integer cents (USD), and per-variant stock tracking. Store all user-visible text (product names, descriptions, currency formatting) in a single English (US) string source. Include placeholder images or generated assets bundled with the app. No network calls required.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Build product list screen with scrolling and formatting",
+      "description": "Implement the product list screen showing at least 12 products with image, name and price formatted from integer cents to USD (e.g. 1999 cents → $19.99) derived from currency code, not hard-coded symbols. Mark products with all variants out of stock. Ensure smooth scrolling on mid-range devices with no jank. Allow tapping a product to navigate to detail screen.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Build product detail screen with variant selection and stock status",
+      "description": "Implement the product detail screen showing product name, image, description, price and variant options (size and color). Allow selecting a size and color; highlight selected variant and display its price and stock status (in stock or out of stock) per variant. Show out-of-stock status and disable add-to-cart action when variant is unavailable. Implement back navigation returning to product list at same scroll position.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Implement in-memory cart with item management and subtotal",
+      "description": "Create an in-memory Riverpod state for the cart. Build cart screen showing cart items with product name, variant, unit price, quantity and line total, all computed and displayed in integer cents USD. Add item count indicator on cart button. Implement add-to-cart action on product detail screen; increment quantity if variant already in cart. Allow removing items or setting quantity to zero. Display empty-state message when cart is empty. Cart is cleared when app process closes.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "ShopEase M1 Speed Demo",
+      "goal": "Deliver a runnable Flutter app on Android emulator showing product list, product detail, and optional in-memory cart, using only a bundled local mock catalog. Cold start to first rendered product list in under 3 seconds. All prices in integer cents USD, no hard-coded symbols. At least 3 flutter_test tests covering price formatting, catalog loading and cart subtotal. No authentication, payments, backend API or network required. App builds with no analyzer errors.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,347 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#1F4E79",
+      "dark": "#9CC4EC"
+    },
+    {
+      "name": "onPrimary",
+      "light": "#FFFFFF",
+      "dark": "#0B2A45"
+    },
+    {
+      "name": "background",
+      "light": "#FFFFFF",
+      "dark": "#121212"
+    },
+    {
+      "name": "surface",
+      "light": "#F5F6F8",
+      "dark": "#1E1E1E"
+    },
+    {
+      "name": "onSurface",
+      "light": "#1B1F23",
+      "dark": "#E6E8EB"
+    },
+    {
+      "name": "onSurfaceVariant",
+      "light": "#4A5460",
+      "dark": "#B5BCC4"
+    },
+    {
+      "name": "outline",
+      "light": "#C9CED4",
+      "dark": "#3A3F45"
+    },
+    {
+      "name": "error",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "onError",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    },
+    {
+      "name": "stockInContainer",
+      "light": "#E3F4E8",
+      "dark": "#1F3A29"
+    },
+    {
+      "name": "onStockInContainer",
+      "light": "#145A2E",
+      "dark": "#B8EBC8"
+    },
+    {
+      "name": "stockOutContainer",
+      "light": "#FDECEA",
+      "dark": "#4A1F1C"
+    },
+    {
+      "name": "onStockOutContainer",
+      "light": "#8C1D18",
+      "dark": "#F9DEDC"
+    },
+    {
+      "name": "placeholderBackground",
+      "light": "#E4E7EB",
+      "dark": "#2A2E33"
+    },
+    {
+      "name": "placeholderIcon",
+      "light": "#5F6B77",
+      "dark": "#A0A8B1"
+    },
+    {
+      "name": "inverseSurface",
+      "light": "#2F3337",
+      "dark": "#E6E8EB"
+    },
+    {
+      "name": "onInverseSurface",
+      "light": "#F4F5F6",
+      "dark": "#1B1F23"
+    },
+    {
+      "name": "disabledContainer",
+      "light": "#E0E3E7",
+      "dark": "#2E3338"
+    },
+    {
+      "name": "onDisabled",
+      "light": "#6B737B",
+      "dark": "#8A929A"
+    }
+  ],
+  "typography": [
+    {
+      "name": "headlineMedium",
+      "size": 24.0,
+      "weight": 700,
+      "line_height": 1.3
+    },
+    {
+      "name": "titleLarge",
+      "size": 20.0,
+      "weight": 600,
+      "line_height": 1.3
+    },
+    {
+      "name": "titleMedium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 1.4
+    },
+    {
+      "name": "priceLarge",
+      "size": 22.0,
+      "weight": 700,
+      "line_height": 1.3
+    },
+    {
+      "name": "bodyLarge",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 1.5
+    },
+    {
+      "name": "bodyMedium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 1.45
+    },
+    {
+      "name": "labelLarge",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 1.4
+    },
+    {
+      "name": "labelSmall",
+      "size": 12.0,
+      "weight": 600,
+      "line_height": 1.35
+    }
+  ],
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ],
+  "corner_radii": [
+    4,
+    8,
+    12,
+    16,
+    999
+  ],
+  "shared_widgets": [
+    {
+      "name": "ProductListTile",
+      "description": "List row for ProductListScreen with fixed itemExtent (96dp + 8dp gap) for smooth scrolling at 300+ items. Layout: 72x72dp ProductImage thumbnail (radius 8, decoded lazily with cacheWidth), then name (titleMedium, max 2 lines), PriceText, and StockBadge. Whole row is tappable, minimum 48dp height, with Semantics label such as 'Product name, £12.99, in stock. Double tap to view details'. Out-of-stock rows remain visible with StockBadge and use onSurfaceVariant text for the name; no hard-coded colours."
+    },
+    {
+      "name": "ProductImage",
+      "description": "Image widget that loads lazily and shows a placeholder (placeholderBackground with an image icon in placeholderIcon) when imageUrl is null or fails to load (errorBuilder), so the app never crashes. Supports a cacheWidth parameter. Always has a Semantics label (product name, or 'No image available' for the placeholder)."
+    },
+    {
+      "name": "PriceText",
+      "description": "Displays an integer-pence amount via formatMoney in UK tax-inclusive format (e.g. 1299 -> £12.99), GBP only, never floats. Variants: list (titleMedium) and detail (priceLarge). Uses onSurface colour. Scales with dynamic text size."
+    },
+    {
+      "name": "StockBadge",
+      "description": "Pill badge (radius 999, min height 24dp, labelSmall) showing 'In stock' (stockInContainer/onStockInContainer) or 'Out of stock' (stockOutContainer/onStockOutContainer). Conveys state with text as well as colour; Semantics label 'In stock' or 'Out of stock'."
+    },
+    {
+      "name": "CartBadgeButton",
+      "description": "App bar IconButton (48x48dp minimum) with a shopping cart icon and a count badge watching cartProvider.itemCount; badge hidden when count is 0. Shown only when the cart feature is enabled. Navigates to /cart. Semantics label 'Cart, N items' (or 'Cart, empty')."
+    },
+    {
+      "name": "LoadingView",
+      "description": "Centred CircularProgressIndicator (primary colour) with Semantics label 'Loading'. Used for loading states of list and detail screens."
+    },
+    {
+      "name": "EmptyView",
+      "description": "Centred icon, title (titleLarge) and optional message (bodyMedium, onSurfaceVariant) with an optional action button (48dp high). Used for 'No products available' and 'Your cart is empty' (action 'Browse products')."
+    },
+    {
+      "name": "ErrorView",
+      "description": "Centred error icon (error colour), message (bodyLarge) and a 'Retry' FilledButton (48dp high) that calls ref.invalidate on the relevant provider. Variant for ProductNotFound shows 'Product not found' with a 'Back' action instead of retry. Semantics announce the error message."
+    },
+    {
+      "name": "AddToCartButton",
+      "description": "Full-width FilledButton, 48dp minimum height, radius 12, label 'Add to cart'. Disabled (disabledContainer/onDisabled) with label 'Out of stock' when inStock is false. On tap calls cartProvider.notifier.add(...) and shows a SnackBar confirmation (inverseSurface, e.g. 'Added to cart'). Semantics label 'Add <product name> to cart'; when disabled, 'Add to cart unavailable, out of stock'."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Cart line stepper with decrement and increment IconButtons (each 48x48dp) and a quantity label between them (minimum 1, maximum stockQuantity; increment disabled at max). Semantics labels 'Decrease quantity of <name>', 'Increase quantity of <name>', and 'Quantity N'."
+    },
+    {
+      "name": "CartLineTile",
+      "description": "Cart row showing ProductImage thumbnail (56dp), name, unit price (PriceText), QuantityStepper and a remove IconButton (48x48dp, Semantics 'Remove <name> from cart'). Quantity and total update immediately on change."
+    },
+    {
+      "name": "AppTheme",
+      "description": "lib/core/theme: single central theme file building light and dark ThemeData from the colour, typography, spacing and corner-radius tokens in this design system (Material 3, ColorScheme from tokens, ThemeMode.system). Widgets never hard-code colours or sizes; tokens are easy to swap."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "Product List",
+      "route": "/",
+      "purpose": "Launch screen and default route. Shows a scrollable list of products from the local mock catalogue (thumbnail, name, tax-inclusive price in £ format, stock status) with no sign-in prompt. Uses productListProvider (AsyncNotifier<ProductListState>) calling catalogRepositoryProvider.listProducts(page, pageSize: 20) with infinite scroll appending pages near the end. ListView.builder with itemExtent and PageStorageKey to preserve scroll position; thumbnails decoded lazily with cacheWidth. Out-of-stock products remain visible and clearly marked.",
+      "components": [
+        "AppBar (title 'Simple Shop')",
+        "CartBadgeButton (only when cart feature enabled)",
+        "ListView.builder with itemExtent and PageStorageKey",
+        "ProductListTile",
+        "ProductImage",
+        "PriceText",
+        "StockBadge",
+        "LoadingView",
+        "EmptyView",
+        "ErrorView"
+      ],
+      "states": [
+        "loading: LoadingView spinner while first page loads; small bottom spinner row while next page loads",
+        "empty: EmptyView with message 'No products available'",
+        "error: ErrorView with Retry that calls ref.invalidate(productListProvider)",
+        "data: list of ProductListTile rows; out-of-stock rows show the 'Out of stock' StockBadge; missing images show placeholder"
+      ],
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "Product Detail",
+      "route": "/products/:productId",
+      "purpose": "Nested under '/'. Shows full product details so the shopper can decide whether to buy: image, name, description, tax-inclusive GBP price and stock availability (in stock or out of stock). Uses productDetailProvider (FutureProvider.autoDispose.family<ProductDetail, String>) calling catalogRepositoryProvider.getProduct(productId). Provides Add to cart (disabled when out of stock) with SnackBar confirmation. Back (app bar back button or system back gesture) returns to the still-mounted list at the same scroll position.",
+      "components": [
+        "AppBar with back button",
+        "CartBadgeButton (only when cart feature enabled)",
+        "ProductImage (large, placeholder fallback)",
+        "Product name (headlineMedium)",
+        "PriceText (detail variant)",
+        "StockBadge",
+        "Description text (bodyLarge)",
+        "AddToCartButton (48dp, semantic label)",
+        "SnackBar confirmation",
+        "LoadingView",
+        "ErrorView"
+      ],
+      "states": [
+        "loading: LoadingView spinner",
+        "error: ErrorView with Retry (ref.invalidate(productDetailProvider)); ProductNotFound shows 'Product not found' with a back action",
+        "data: full details shown; in stock enables AddToCartButton",
+        "out-of-stock: 'Out of stock' StockBadge shown and AddToCartButton disabled",
+        "no-image: placeholder image shown instead of product image without crashing",
+        "empty: not applicable (a missing product is handled as the ProductNotFound error state)"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "Cart",
+      "route": "/cart",
+      "purpose": "Could-have (delivered only if time allows). In-memory cart listing each added item with name, quantity stepper and unit price, and the cart total (sum computed in integer pence, formatted £x.xx via formatMoney). Uses cartProvider (NotifierProvider<CartNotifier, CartState>) with add, increment, decrement, setQuantity (min 1, max stockQuantity) and remove. Lines and total update immediately. No persistence (relaunch yields an empty cart). No checkout button in this release.",
+      "components": [
+        "AppBar with back button (title 'Cart')",
+        "ListView of CartLineTile",
+        "QuantityStepper",
+        "PriceText",
+        "Total row (titleLarge label 'Total' and PriceText)",
+        "EmptyView with 'Browse products' action"
+      ],
+      "states": [
+        "loading: not applicable (in-memory state is synchronous)",
+        "empty: EmptyView 'Your cart is empty' with 'Browse products' action navigating to /",
+        "error: not applicable (no network or persistence); quantity limited to stockQuantity with increment disabled at max",
+        "data: CartLineTiles with live total; removing or changing quantity updates lines and total immediately"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap a ProductListTile row -> context.go/push('/products/:productId')"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "App bar back button or system back gesture -> list remains mounted and keeps scroll position (PageStorageKey)"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "Back action on the 'Product not found' ErrorView"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Tap CartBadgeButton in app bar -> '/cart' (only when cart feature enabled)"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Tap CartBadgeButton in app bar -> '/cart' (only when cart feature enabled)"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-01",
+      "trigger": "Tap 'Browse products' in the empty cart state -> '/'"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-02",
+      "trigger": "App bar back button or system back gesture returns to the previous screen (detail or list) in the navigation stack"
+    }
+  ],
+  "accessibility": [
+    "Minimum touch target 48x48dp for all interactive elements (list rows, CartBadgeButton, AddToCartButton, QuantityStepper buttons, remove buttons, Retry and other action buttons).",
+    "Text contrast at least WCAG 2.1 AA (4.5:1 for body text, 3:1 for large text and UI components) for all light and dark token pairs; stock state is never conveyed by colour alone (badge always has 'In stock' / 'Out of stock' text).",
+    "Dynamic text sizing supported: all text uses theme text styles that scale with system font size; layouts avoid fixed heights for text (ProductListTile uses itemExtent with overflow ellipsis and max lines, and must be verified at large text scale).",
+    "TalkBack semantic labels on all buttons, images and interactive elements, including product images (product name or 'No image available' for placeholder), CartBadgeButton ('Cart, N items'), AddToCartButton, QuantityStepper and remove buttons.",
+    "ProductListTile merges its semantics into a single readable label: name, price, stock status.",
+    "Loading, error and empty states are announced to screen readers (Semantics labels on LoadingView, ErrorView and EmptyView); SnackBar confirmation after adding to cart is announced as a live region.",
+    "Prices read in full UK format (e.g. '£12.99') and formatted only via formatMoney from integer pence.",
+    "Light and dark themes both supported via ThemeMode.system using tokens from lib/core/theme; no hard-coded colours or sizes in widgets.",
+    "Keyboard/focus order follows visual order (app bar, content, actions); back navigation is available on all non-root screens via the app bar back button and system back gesture.",
+    "Widget tests per screen (list and detail) include checks for semantic labels and out-of-stock disabled state."
+  ]
+}

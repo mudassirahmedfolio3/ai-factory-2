@@ -1,0 +1,39 @@
+name: mobile-api-client-ci
+
+on:
+  push:
+    paths:
+      - "app/**"
+      - "docs/openapi.yaml"
+      - "scripts/generate-dart-api-client.*"
+      - ".github/workflows/mobile-api-client-ci.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "docs/openapi.yaml"
+      - "scripts/generate-dart-api-client.*"
+      - ".github/workflows/mobile-api-client-ci.yml"
+
+jobs:
+  flutter-api-client:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Install app dependencies
+        run: flutter pub get
+      - name: Analyze (includes packages/api_client)
+        run: flutter analyze
+      - name: Flutter tests (catalog integration + mock fallback)
+        run: |
+          flutter test test/features/products/data test/infra
+          flutter test
+      - name: Generated api_client package tests
+        run: dart test
+        working-directory: app/packages/api_client

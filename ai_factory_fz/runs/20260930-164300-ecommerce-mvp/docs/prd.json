@@ -1,0 +1,904 @@
+{
+  "title": "ShopEase Mobile Shopping App - Product Requirements Document (Version 1 / MVP)",
+  "summary": "ShopEase is our own fast, simple mobile shopping app for Android and iOS, built from a single shared codebase, where signed-in customers discover our clothing and accessories, buy them in a few taps with a card, and follow their orders. Version 1 sells to one country (Germany) in one currency (EUR) and one language (English). Prices shown include VAT, and the VAT amount is shown as a line on the order summary. Scope is the core shopping journey: email/password accounts with password reset, category browsing and keyword search, product detail with size/color variants and stock indication, cart, checkout with delivery address and delivery option (Standard EUR 4.90 in 3-5 working days, free from EUR 60; Express EUR 9.90 in 1-2 working days), Stripe card payment in test mode (PaymentIntents, no card data on our servers), order confirmation on screen and by email, order history with a single clear status per order, and email-only notifications. A web-based back-office with one admin role lets non-technical staff manage products, photos, prices and stock (manually and via CSV import), process orders, cancel orders, record refunds, and keep an audit trail. Guest checkout, social sign-in, push notifications, in-app returns, Apple Pay, Google Pay, PayPal, wishlists, discount codes and loyalty are out of scope for v1. Internally, orders follow pending_payment -> paid -> fulfilled -> delivered, plus cancelled and refunded. Customers see Placed, Processing, Shipped, Delivered, Cancelled and Refunded. Stock is tracked per variant and reserved for 30 minutes from checkout start. Prices are stored as integer cents with currency code EUR. The target is a live release on Android and iOS around the end of December 2026, with Stripe live mode enabled by configuration only after the full test is passed. Success metrics in order: conversion rate, cart abandonment and checkout drop-off, repeat purchase rate, registered accounts. Analytics events are tracked with GDPR-compliant consent.",
+  "personas": [
+    {
+      "name": "Existing Customer (Quick Buyer)",
+      "description": "An existing customer of our clothing and accessories who wants a quicker, more convenient way to buy from us on their phone.",
+      "goals": [
+        "Find a known product fast and pay in a few taps",
+        "Trust that stock shown is actually available",
+        "Receive a clear confirmation and receipt by email"
+      ]
+    },
+    {
+      "name": "New Mobile Shopper",
+      "description": "A new shopper aged roughly 18-45 who discovers our brand and prefers shopping on mobile rather than a desktop website.",
+      "goals": [
+        "Browse categories and search without needing any explanation",
+        "See photos, sizes, colors, price and stock status clearly",
+        "Create an account and check out with minimal friction"
+      ]
+    },
+    {
+      "name": "Repeat Buyer",
+      "description": "A returning customer who wants to reorder, check past orders and see the status of each order.",
+      "goals": [
+        "See order history with a clear status per order",
+        "Get email updates when an order ships, is delivered, cancelled or refunded",
+        "Find the returns policy and contact support easily"
+      ]
+    },
+    {
+      "name": "Store Admin / Staff",
+      "description": "An internal, non-technical team member using the web back-office to add products, manage stock and prices, and process orders. One admin role with full access in v1; admin accounts are separate from shopper accounts.",
+      "goals": [
+        "Load the initial catalog of a few hundred products via CSV and maintain it manually day to day",
+        "Update stock daily from a spreadsheet exported from the existing stock system and correct single items at any time",
+        "Move orders through statuses, cancel orders and record refunds with an audit trail"
+      ]
+    }
+  ],
+  "user_stories": [
+    {
+      "id": "US-001",
+      "title": "Create an account with email and password",
+      "as_a": "new shopper",
+      "i_want": "to create an account with my email address and a password",
+      "so_that": "I can place orders and see my order history",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am not signed in and on the sign-up screen",
+          "when": "I enter a valid, unused email address and a password meeting the password rules (minimum 8 characters) and submit",
+          "then": "my account is created, I am signed in, and I land on the home screen"
+        },
+        {
+          "given": "an account already exists for the email I enter",
+          "when": "I submit the sign-up form",
+          "then": "I see an error that the email cannot be used, and no second account is created"
+        },
+        {
+          "given": "I am on the sign-up screen",
+          "when": "I submit an invalid email format or a password shorter than the minimum",
+          "then": "I see an inline validation message for the offending field and no account is created"
+        },
+        {
+          "given": "my account is created",
+          "when": "the data is stored",
+          "then": "the password is stored only as a bcrypt or argon2 hash and only the minimum personal data (email, optional name, addresses entered at checkout) is stored"
+        }
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Sign in and sign out",
+      "as_a": "registered customer",
+      "i_want": "to sign in with my email and password and sign out",
+      "so_that": "my cart and orders are tied to my account",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I have a registered account",
+          "when": "I enter the correct email and password",
+          "then": "I am signed in and stay signed in across app restarts until I sign out or the session expires"
+        },
+        {
+          "given": "I am on the sign-in screen",
+          "when": "I enter a wrong password or unknown email",
+          "then": "I see one generic 'email or password is incorrect' message that does not reveal which was wrong"
+        },
+        {
+          "given": "I am signed in",
+          "when": "I tap sign out",
+          "then": "my session tokens are removed from the device and I am returned to the signed-out state"
+        },
+        {
+          "given": "I am not signed in and I browse the catalog",
+          "when": "I tap add to cart or start checkout",
+          "then": "I am asked to sign in or create an account first and, after signing in, I am returned to where I was"
+        }
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Reset a forgotten password",
+      "as_a": "registered customer",
+      "i_want": "to reset my password by email",
+      "so_that": "I can regain access to my account",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am on the sign-in screen",
+          "when": "I request a password reset for any email address",
+          "then": "I see the same confirmation message whether or not an account exists, and a reset email is sent only if an account exists"
+        },
+        {
+          "given": "I received a reset email",
+          "when": "I open the single-use link within its validity period (60 minutes) and set a new valid password",
+          "then": "my password is changed, the old password no longer works, and I can sign in with the new one"
+        },
+        {
+          "given": "a reset link has expired or was already used",
+          "when": "I open it",
+          "then": "I see an error that the link is invalid and I can request a new one"
+        }
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Browse products by category",
+      "as_a": "shopper",
+      "i_want": "to browse products by category (for example Women, Men, Accessories)",
+      "so_that": "I can discover items without knowing exactly what I want",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am on the home screen",
+          "when": "I open the category list",
+          "then": "I see all active categories configured in the back-office"
+        },
+        {
+          "given": "I open a category",
+          "when": "the product list loads",
+          "then": "I see only active products in that category with main photo, name and price in EUR including VAT, in pages that load more on scroll"
+        },
+        {
+          "given": "a product has all variants out of stock",
+          "when": "it appears in a category list",
+          "then": "it is clearly marked as out of stock"
+        },
+        {
+          "given": "a category has no active products",
+          "when": "I open it",
+          "then": "I see an empty-state message"
+        }
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Search products by keyword",
+      "as_a": "shopper",
+      "i_want": "to search the catalog by keyword",
+      "so_that": "I can quickly find a specific item",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am on the search screen",
+          "when": "I enter a keyword that matches product names or descriptions and submit",
+          "then": "I see the matching active products with photo, name and price"
+        },
+        {
+          "given": "no product matches my keyword",
+          "when": "I submit the search",
+          "then": "I see a 'no results' message with a suggestion to browse categories"
+        },
+        {
+          "given": "I submit a search",
+          "when": "the search is performed",
+          "then": "a search analytics event including the keyword is recorded, provided analytics consent was given"
+        }
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "View product details",
+      "as_a": "shopper",
+      "i_want": "to see a product's photos, description, price, sizes, colors and stock status",
+      "so_that": "I can decide whether to buy it",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I open a product",
+          "when": "the detail page loads",
+          "then": "I see multiple photos I can swipe through, name, description, price in EUR including VAT, and the available sizes and colors"
+        },
+        {
+          "given": "a specific size and color combination (variant) has no available stock",
+          "when": "I view the size and color selectors",
+          "then": "that variant is shown as out of stock and cannot be added to the cart"
+        },
+        {
+          "given": "a variant has available stock",
+          "when": "I select it",
+          "then": "the add to cart action becomes enabled"
+        },
+        {
+          "given": "I open a product",
+          "when": "the page is shown",
+          "then": "a product view analytics event is recorded, provided analytics consent was given"
+        }
+      ]
+    },
+    {
+      "id": "US-007",
+      "title": "Add a product variant to the cart",
+      "as_a": "signed-in customer",
+      "i_want": "to add a product in my chosen size and color to my cart",
+      "so_that": "I can collect items to buy",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am signed in and have selected an in-stock size and color",
+          "when": "I tap add to cart",
+          "then": "that variant is added with quantity 1, the cart badge updates, and I get a confirmation"
+        },
+        {
+          "given": "the same variant is already in my cart",
+          "when": "I add it again",
+          "then": "its quantity increases instead of creating a duplicate line"
+        },
+        {
+          "given": "I try to add a quantity above the available stock of the variant",
+          "when": "I confirm",
+          "then": "the quantity is limited to the available stock and I see a message explaining the limit"
+        },
+        {
+          "given": "I am signed in on a different device",
+          "when": "I open the cart",
+          "then": "I see the same cart because the cart belongs to my account"
+        }
+      ]
+    },
+    {
+      "id": "US-008",
+      "title": "Manage the cart and see the running total",
+      "as_a": "signed-in customer",
+      "i_want": "to change quantities, remove items and see the running total",
+      "so_that": "I know what I will pay before checkout",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "my cart has items",
+          "when": "I open the cart",
+          "then": "I see each line with photo, name, size, color, unit price, quantity and line total, plus the subtotal in EUR including VAT"
+        },
+        {
+          "given": "I am viewing my cart",
+          "when": "I change a quantity or remove a line",
+          "then": "the line totals and subtotal update immediately, and a remove-from-cart event is recorded on removal (with analytics consent)"
+        },
+        {
+          "given": "a variant in my cart became out of stock or its price changed since I added it",
+          "when": "I open the cart",
+          "then": "I see the current price, and out-of-stock lines are flagged and must be removed or adjusted before checkout"
+        },
+        {
+          "given": "my cart is empty",
+          "when": "I open the cart",
+          "then": "I see an empty-state message with a link to browse products"
+        }
+      ]
+    },
+    {
+      "id": "US-009",
+      "title": "Enter delivery address and choose a delivery option",
+      "as_a": "signed-in customer",
+      "i_want": "to enter my delivery address and choose Standard or Express delivery",
+      "so_that": "my order arrives where and when I want",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I start checkout with a valid cart",
+          "when": "I reach the delivery step",
+          "then": "I must enter full name, street and house number, postal code, city and phone (optional), and the country is fixed to Germany"
+        },
+        {
+          "given": "I am on the delivery step",
+          "when": "I view delivery options",
+          "then": "I see Standard at EUR 4.90 (3-5 working days) and Express at EUR 9.90 (1-2 working days), using the current configured values"
+        },
+        {
+          "given": "my cart subtotal is EUR 60.00 or more",
+          "when": "I select Standard delivery",
+          "then": "the shipping cost is EUR 0.00"
+        },
+        {
+          "given": "my cart subtotal is EUR 60.00 or more",
+          "when": "I select Express delivery",
+          "then": "the shipping cost is EUR 9.90"
+        },
+        {
+          "given": "my cart subtotal is EUR 59.99",
+          "when": "I select Standard delivery",
+          "then": "the shipping cost is EUR 4.90"
+        },
+        {
+          "given": "I am on the review step",
+          "when": "I look at the order summary",
+          "then": "I see items, subtotal, shipping, total and the VAT amount included as a separate line, all in EUR"
+        }
+      ]
+    },
+    {
+      "id": "US-010",
+      "title": "Reserve stock when checkout starts",
+      "as_a": "customer",
+      "i_want": "the items I am buying to be held for me once I start checkout",
+      "so_that": "they are not sold to someone else while I pay",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "all items in my cart are in stock",
+          "when": "I start payment at checkout",
+          "then": "an order is created in status pending_payment, stock for each variant is reserved, and the reservation lasts 30 minutes"
+        },
+        {
+          "given": "a variant in my cart has less available stock than my quantity when I start checkout",
+          "when": "the reservation is attempted",
+          "then": "no order is created, nothing is reserved for any line, and I am told which items are unavailable so I can change my cart"
+        },
+        {
+          "given": "I only added items to the cart without starting checkout",
+          "when": "another customer checks out the same variant",
+          "then": "my cart does not hold any stock"
+        },
+        {
+          "given": "an order is pending_payment and 30 minutes have passed without successful payment",
+          "when": "the expiry job runs",
+          "then": "the order is set to cancelled, the reserved stock is released, and the customer sees it as Cancelled"
+        },
+        {
+          "given": "a payment fails or is cancelled by the customer",
+          "when": "the failure is received",
+          "then": "the reserved stock is released and the order is set to cancelled, or the customer can retry payment within the original 30-minute window"
+        }
+      ]
+    },
+    {
+      "id": "US-011",
+      "title": "Pay by card with Stripe",
+      "as_a": "customer",
+      "i_want": "to pay by card securely",
+      "so_that": "I can complete my purchase",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I have confirmed the order summary",
+          "when": "I tap pay",
+          "then": "the server creates a Stripe PaymentIntent for the order total in integer cents with currency EUR and the app confirms it with the Stripe SDK, so card data never touches our server"
+        },
+        {
+          "given": "I pay with a valid Stripe test card (for example 4242 4242 4242 4242)",
+          "when": "Stripe confirms the payment and sends the webhook",
+          "then": "the order status becomes paid, the stock reservation becomes a permanent stock reduction, and my cart is cleared"
+        },
+        {
+          "given": "I pay with a Stripe test card that is declined",
+          "when": "the payment fails",
+          "then": "I see a clear error, the order is not marked paid, and a payment-failed event is recorded (with analytics consent)"
+        },
+        {
+          "given": "the app confirms payment but the webhook has not arrived yet",
+          "when": "I am returned to the app",
+          "then": "I see a 'confirming payment' state, and the order is marked paid only when the webhook is processed"
+        },
+        {
+          "given": "the same Stripe webhook event is delivered more than once",
+          "when": "the server processes it",
+          "then": "the order is marked paid once and stock is reduced only once"
+        },
+        {
+          "given": "the webhook signature is invalid",
+          "when": "the server receives the request",
+          "then": "it is rejected and no order is changed"
+        }
+      ]
+    },
+    {
+      "id": "US-012",
+      "title": "See and receive an order confirmation",
+      "as_a": "customer",
+      "i_want": "an order confirmation on screen and by email after paying",
+      "so_that": "I know the order was placed and have a receipt",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "my payment succeeded",
+          "when": "the order is marked paid",
+          "then": "I see a confirmation screen with the order number, items, delivery address, delivery option and total"
+        },
+        {
+          "given": "my payment succeeded",
+          "when": "the order is marked paid",
+          "then": "a branded confirmation email is sent to my account email showing the order number, status, items with names and prices, VAT amount, shipping, total and delivery address"
+        },
+        {
+          "given": "an order has been placed",
+          "when": "the catalog price or product name later changes",
+          "then": "the order lines and the confirmation still show the name and unit price copied at purchase time"
+        }
+      ]
+    },
+    {
+      "id": "US-013",
+      "title": "View order history and order detail with status",
+      "as_a": "signed-in customer",
+      "i_want": "to see my past orders and the status of each",
+      "so_that": "I can follow my orders and reorder",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I have placed orders",
+          "when": "I open order history",
+          "then": "I see my orders, newest first, each with order number, date, total and one customer-facing status"
+        },
+        {
+          "given": "I open an order",
+          "when": "the detail page loads",
+          "then": "I see order lines (name, size, color, unit price, quantity), subtotal, shipping, VAT amount, total, delivery address, delivery option and the current status"
+        },
+        {
+          "given": "an order is in internal status pending_payment or paid and no admin has started preparing it",
+          "when": "I view it",
+          "then": "the status shown is Placed"
+        },
+        {
+          "given": "an admin has marked a paid order as being prepared",
+          "when": "I view it",
+          "then": "the status shown is Processing"
+        },
+        {
+          "given": "an order is fulfilled, delivered, cancelled or refunded",
+          "when": "I view it",
+          "then": "the status shown is Shipped, Delivered, Cancelled or Refunded respectively"
+        },
+        {
+          "given": "an unpaid order expired",
+          "when": "I view it",
+          "then": "the status shown is Cancelled"
+        },
+        {
+          "given": "I have no orders",
+          "when": "I open order history",
+          "then": "I see an empty-state message"
+        },
+        {
+          "given": "another customer's order number",
+          "when": "I try to access it",
+          "then": "access is denied and no data is shown"
+        }
+      ]
+    },
+    {
+      "id": "US-014",
+      "title": "Receive status emails",
+      "as_a": "customer",
+      "i_want": "emails when my order ships, is delivered, is cancelled or is refunded",
+      "so_that": "I am informed without opening the app",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "an admin sets an order to fulfilled",
+          "when": "the status is saved",
+          "then": "a Shipped email with branding, order number and status is sent to the customer"
+        },
+        {
+          "given": "an admin sets an order to delivered",
+          "when": "the status is saved",
+          "then": "a Delivered email with order number and status is sent"
+        },
+        {
+          "given": "an order is cancelled by an admin or by expiry of an unpaid order",
+          "when": "the status is saved",
+          "then": "a Cancelled email with order number and status is sent for admin cancellations and for paid orders, and no email is required for unpaid orders that expire before payment"
+        },
+        {
+          "given": "an admin marks an order as refunded",
+          "when": "the status is saved",
+          "then": "a Refund confirmation email with order number and status is sent"
+        },
+        {
+          "given": "an email fails to send",
+          "when": "the failure occurs",
+          "then": "the status change is not rolled back and the failure is logged for retry"
+        }
+      ]
+    },
+    {
+      "id": "US-015",
+      "title": "Read the returns policy",
+      "as_a": "customer",
+      "i_want": "to read the returns and refund policy and know how to contact support",
+      "so_that": "I know how to return an item",
+      "priority": "should",
+      "acceptance_criteria": [
+        {
+          "given": "I am in the app, signed in or not",
+          "when": "I open the returns policy page from the menu or order detail",
+          "then": "I see the static policy: unworn items with tags within 30 days of delivery, full refund of item price, return shipping paid by customer unless the item is faulty"
+        },
+        {
+          "given": "I am viewing the returns policy",
+          "when": "I look for how to start a return",
+          "then": "I see the support email address and no in-app return form"
+        }
+      ]
+    },
+    {
+      "id": "US-016",
+      "title": "Delete my account",
+      "as_a": "customer",
+      "i_want": "to delete my account and personal data",
+      "so_that": "I stay in control of my privacy",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am signed in",
+          "when": "I choose delete account and confirm by entering my password",
+          "then": "my profile, saved addresses and cart are deleted and I am signed out"
+        },
+        {
+          "given": "I deleted my account",
+          "when": "I try to sign in with the old credentials",
+          "then": "sign-in fails"
+        },
+        {
+          "given": "I deleted my account and had past orders",
+          "when": "the deletion completes",
+          "then": "personal data on orders is anonymized or removed except data the business is legally required to retain for accounting, and order records needed for accounting remain without linking to my identity"
+        },
+        {
+          "given": "I have an order with status pending_payment",
+          "when": "I request deletion",
+          "then": "I am told to wait or the pending order is cancelled and its stock released before deletion"
+        }
+      ]
+    },
+    {
+      "id": "US-017",
+      "title": "Track analytics events with consent",
+      "as_a": "product owner",
+      "i_want": "key shopping events tracked only with user consent",
+      "so_that": "we can measure conversion, abandonment, repeat purchases and registrations in compliance with GDPR",
+      "priority": "should",
+      "acceptance_criteria": [
+        {
+          "given": "I open the app for the first time",
+          "when": "the consent screen is shown",
+          "then": "I can accept or decline analytics, and declining does not block any shopping function"
+        },
+        {
+          "given": "I have declined analytics consent",
+          "when": "I use the app",
+          "then": "no analytics events are sent"
+        },
+        {
+          "given": "I have accepted analytics consent",
+          "when": "I perform app open, sign-up, sign-in, search with keyword, category view, product view, add to cart, remove from cart, checkout started, payment succeeded or failed, or order placed",
+          "then": "the corresponding event is recorded with a timestamp and a pseudonymous identifier, and no card data or password is included"
+        },
+        {
+          "given": "I previously gave consent",
+          "when": "I open settings and withdraw it",
+          "then": "event sending stops immediately"
+        }
+      ]
+    },
+    {
+      "id": "US-018",
+      "title": "Admin secure sign-in",
+      "as_a": "admin",
+      "i_want": "to sign in to the web back-office with a separate admin account",
+      "so_that": "only authorized staff can manage the shop",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "an admin account created by us",
+          "when": "I enter correct credentials in the back-office",
+          "then": "I am signed in and can access all back-office functions"
+        },
+        {
+          "given": "I am signed in with a shopper account",
+          "when": "I try to access the back-office or admin endpoints",
+          "then": "access is denied"
+        },
+        {
+          "given": "I am not signed in",
+          "when": "I open a back-office page or call an admin endpoint",
+          "then": "I am redirected to sign-in or receive an unauthorized response"
+        },
+        {
+          "given": "repeated failed admin sign-in attempts occur",
+          "when": "the attempts exceed the configured limit",
+          "then": "further attempts are temporarily blocked"
+        }
+      ]
+    },
+    {
+      "id": "US-019",
+      "title": "Manage products, photos, prices and stock manually",
+      "as_a": "admin",
+      "i_want": "to create and edit products, photos, prices, variants and stock in the back-office",
+      "so_that": "the app always shows correct and available items",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am signed in as admin",
+          "when": "I create a product with name, description, category, photos, and variants (size, color, price in EUR, stock quantity) and save",
+          "then": "the product appears in the app once set to active"
+        },
+        {
+          "given": "I enter a price in the back-office",
+          "when": "I save it",
+          "then": "it is stored as an integer in cents with currency code EUR, and prices with more than two decimals or negative values are rejected"
+        },
+        {
+          "given": "I edit a product's price or name",
+          "when": "I save",
+          "then": "the app shows the new value and existing orders keep the old copied name and price"
+        },
+        {
+          "given": "I correct stock for a single variant",
+          "when": "I save",
+          "then": "the new available quantity is used by the app immediately"
+        },
+        {
+          "given": "I deactivate a product",
+          "when": "customers browse",
+          "then": "it no longer appears in lists or search, while existing orders are unchanged"
+        },
+        {
+          "given": "I upload photos",
+          "when": "I upload unsupported file types or files above the size limit",
+          "then": "the upload is rejected with a clear message"
+        }
+      ]
+    },
+    {
+      "id": "US-020",
+      "title": "Import the product catalog from CSV",
+      "as_a": "admin",
+      "i_want": "to import the initial catalog of a few hundred products from a CSV or spreadsheet",
+      "so_that": "we can launch without typing every product",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "a CSV file in the documented template (product identifier, name, description, category, variant size, color, price, stock)",
+          "when": "I upload it in the back-office",
+          "then": "products and variants are created or updated and I see a summary of created, updated and failed rows"
+        },
+        {
+          "given": "a CSV contains rows with invalid data (missing name, non-numeric price, unknown category)",
+          "when": "I import it",
+          "then": "valid rows are imported, invalid rows are listed with row number and reason, and nothing is silently skipped"
+        },
+        {
+          "given": "a CSV contains a product that already exists by identifier",
+          "when": "I import it",
+          "then": "the existing product is updated and no duplicate is created"
+        },
+        {
+          "given": "a CSV includes prices",
+          "when": "it is imported",
+          "then": "prices are converted and stored as integer cents in EUR"
+        }
+      ]
+    },
+    {
+      "id": "US-021",
+      "title": "Import the daily stock spreadsheet",
+      "as_a": "admin",
+      "i_want": "to import a stock spreadsheet exported from our shop system each morning",
+      "so_that": "online stock reflects the physical stock and we do not oversell",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "a stock file with variant identifier and quantity",
+          "when": "I upload it",
+          "then": "the stock of matching variants is updated and I see a summary of updated and unmatched rows"
+        },
+        {
+          "given": "some variants have active reservations for orders in pending_payment",
+          "when": "a stock import is applied",
+          "then": "the imported quantity is treated as physical stock and active reservations are still respected so available stock never goes below zero"
+        },
+        {
+          "given": "a stock row contains a negative or non-integer quantity",
+          "when": "I import",
+          "then": "that row is rejected and reported"
+        },
+        {
+          "given": "a stock import finished",
+          "when": "I open the import history",
+          "then": "I see who ran it, when, and the result"
+        }
+      ]
+    },
+    {
+      "id": "US-022",
+      "title": "Process orders and update status with an audit trail",
+      "as_a": "admin",
+      "i_want": "to view orders and move them through statuses",
+      "so_that": "customers get their orders and see accurate status",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "orders exist",
+          "when": "I open the order list",
+          "then": "I can filter by status and see order number, customer, date, total and status"
+        },
+        {
+          "given": "an order is paid",
+          "when": "I mark it as being prepared",
+          "then": "the customer-facing status becomes Processing"
+        },
+        {
+          "given": "an order is paid or being prepared",
+          "when": "I mark it as fulfilled (shipped)",
+          "then": "the status becomes fulfilled, the customer sees Shipped and the shipped email is sent"
+        },
+        {
+          "given": "an order is fulfilled",
+          "when": "I mark it delivered",
+          "then": "the status becomes delivered and the delivered email is sent"
+        },
+        {
+          "given": "an order is pending_payment",
+          "when": "I try to mark it fulfilled or delivered",
+          "then": "the action is refused because unpaid orders cannot be fulfilled"
+        },
+        {
+          "given": "any status change is made",
+          "when": "it is saved",
+          "then": "the audit log records the admin, previous status, new status and timestamp"
+        }
+      ]
+    },
+    {
+      "id": "US-023",
+      "title": "Cancel an order",
+      "as_a": "admin",
+      "i_want": "to cancel an order that has not been shipped",
+      "so_that": "stock is released and the customer is informed",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "an order is pending_payment, paid or being prepared",
+          "when": "I cancel it and confirm",
+          "then": "the status becomes cancelled, reserved or committed stock is released back to the variants, and the Cancelled email is sent"
+        },
+        {
+          "given": "an order is fulfilled or delivered",
+          "when": "I try to cancel it",
+          "then": "cancel is not offered and the order follows the refund process instead"
+        },
+        {
+          "given": "I cancel a paid order",
+          "when": "the cancellation is saved",
+          "then": "the back-office shows that a refund is still required in Stripe and the order can later be marked refunded"
+        },
+        {
+          "given": "an order is cancelled",
+          "when": "the action is saved",
+          "then": "the audit log records the admin and timestamp"
+        }
+      ]
+    },
+    {
+      "id": "US-024",
+      "title": "Record refunds",
+      "as_a": "admin",
+      "i_want": "to mark an order as refunded after issuing the refund in Stripe",
+      "so_that": "the customer and our records show the refund",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "a paid, fulfilled, delivered or cancelled-but-paid order and a refund issued manually in Stripe",
+          "when": "I mark the order as refunded in the back-office",
+          "then": "the status becomes refunded, the customer sees Refunded and a refund confirmation email is sent"
+        },
+        {
+          "given": "an order was never paid",
+          "when": "I try to mark it refunded",
+          "then": "the action is refused"
+        },
+        {
+          "given": "I mark an order refunded",
+          "when": "it is saved",
+          "then": "I can enter an optional note such as partial refund amount in cents, and the audit log records the admin and timestamp"
+        }
+      ]
+    },
+    {
+      "id": "US-025",
+      "title": "Handle late payment after an order expired",
+      "as_a": "admin",
+      "i_want": "to be alerted when a payment arrives for an expired order",
+      "so_that": "the team can check stock and fulfil or refund it",
+      "priority": "should",
+      "acceptance_criteria": [
+        {
+          "given": "an order was cancelled by expiry",
+          "when": "a successful payment webhook arrives for it",
+          "then": "the order is flagged 'late payment - needs review' in the back-office and is not silently fulfilled"
+        },
+        {
+          "given": "a flagged order exists",
+          "when": "I review it",
+          "then": "I see whether stock is currently available and can either reinstate it as paid (reducing stock) or cancel and refund it manually in Stripe"
+        }
+      ]
+    },
+    {
+      "id": "US-026",
+      "title": "Configure shipping prices and free-shipping threshold",
+      "as_a": "admin",
+      "i_want": "to change delivery prices and the free-shipping threshold without a new app release",
+      "so_that": "we can adjust offers quickly",
+      "priority": "should",
+      "acceptance_criteria": [
+        {
+          "given": "I am signed in as admin",
+          "when": "I change the Standard price, Express price or free-shipping threshold (in cents) and save",
+          "then": "new checkouts use the new values with no app update"
+        },
+        {
+          "given": "an order was placed before the change",
+          "when": "I view that order",
+          "then": "its shipping cost is unchanged"
+        },
+        {
+          "given": "I enter a negative or non-integer value",
+          "when": "I save",
+          "then": "the value is rejected"
+        }
+      ]
+    }
+  ],
+  "non_functional_requirements": [
+    "Platforms: Android and iOS from the first release using a single shared codebase; Android is built and tested first, iOS follows in the same release. Minimum supported OS versions (for example Android 8.0+ and iOS 14+) to be confirmed at kickoff. Common phone sizes are supported in portrait; tablets and landscape are not required. The back-office is a responsive web app for current desktop browsers (Chrome, Firefox, Safari, Edge).",
+    "Performance: on a mid-range phone over a 4G connection, cold app start to an interactive home screen within 3 seconds, category, search and product screens display content within 2 seconds at the 90th percentile, API responses under 500 ms at the 95th percentile for the catalog of a few hundred products. Images are served in optimized sizes and lazy-loaded.",
+    "Reliability: checkout and payment handling are idempotent; payment webhooks can be safely re-delivered; the expiry job releases stock for unpaid orders within 1 minute after the 30-minute window; stock can never become negative and concurrent checkouts cannot oversell the same variant.",
+    "Money handling: all prices and amounts are stored and calculated as integer minor units (cents) with ISO 4217 currency code EUR, never floats. Prices shown include VAT and the VAT amount is shown as a line on the order summary and confirmation email. Order lines copy product name and unit price at purchase time.",
+    "Payments and security: Stripe PaymentIntents in test mode; the server creates the intent, the app confirms it with the Stripe SDK, and a Stripe webhook marks the order paid; webhook signatures are verified. Card data never touches or is stored on our servers or logs. Switching to Stripe live mode requires only a configuration change of keys, and go-live happens only after the full test is passed.",
+    "Security: all traffic over TLS; passwords hashed with bcrypt or argon2; short-lived access tokens with refresh handling; server-side authorization so customers can only read and change their own cart, orders and data; admin endpoints restricted to admin accounts; rate limiting on sign-in and password reset; input validation on all endpoints; secrets kept out of source control; protection against common OWASP Top 10 risks; admin actions audit-logged.",
+    "Privacy and GDPR: store the minimum personal data; explicit consent before analytics tracking; account deletion supported from within the app; a privacy policy is accessible in the app; data retention for accounting records documented; personal data not written to logs; analytics data pseudonymous.",
+    "Accessibility: support system font scaling, minimum touch target of 44x44 points, sufficient color contrast (WCAG 2.1 AA), screen reader labels on interactive elements and images (VoiceOver and TalkBack), and errors conveyed by text and not color alone.",
+    "Localization: a single language (English), a single currency (EUR), a single country (Germany); text is kept in resource files to allow later localization; dates and numbers formatted for the Germany region.",
+    "Email: transactional emails (order confirmation, shipped, delivered, cancelled, refund confirmation, password reset) are branded, simple, sent within 1 minute of the trigger, and show order number and status where applicable.",
+    "Quality and testability: automated unit, API and integration tests cover the core journey (sign-up, browse, cart, checkout, payment, order status); OpenAPI documentation is kept current for the API; staging environment is available for acceptance testing with Stripe test mode.",
+    "Observability: server errors, failed payments, failed emails and failed imports are logged and monitored; crash reporting is enabled on the apps (respecting privacy rules).",
+    "Configuration: delivery prices and free-shipping threshold are configurable without an app release; the order reservation window is set to 30 minutes via server configuration; Stripe keys are environment configuration."
+  ],
+  "out_of_scope": [
+    "Guest checkout (carts and orders belong to signed-in users only)",
+    "Social sign-in (Google, Apple); therefore Sign in with Apple is not required",
+    "Payment methods other than Stripe card payments (Apple Pay, Google Pay and PayPal are deferred, with Apple Pay and Google Pay first)",
+    "Push notifications (email only)",
+    "In-app returns or return requests (customers contact support by email; refunds are handled manually in Stripe)",
+    "Automated refunds or partial refunds from within the back-office (recorded manually after issuing in Stripe)",
+    "PDF invoices (the confirmation email is the receipt; invoices are issued manually on request)",
+    "Multiple languages, multiple currencies or shipping outside Germany",
+    "Wishlists or favorites, discount codes, gift cards and loyalty programs",
+    "Product reviews and ratings, recommendations and personalization",
+    "Live integration with physical shop or stock systems (daily stock spreadsheet import only)",
+    "Multiple admin roles and permissions (one full-access admin role only)",
+    "Real-time order tracking with carrier integration or tracking numbers",
+    "Reserving stock when items are added to the cart (reserved only when checkout starts)",
+    "Live mode payments before the full test is passed",
+    "Social sharing, in-app chat support and customer support tooling",
+    "Tablet-optimized layouts and web storefront"
+  ],
+  "assumptions": [
+    "Country is Germany, currency EUR, language English; the brief does not name the country and Germany was chosen by the customer.",
+    "Prices include VAT; the VAT amount on the order summary and in emails is calculated from the gross price using the applicable German rate (assumed 19% standard rate for clothing and accessories), configurable in one place; the exact rate and reduced-rate cases are to be confirmed with the customer's accountant.",
+    "The free-shipping threshold of EUR 60 is compared against the cart subtotal (items only, including VAT), before shipping, and Express is never free.",
+    "Internal order statuses are pending_payment, paid, fulfilled, delivered, cancelled and refunded. Processing is a customer-facing status for a paid order that an admin has started preparing; it is implemented as an admin-set marker on the paid order and not as an additional payment state.",
+    "Customer-facing mapping: Placed = pending_payment or paid (not yet picked up), Processing = paid and picked up by an admin, Shipped = fulfilled, Delivered = delivered, Cancelled = cancelled (including expired unpaid orders), Refunded = refunded.",
+    "Stock is tracked per variant (size and color). It is reserved for 30 minutes when checkout starts and permanently reduced when the order is paid; failed, cancelled or expired payments release the reservation. The customer's statement that stock is reduced when an order is paid is reconciled with the reservation model in this way.",
+    "Cancelling a paid order releases its stock and sends the Cancelled email, and the refund is issued manually in Stripe, after which the admin marks the order Refunded.",
+    "Orders can be cancelled by an admin only before they are fulfilled; after shipping, the return and refund policy applies.",
+    "Payment after an order has expired is a rare exception handled manually by the team (check stock, then fulfil or refund).",
+    "The first release uses Stripe test mode; moving to live mode is a configuration change made only after the full test is passed.",
+    "Product and stock data are loaded through CSV or spreadsheet import in the back-office using a documented template; the back-office is the single source of truth for what the app shows; the stock spreadsheet is imported once a day in the morning.",
+    "Admin accounts are created by the project team (no self-service admin sign-up), and the admin sign-in is secure with a password policy; second-factor authentication is desirable but not required for v1.",
+    "Minimum password length is 8 characters; password reset links are valid for 60 minutes and single use; these values can be changed at kickoff.",
+    "Email delivery uses a transactional email provider to be chosen by the development team; sending an email does not block a status change.",
+    "Content owners: product content (photos, descriptions) and customer support ownership after launch are internal staff roles still to be named by the customer.",
+    "Target launch is around the end of December 2026, about 3 months from the current date (30 September 2026), delivered in phases; no fixed budget figure yet.",
+    "Success metrics in priority order are conversion rate, cart abandonment and checkout drop-off, repeat purchase rate and registered accounts; downloads are secondary.",
+    "The returns policy (unworn items with tags within 30 days of delivery, full item price refund, return shipping paid by customer unless faulty) is shown as static text; the exact wording and support email address are supplied by the customer.",
+    "Legal pages such as privacy policy, terms and imprint required in Germany are supplied by the customer and displayed in the app as static pages."
+  ]
+}

@@ -12,6 +12,8 @@ import {
   stageProgress,
   slugProjectName,
   buildClientBrief,
+  buildProgressFooterLine,
+  fzCurrentWorkLabel,
 } from '../src/phaseMap.js';
 
 const discoveryActive = {
@@ -75,6 +77,51 @@ test('slugProjectName creates kebab-case slug', () => {
 test('buildClientBrief appends attachment names', () => {
   const brief = buildClientBrief('Hello', [{ name: 'req.pdf' }]);
   assert.match(brief, /req\.pdf/);
+});
+
+test('buildProgressFooterLine shows work item counts for FZ runs', () => {
+  const line = buildProgressFooterLine(
+    {
+      factory_engine: 'fz',
+      build_progress: { total: 12, done: 7, remaining: 5 },
+    },
+    { estimatedMinutes: 90 },
+  );
+  assert.equal(line, 'Work items 7/12 done · 5 left');
+});
+
+test('buildProgressFooterLine shows complete counts without phase noise', () => {
+  const line = buildProgressFooterLine(
+    {
+      status: 'completed',
+      factory_engine: 'fz',
+      phase: 'complete',
+      build_progress: {
+        total: 12,
+        done: 12,
+        remaining: 0,
+        milestones: [
+          { id: 'M1', done: 6, total: 6 },
+          { id: 'M2', done: 6, total: 6 },
+        ],
+      },
+    },
+    {},
+  );
+  assert.match(line, /12\/12 complete/);
+  assert.match(line, /M1 6\/6/);
+  assert.doesNotMatch(line, /Phase:/);
+});
+
+test('fzCurrentWorkLabel prefers active work item', () => {
+  const label = fzCurrentWorkLabel({
+    build_progress: {
+      active_work_item_id: 'WI-009',
+      active_work_item_title: 'Catalog home API',
+      qa_in_progress: false,
+    },
+  });
+  assert.equal(label, 'WI-009: Catalog home API');
 });
 
 test('previewReadyFromState is true when post_deploy_passed', () => {

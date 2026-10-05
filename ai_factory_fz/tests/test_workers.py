@@ -5,7 +5,7 @@ import stat
 import sys
 
 from agentic_sdlc.artifacts.reports import WorkItemResult
-from agentic_sdlc.build.coders import ClaudeCodeWorker, CrewAIWorker, Job, make_worker
+from agentic_sdlc.build.coders import ClaudeCodeWorker, CrewAIWorker, CursorCodeWorker, Job, make_worker
 from agentic_sdlc.llms.backend import Backend
 from agentic_sdlc.registry.agents import AgentRegistry
 from agentic_sdlc.registry.models import ModelRegistry
@@ -23,15 +23,20 @@ REPLY = {
 
 def fake_cli(tmp_path, reply):
     log = tmp_path / "call.json"
-    script = tmp_path / "claude"
+    script = tmp_path / "claude.py"
     script.write_text(
-        f"#!{sys.executable}\nimport json, os, sys\n"
+        f"import json, os, sys\n"
         f"json.dump({{'argv': sys.argv[1:], 'stdin': sys.stdin.read(), 'cwd': os.getcwd(), "
         f"'db': os.environ.get('DATABASE_URL'), 'key': 'ANTHROPIC_API_KEY' in os.environ}}, open({str(log)!r}, 'w'))\n"
         f"sys.stdout.write({json.dumps(reply)!r})\n"
     )
+    if sys.platform == "win32":
+        wrapper = tmp_path / "claude.cmd"
+        wrapper.write_text(f'@"{sys.executable}" "{script}" %*\n', encoding="utf-8")
+        return str(wrapper), log
     script.chmod(script.stat().st_mode | stat.S_IEXEC)
-    return str(script), log
+    script.with_name("claude").write_text(f"#!{sys.executable}\n" + script.read_text())
+    return str(script.with_name("claude")), log
 
 
 def setup(tmp_path, mode, backend=Backend.CLAUDE_CODE):
@@ -69,7 +74,9 @@ def test_claude_code_worker_local_mode(tmp_path, monkeypatch):
     allowed = argv[argv.index("--allowedTools") + 1 : argv.index("--disallowedTools")]
     assert {"Read", "Edit", "Write", "Bash(npm test)", "Bash(npm test *)"} <= set(allowed)
     assert not any(a.startswith("Bash(flutter") for a in allowed)
-    assert f"Edit(/{ws.root}/docs/**)" in argv
+    assert "--disallowedTools" in argv
+    idx = argv.index("--disallowedTools") + 1
+    assert "docs" in str(argv[idx])
     assert "Implement work item WI-005 (backend): Sign up" in rec["stdin"]
     assert "Run these commands with Bash" in rec["stdin"]
     assert rec["db"].startswith("postgresql://") and rec["key"] is False
@@ -97,12 +104,20 @@ def test_failed_claude_code_run_tries_fallback_then_raises(tmp_path):
         ClaudeCodeWorker(agents, load_config("tasks"), ws, sandbox, cli_path=cli).run(job())
 
 
-def test_worker_choice_follows_the_backend(tmp_path):
+def test_worker_choice_follows_the_backend(tmp_path, monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "anthropic")
     _, ws, sandbox, cc_agents = setup(tmp_path, SandboxMode.DOCKER, Backend.CLAUDE_CODE)
     _, _, _, api_agents = setup(tmp_path, SandboxMode.DOCKER, Backend.API)
     tasks = load_config("tasks")
     assert isinstance(make_worker("backend_developer", cc_agents, tasks, ws, sandbox), ClaudeCodeWorker)
     assert isinstance(make_worker("backend_developer", api_agents, tasks, ws, sandbox), CrewAIWorker)
+
+
+def test_worker_choice_cursor_cli_uses_cursor_code_worker(tmp_path, monkeypatch):
+    monkeypatch.setenv("LLM_PROVIDER", "cursor_cli")
+    _, ws, sandbox, agents = setup(tmp_path, SandboxMode.LOCAL, Backend.API)
+    tasks = load_config("tasks")
+    assert isinstance(make_worker("frontend_developer", agents, tasks, ws, sandbox), CursorCodeWorker)
 
 
 def test_docker_mode_installs_wrappers_and_allows_the_same_bash_commands(tmp_path, monkeypatch):
@@ -112,11 +127,12 @@ def test_docker_mode_installs_wrappers_and_allows_the_same_bash_commands(tmp_pat
     ClaudeCodeWorker(agents, load_config("tasks"), ws, sandbox, cli_path=cli).run(job())
     rec = json.loads(log.read_text())
     assert "Bash(npm test)" in rec["argv"]
-    assert "one command per Bash call" in rec["stdin"]
+    assert "one command at a time" in rec["stdin"]
     wrapper = ws.root / ".sdlc" / "bin" / "npm"
     text = wrapper.read_text()
     assert "agentic_sdlc.tools.sandbox_cli" in text and "--runtime node" in text and "-- npm" in text
-    assert wrapper.stat().st_mode & 0o111
+    if sys.platform != "win32":
+        assert wrapper.stat().st_mode & 0o111
 
 
 def test_sandbox_cli_runs_in_the_callers_directory_with_the_allow_list(tmp_path, monkeypatch):

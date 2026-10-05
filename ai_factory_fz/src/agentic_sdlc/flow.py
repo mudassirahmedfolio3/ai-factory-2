@@ -14,6 +14,7 @@ from pydantic import PrivateAttr
 
 from agentic_sdlc.build.coders import Worker, make_worker
 from agentic_sdlc.build.loop import BuildConfig, Builder
+from agentic_sdlc.build.sync import sync_build_with_backlog
 from agentic_sdlc import preflight
 from agentic_sdlc.crews import design, discovery, estimation, planning
 from agentic_sdlc.guardrails import agents as agent_guardrails
@@ -29,6 +30,7 @@ from agentic_sdlc.scope import Scope
 from agentic_sdlc.settings import load_config
 from agentic_sdlc.state import GateDecision, ProjectState
 from agentic_sdlc.tools.registry import build_tool_resolver
+from agentic_sdlc.env_toolchain import apply_toolchain_path
 from agentic_sdlc.tools.sandbox_exec import SandboxRunner, sandbox_mode
 from agentic_sdlc.workspace import Workspace
 
@@ -51,13 +53,14 @@ class Deps:
 
 
 def default_deps(state: ProjectState) -> Deps:
+    apply_toolchain_path()
     profile = Profile.load(state.profile)
     workspace = Workspace.create(state.run_id)
     pipeline = load_config(state.pipeline)
     build_cfg = pipeline.get("build", {}) or {}
     sandbox = SandboxRunner(workspace, profile.sandbox, sandbox_mode(build_cfg.get("sandbox", "docker")))
     agents = AgentRegistry.from_config(profile, build_tool_resolver(workspace, sandbox), pipeline.get("models"))
-    runner = TaskRunner(agents)
+    runner = TaskRunner(agents, workspace=workspace)
     timeout = build_cfg.get("agent_timeout_s", 3600)
     release_cfg = pipeline.get("release", {}) or {}
     staging = Staging(workspace, profile, sandbox, port=release_cfg.get("staging_port", 3100),
@@ -317,6 +320,7 @@ class SDLCFlow(Flow[ProjectState]):
 
     @router("build_requested")
     def build_phase(self) -> Literal["release_requested", "run_finished", "stopped"]:
+        sync_build_with_backlog(self.state)
         done_before = {w for w, p in self.state.build.items.items() if p.status == "done"}
         if self._can_continue():
             Builder(

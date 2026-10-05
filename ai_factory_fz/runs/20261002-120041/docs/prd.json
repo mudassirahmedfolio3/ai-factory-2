@@ -1,0 +1,135 @@
+{
+  "title": "Laptop Store Flutter MVP (M1 Speed Demo) — Product Requirements Document",
+  "summary": "Build the smallest demo-ready Flutter e-commerce MVP for a laptop storefront so shoppers can browse a local mock catalog of mid-to-premium laptops (including New DELL XPS 13 9300 Laptop at $1499.99), open a product detail screen, and optionally manage an in-memory cart with quantity updates. M1 is Android-first, mobile-first, and runs immediately on an emulator with no auth, payments, checkout, or backend API dependency. Catalog is seeded locally (~12–15 SKUs across Dell, Apple, HP, Lenovo). Prices are integer minor units (cents) with ISO 4217 currency code USD. Later releases may add guest/registered checkout, Stripe PaymentIntents, promo codes, and national shipping; those are explicitly out of scope for this sprint.",
+  "personas": [
+    {
+      "name": "Laptop Shopper (Demo Browser)",
+      "description": "A professional or student evaluating mid-to-premium laptops who opens the Flutter demo app on Android to browse SKUs, compare key specs and prices, and confirm the storefront feels real enough to validate demand.",
+      "goals": [
+        "Find relevant laptops quickly via browse and search/filter cues on the product list",
+        "Inspect a single laptop’s name, price, and key details on a product detail screen",
+        "Optionally add items and adjust quantities in a simple in-memory cart without creating an account"
+      ]
+    },
+    {
+      "name": "Demo Stakeholder / Product Owner",
+      "description": "Business owner validating the laptop vertical with a one-sprint, releasable Flutter increment that runs on an emulator without waiting on backend or payment integration.",
+      "goals": [
+        "Ship a focused runnable demo with product list and product detail in one sprint",
+        "Prove catalog UX with a seeded 12–15 SKU laptop catalog including the Dell XPS 13 flagship",
+        "Defer auth, payments, and checkout until after browsing conversion is demonstrated"
+      ]
+    }
+  ],
+  "user_stories": [
+    {
+      "id": "US-001",
+      "title": "Browse seeded laptop catalog",
+      "as_a": "laptop shopper",
+      "i_want": "to see a mobile product list of demo laptops loaded from a local mock catalog",
+      "so_that": "I can scan available machines (including New DELL XPS 13 9300 Laptop at $1499.99) without waiting for a backend",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the Flutter app is launched on an Android emulator with the seeded local mock catalog available",
+          "when": "I open the product list (browse) screen",
+          "then": "I see between 12 and 15 laptop SKUs across Dell, Apple, HP, and Lenovo, each showing at least product name and price displayed from integer minor units (cents) with currency code USD (e.g. New DELL XPS 13 9300 Laptop shown as $1499.99 from 149999 cents)"
+        },
+        {
+          "given": "the product list is displayed",
+          "when": "I use the catalog search and/or filter controls on the list screen",
+          "then": "the visible results update to match my query or selected filters (e.g. brand or price range) and an empty-result state is shown when nothing matches"
+        },
+        {
+          "given": "the mock catalog fails to load or is empty",
+          "when": "I open the product list screen",
+          "then": "I see a clear error or empty-state message and can retry or return without the app crashing"
+        }
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "View laptop product detail",
+      "as_a": "laptop shopper",
+      "i_want": "to open a product detail screen for a selected laptop",
+      "so_that": "I can evaluate name, price, and key listing details before deciding to add it to cart",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am on the product list and a laptop SKU is visible",
+          "when": "I tap that laptop",
+          "then": "I navigate to a product detail screen that shows the same product name and unit price (integer cents + USD) as on the list, plus key demo attributes (e.g. brand, short description or specs summary)"
+        },
+        {
+          "given": "I am on a product detail screen",
+          "when": "I use the back or navigation control to leave detail",
+          "then": "I return to the product list with my prior browse context preserved where the app supports it"
+        },
+        {
+          "given": "I open the flagship demo SKU New DELL XPS 13 9300 Laptop",
+          "when": "the product detail screen finishes loading",
+          "then": "the screen shows price equivalent to $1499.99 (149999 cents, USD) and does not display placeholder or mismatched catalog data for that SKU"
+        }
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Manage simple in-memory cart quantities",
+      "as_a": "laptop shopper",
+      "i_want": "to add a laptop from detail to an in-memory cart and update quantities",
+      "so_that": "I can rehearse the path toward purchase without auth or checkout in this sprint",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "I am on a product detail screen for an in-stock demo SKU",
+          "when": "I choose to add the product to the cart",
+          "then": "the in-memory cart contains that product with quantity at least 1 and a simple cart view or indicator reflects the updated count"
+        },
+        {
+          "given": "my in-memory cart already contains a laptop line",
+          "when": "I increase or decrease the quantity for that line (and decrease is allowed down to removing the line at quantity 0)",
+          "then": "the cart totals and line quantities update immediately in memory without calling a backend API"
+        },
+        {
+          "given": "I have items in the in-memory cart and I fully restart the app process",
+          "when": "the app launches again",
+          "then": "the cart may be empty (persistence is not required in M1) and the app still launches to the product list without errors"
+        }
+      ]
+    }
+  ],
+  "non_functional_requirements": [
+    "Android-first Flutter 3.x app must launch on an emulator and reach the product list within a few seconds using local/mock catalog data only (no required network for M1 browse).",
+    "Product prices must be stored and handled as integer minor units (cents) with ISO 4217 currency code USD; never floating-point money types in app models.",
+    "Mobile-first UX: product list and product detail must be usable on a typical phone viewport without horizontal scrolling of primary content.",
+    "UI style tokens may be chosen by the implementing agent without stakeholder style approval gates.",
+    "Accessibility: interactive controls (list items, add-to-cart, quantity steppers, search/filter) must have visible labels or semantics suitable for Flutter accessibility testing.",
+    "Performance: scrolling the seeded 12–15 SKU list must remain smooth on a mid-range Android emulator; catalog load from local assets/mocks must not block the UI thread.",
+    "Privacy/security for M1: no account credentials, no card data, and no personal data collection; do not introduce auth or Stripe flows in this milestone.",
+    "Supported platform for M1 demo: Android (primary). iOS may compile but is not a release gate for this sprint.",
+    "Reliability: navigation between list, detail, and optional cart must not crash on missing images or absent optional fields; degrade with placeholders."
+  ],
+  "out_of_scope": [
+    "User authentication, registration, guest checkout accounts, JWT sessions, password reset, and email verification",
+    "Stripe PaymentIntents, card entry, Apple Pay / Google Pay / PayPal, webhooks, and any payment confirmation",
+    "Checkout, shipping address, tax, national shipping rates, order creation, order confirmation email, order history, and order tracking",
+    "Promo codes (WELCOME10, SAVE50, LAPTOP15) and discount application",
+    "Backend NestJS API, Prisma/PostgreSQL, OpenAPI-driven remote catalog for M1 (local mock only); except optional non-counting health/docs if a stub exists later",
+    "Server-side stock reservation, admin inventory UI, warehouse integration",
+    "Guest carts tied to users, persistent cart across restarts, and multi-device cart sync",
+    "Returns/warranty enforcement workflows beyond static copy that may appear later at checkout",
+    "International shipping and multi-currency",
+    "More than 3 app screens (product list, product detail, optional simple cart only)",
+    "More than 3 user stories, more than 1 milestone, and work items requiring human or stakeholder approval gates"
+  ],
+  "assumptions": [
+    "M1 SPEED DEMO scope rules override the fuller product brief: deliver browse + detail first; in-memory cart is allowed; auth, payments, checkout, and backend API work are deferred if they slow delivery.",
+    "Catalog is a local/mock seed of about 12–15 laptop SKUs across Dell, Apple, HP, and Lenovo, including New DELL XPS 13 9300 Laptop at 149999 cents USD.",
+    "Stock display may be static per mock variant for demo realism; true reservation and release on payment failure are postponed to a later release with checkout.",
+    "Cart belongs to the device session in memory only for M1; signed-in user carts and guest checkout from the domain rules apply in a later release when auth is introduced.",
+    "One milestone only: runnable Flutter Android demo with product list, product detail, and optional in-memory cart.",
+    "At most 4 API operations in any contract for adjacent work; infrastructure /health and /api/docs-json do not count; M1 prefers zero business API dependency.",
+    "Home-country national shipping, cards-only Stripe, promo rules, 14-day returns policy, and manufacturer warranty copy are accepted product decisions for future checkout scope, not M1 implementation.",
+    "Style and visual tokens are agent-selectable; no style-approval work items will be created."
+  ]
+}

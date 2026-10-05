@@ -1,0 +1,259 @@
+{
+  "title": "beauty-mvp: Mobile Shopping Demo (Browse, Product Detail, Cart) - Product Requirements Document",
+  "summary": "beauty-mvp is a simple, attractive Flutter mobile app (iOS and Android) where beauty shoppers browse a sample catalog of about 20-30 products, view clear product details and add items to an in-session cart. The first release is a demo for stakeholders, investors and partners. It proves the core shopping experience before the business invests in full checkout, payments, accounts and a live backend. Scope is limited to three screens: Browse (with category filter), Product Detail and Cart. Product data comes from a bundled local JSON file plus image files supplied by the business. All prices are in USD and all text is in English. The cart lives in memory only and is lost when the app closes. The cart ends at the total, with no checkout entry point, placeholder button, accounts, search, sorting, variants, stock display, promotions, tax, shipping or analytics. Prices are held as integer cents with currency code USD and displayed as dollars, never as floats. The data model is kept easy to extend so the codebase can later grow into a full ecommerce app without a rewrite. Target delivery is roughly 4-6 weeks, in 2 milestones: (1) style proposal approval, catalog loading, Browse and category filter, Product Detail; (2) Cart, polish, accessibility and performance checks, demo build on an iPhone and a mid-range Android phone.",
+  "personas": [
+    {
+      "name": "Beauty shopper",
+      "description": "Woman or man aged 18-40 who buys skincare, makeup and haircare products and is comfortable shopping on their phone. Often an existing customer of the online and in-store beauty business.",
+      "goals": [
+        "Quickly browse the catalog and find products in a category of interest",
+        "Understand a product clearly (image, brand, price, description, ingredients or usage notes) before adding it to the cart",
+        "Collect items in a cart and see an accurate total"
+      ]
+    },
+    {
+      "name": "Existing customer",
+      "description": "Current customer of the online and in-store beauty business who wants a faster, more convenient way to browse the catalog on a phone.",
+      "goals": [
+        "Browse the familiar catalog more conveniently than on the website or in store",
+        "See clear prices and product information",
+        "Keep track of items of interest in a cart while using the app"
+      ]
+    },
+    {
+      "name": "Internal stakeholder, investor or partner",
+      "description": "Person who sees the first demo and judges the quality of the experience and the brand presentation.",
+      "goals": [
+        "See a polished, premium, beauty-oriented app running on both iOS and Android",
+        "Walk through browse, detail and cart smoothly without errors or dead ends",
+        "Gain confidence that the codebase can grow into a full ecommerce app"
+      ]
+    }
+  ],
+  "user_stories": [
+    {
+      "id": "US-001",
+      "title": "Browse the product catalog",
+      "as_a": "beauty shopper",
+      "i_want": "to scroll through a grid of products showing image, name, brand and price",
+      "so_that": "I can quickly see what the brand offers",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the app is launched and the bundled catalog of 20-30 products loads successfully",
+          "when": "the Browse screen is displayed",
+          "then": "a scrollable grid shows every product in the All view, and each tile shows the product image, name, brand and price formatted in USD (for example $24.50)"
+        },
+        {
+          "given": "the Browse screen is displayed",
+          "when": "I scroll to the end of the grid",
+          "then": "all products in the catalog are reachable by scrolling alone, with no search field or sort control present"
+        },
+        {
+          "given": "a product image is slow to load or fails to load",
+          "when": "its tile is displayed",
+          "then": "a placeholder is shown in the image area, the name, brand and price remain visible, and the app does not crash or block scrolling"
+        },
+        {
+          "given": "the catalog file cannot be read or parsed",
+          "when": "the app launches",
+          "then": "a friendly error message with a retry action is shown instead of a blank screen or a crash"
+        }
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Filter products by category",
+      "as_a": "beauty shopper",
+      "i_want": "to filter the product grid by Skincare, Makeup, Haircare or Fragrance",
+      "so_that": "I can focus on the type of product I am interested in",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the Browse screen is displayed",
+          "when": "I look at the category filter",
+          "then": "the options All, Skincare, Makeup, Haircare and Fragrance are visible, All is selected by default, and the selected option is clearly highlighted"
+        },
+        {
+          "given": "the Browse screen is displayed with All selected",
+          "when": "I select a category such as Makeup",
+          "then": "only products whose category is Makeup are shown, and each product appears in exactly one category"
+        },
+        {
+          "given": "a category is selected",
+          "when": "I select All",
+          "then": "the full catalog is shown again"
+        },
+        {
+          "given": "I select a category and open a product then return to Browse",
+          "when": "the Browse screen is displayed again",
+          "then": "the previously selected category is still applied"
+        }
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "View product details",
+      "as_a": "beauty shopper",
+      "i_want": "to open a product and see a large image, name, brand, price, short description and key ingredients or usage notes",
+      "so_that": "I can decide whether to buy it",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the Browse screen is displayed",
+          "when": "I tap a product tile",
+          "then": "the Product Detail screen opens showing a large product image, name, brand, price in USD, short description, key ingredients or usage notes, a quantity selector and an Add to Cart button"
+        },
+        {
+          "given": "the Product Detail screen is displayed",
+          "when": "I use the back control or the system back gesture",
+          "then": "I return to the Browse screen at the same scroll position and with the same category filter"
+        },
+        {
+          "given": "the Product Detail screen is displayed",
+          "when": "I look for stock information, variant selectors (shade or size), reviews or wishlist controls",
+          "then": "none are shown, because every product is a single, always-available purchasable item"
+        }
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Add a product to the cart with a quantity",
+      "as_a": "beauty shopper",
+      "i_want": "to choose a quantity and add the product to my cart",
+      "so_that": "I can collect the items I want",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the Product Detail screen is displayed",
+          "when": "it first opens",
+          "then": "the quantity selector shows 1, the minimum allowed quantity, and the decrease control is disabled at 1"
+        },
+        {
+          "given": "the quantity selector shows 10",
+          "when": "I try to increase it further",
+          "then": "the quantity stays at 10 and the increase control is disabled, because the maximum per cart line is 10"
+        },
+        {
+          "given": "the cart does not contain the product and I have selected a quantity of 3",
+          "when": "I tap Add to Cart",
+          "then": "a cart line is created with quantity 3, confirmation feedback is shown, and a cart item count indicator reflects the new total number of units in the cart"
+        },
+        {
+          "given": "the cart already contains the product with quantity 8",
+          "when": "I add 5 more of the same product",
+          "then": "the existing cart line is updated instead of a duplicate line being created, the quantity is capped at 10, and a message tells me the maximum per line is 10"
+        }
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "View and manage the cart",
+      "as_a": "beauty shopper",
+      "i_want": "to see my cart items, change quantities, remove items and see subtotals and an overall total",
+      "so_that": "I know exactly what I have selected and what it costs",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the cart contains items",
+          "when": "I open the Cart screen",
+          "then": "each line shows the product image, name, brand, unit price, quantity and line subtotal (unit price multiplied by quantity), and an overall total equal to the sum of all line subtotals is shown in USD"
+        },
+        {
+          "given": "the Cart screen shows a line with quantity 2",
+          "when": "I increase the quantity to 3",
+          "then": "the line subtotal and the overall total update immediately, and the quantity cannot go above 10 or below 1 using the quantity controls"
+        },
+        {
+          "given": "the Cart screen shows a line",
+          "when": "I remove the line",
+          "then": "the line disappears, the overall total and the cart item count indicator update, and the other lines are unchanged"
+        },
+        {
+          "given": "I remove the last line in the cart",
+          "when": "the cart becomes empty",
+          "then": "an empty-cart message with an action to return to Browse is shown and no total is displayed"
+        },
+        {
+          "given": "the Cart screen is displayed",
+          "when": "I look at the area below the total",
+          "then": "there is no checkout, payment, promo code, shipping or tax element, and the screen ends at the total"
+        },
+        {
+          "given": "the cart contains items and I navigate between Browse, Product Detail and Cart",
+          "when": "I return to the Cart screen while the app stays open",
+          "then": "the cart contents are unchanged; if the app is fully closed and reopened, the cart is empty"
+        }
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "Consistent, branded and accessible look and feel",
+      "as_a": "stakeholder or shopper using an iPhone or an Android phone",
+      "i_want": "a clean, premium, beauty-oriented design with readable text and sufficient contrast on both platforms",
+      "so_that": "the demo reflects the brand quality and is comfortable to use",
+      "priority": "should",
+      "acceptance_criteria": [
+        {
+          "given": "the business has supplied its logo and approved the proposed style (colors, typography, imagery guidelines)",
+          "when": "I use any of the three screens on iOS and on Android",
+          "then": "the approved colors, typography and logo are applied consistently and the layout has no overflow or clipping"
+        },
+        {
+          "given": "the device text size is increased in the system accessibility settings to 150%",
+          "when": "I view Browse, Product Detail and Cart",
+          "then": "product name, price, quantity and the Add to Cart button remain readable and usable without overlapping or being cut off"
+        },
+        {
+          "given": "any screen is displayed",
+          "when": "text and interactive elements are checked against the style",
+          "then": "body text is at least 14 sp, text/background contrast is at least 4.5:1, interactive controls have a touch target of at least 48x48 dp, and images and controls have accessibility labels for screen readers"
+        }
+      ]
+    }
+  ],
+  "non_functional_requirements": [
+    "Platforms: a single Flutter codebase running on iOS 14 or later and Android 8 (API 26) or later; phones only in portrait; tablets and web are not required. The team may recommend different minimum OS versions, and the client will be informed if so.",
+    "Demo devices: the demo is verified on a recent iPhone and a recent mid-range Android phone.",
+    "Performance: cold start to a visible Browse screen within 3 seconds on a recent mid-range phone; product grid scrolls smoothly (target 60 fps, no visible jank); product images are sized appropriately for mobile, cached after first load and show a placeholder while loading so they load quickly on typical mobile connections.",
+    "Performance: quantity changes, add to cart and remove actions update the UI within 100 ms, since all cart logic is local.",
+    "Data: the catalog (about 20-30 products) is loaded from a bundled local JSON file with bundled image files; no live backend, inventory or order system is required. Each product has an ID, name, brand, exactly one category, price, short description, key ingredients or usage notes and an image. The data model is structured so variants and additional fields can be added later without a rewrite.",
+    "Money: prices are stored as integer minor units (cents) with ISO 4217 currency code USD, never as floating-point numbers. The display is formatted as USD (for example $24.50), and line subtotals and the total are computed in integer cents with no rounding errors.",
+    "Localization: English only and USD only.",
+    "Security and privacy: the app collects no personal data, has no accounts or sign-in, and stores nothing on the device beyond the app bundle (the cart is in memory only). No analytics, event tracking or advertising SDKs are included, so no consent flow is needed. No card or payment data is handled.",
+    "Accessibility: minimum body text of 14 sp, contrast of at least 4.5:1 for text, touch targets of at least 48x48 dp, screen-reader labels for images and controls, and layouts that remain usable at 150% system text scale.",
+    "Reliability: the app does not crash when images fail to load or when the catalog file is missing or malformed; in those cases a placeholder or an error message with retry is shown.",
+    "Maintainability: the codebase is structured (separation of UI, state and data) so the local data source can later be replaced by a backend API and checkout can be added without a rewrite.",
+    "Testing: acceptance criteria are covered by automated widget tests and at least one integration test of the journey Browse, Filter, Detail, Add to Cart, Cart."
+  ],
+  "out_of_scope": [
+    "Checkout, payments, payment providers and any checkout entry point or placeholder button in the cart",
+    "User accounts, sign-in, sign-up, profiles and account deletion",
+    "Order creation, order status, order history and fulfilment",
+    "Guest or signed-in cart persistence across app restarts (the cart is in-session only)",
+    "Search and sorting (by price, popularity or anything else)",
+    "Product variants (shades, sizes) and per-variant stock tracking",
+    "Stock display, out-of-stock states and inventory integration",
+    "Promotions, discounts, promo codes, shipping costs and tax estimates",
+    "Reviews, ratings and wishlists",
+    "Analytics, event tracking and feedback collection inside the app",
+    "Live backend, catalog integration, server-side APIs and Stripe integration",
+    "Multiple currencies or languages; regions and shipping rules",
+    "Tablet layouts, web and landscape orientation",
+    "Push notifications, deep links and social sharing",
+    "Legal and privacy requirements such as cosmetics labeling, tax and data privacy flows, to be revisited in a later phase"
+  ],
+  "assumptions": [
+    "The project conventions for signed-in carts, stock reservation, order status flow, order lines and Stripe payments do not apply to this release, because the client brief and clarifications explicitly exclude accounts, checkout, payments, orders and stock. They will apply when those phases are added.",
+    "The demo needs no backend API, so there are no API operations in this release. If the team keeps a stub service for later phases, only the health check endpoint is required.",
+    "The business supplies about 20-30 products as a JSON file (or a spreadsheet converted to JSON using a template from the team) plus image files, so the team does not need to source content.",
+    "Each product belongs to exactly one of the categories Skincare, Makeup, Haircare and Fragrance; All is a view showing every product and not a category.",
+    "Each product is a single always-available item; the quantity per cart line ranges from 1 to 10.",
+    "Adding a product already in the cart merges into the existing line, capped at 10 units.",
+    "The cart total is a simple sum of line subtotals (price multiplied by quantity) in USD.",
+    "The business will supply its logo; the team proposes a simple, premium, beauty-oriented style (colors, typography, imagery) and sends it for approval early in the project.",
+    "Delivery targets roughly 4-6 weeks in two milestones: (1) style approval, catalog loading, Browse with category filter, Product Detail; (2) Cart, polish, accessibility and performance checks, demo build.",
+    "The app has three main screens (Browse with category filter, Product Detail, Cart), plus an optional simple splash screen that is not counted as a functional screen.",
+    "The next phase (checkout and payments, accounts, or backend and catalog integration) is not decided yet and does not affect this release."
+  ]
+}

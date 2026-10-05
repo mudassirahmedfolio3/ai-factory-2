@@ -1,0 +1,330 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#1A5FB4",
+      "dark": "#8AB4F8"
+    },
+    {
+      "name": "onPrimary",
+      "light": "#FFFFFF",
+      "dark": "#0B1D33"
+    },
+    {
+      "name": "background",
+      "light": "#FFFFFF",
+      "dark": "#121212"
+    },
+    {
+      "name": "surface",
+      "light": "#F6F7F9",
+      "dark": "#1E1E1E"
+    },
+    {
+      "name": "onSurface",
+      "light": "#1B1B1F",
+      "dark": "#E6E6EA"
+    },
+    {
+      "name": "onSurfaceVariant",
+      "light": "#525866",
+      "dark": "#B8BCC7"
+    },
+    {
+      "name": "outline",
+      "light": "#767B88",
+      "dark": "#8D919E"
+    },
+    {
+      "name": "selectedContainer",
+      "light": "#D6E4FA",
+      "dark": "#1F3A5F"
+    },
+    {
+      "name": "success",
+      "light": "#1B6E3C",
+      "dark": "#7FD6A0"
+    },
+    {
+      "name": "warning",
+      "light": "#8A5300",
+      "dark": "#FFC46B"
+    },
+    {
+      "name": "error",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "onError",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    },
+    {
+      "name": "disabled",
+      "light": "#5F6470",
+      "dark": "#9A9EAB"
+    },
+    {
+      "name": "disabledContainer",
+      "light": "#E3E5EA",
+      "dark": "#2E3038"
+    },
+    {
+      "name": "badge",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "onBadge",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    }
+  ],
+  "typography": [
+    {
+      "name": "titleLarge",
+      "size": 22.0,
+      "weight": 700,
+      "line_height": 28.0
+    },
+    {
+      "name": "titleMedium",
+      "size": 18.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "bodyLarge",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "bodyMedium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "labelLarge",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "priceLarge",
+      "size": 24.0,
+      "weight": 700,
+      "line_height": 32.0
+    },
+    {
+      "name": "priceMedium",
+      "size": 16.0,
+      "weight": 700,
+      "line_height": 24.0
+    },
+    {
+      "name": "caption",
+      "size": 14.0,
+      "weight": 500,
+      "line_height": 20.0
+    }
+  ],
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48
+  ],
+  "corner_radii": [
+    4,
+    8,
+    12,
+    16,
+    24
+  ],
+  "shared_widgets": [
+    {
+      "name": "CartBadgeButton",
+      "description": "App bar IconButton (minimum 48x48dp) with a cart icon and a count badge driven by cartItemCountProvider (sum of quantities); shown on every screen except the cart screen; tap runs context.push('/cart'); semantic label 'Cart, N items'; badge hidden when the count is 0."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Tappable card in the product list showing ProductImage, product name and formatted price; the whole card is at least 48dp tall; tap runs context.push('/products/<id>'); semantic label '<name>, <price>'."
+    },
+    {
+      "name": "ProductImage",
+      "description": "Lazy-loaded image (bundled asset or placeholder) sized for mobile, with a placeholder when missing and an errorBuilder fallback; always has a semantic label (product name)."
+    },
+    {
+      "name": "PriceText",
+      "description": "Formats integer minor units (pence) with currency GBP into '£19.99' VAT-inclusive using integer arithmetic only (no floating point); uses the priceMedium/priceLarge type styles; semantic label reads the amount."
+    },
+    {
+      "name": "VariantChoiceChips",
+      "description": "Wrap of ChoiceChips for variant selection; each chip at least 48dp high and wide; the selected chip is highlighted with selectedContainer plus a check icon (not colour alone); out-of-stock chips are disabled with semantic label '<size>, out of stock'."
+    },
+    {
+      "name": "StockStatusText",
+      "description": "Text showing the selected variant's derived StockStatus: 'In stock', 'Low stock - only N left' (stock 1..5) or 'Out of stock' (stock 0); paired with an icon and colour (success, warning, error) so it is not colour only."
+    },
+    {
+      "name": "CartLineTile",
+      "description": "Cart row showing product name, variant label, unit price and quantity; decrement/increment IconButtons at least 48dp with semantic labels ('Decrease quantity of <name>', 'Increase quantity of <name>'); decrement disabled at quantity 1, increment disabled at variant stock; a Remove button of at least 48dp."
+    },
+    {
+      "name": "TotalRow",
+      "description": "Cart total row 'Total £X.XX' computed by cartTotalProvider from integer pence (sum of unitPriceMinor * quantity); announced as a live region on change."
+    },
+    {
+      "name": "LoadingView",
+      "description": "Centered CircularProgressIndicator with semantic label 'Loading'."
+    },
+    {
+      "name": "EmptyView",
+      "description": "Centered icon, message and optional action button (e.g. 'No products available', 'Your cart is empty' with 'Browse products')."
+    },
+    {
+      "name": "ErrorView",
+      "description": "Centered error icon, message and a 'Retry' button (at least 48dp) that invalidates the relevant provider; used for load failures and product not found."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "ProductListScreen",
+      "route": "/",
+      "purpose": "Home screen: scrollable list of products from the local mock catalogue, each showing image, name and VAT-inclusive GBP price; tapping a card opens the product detail. Scroll position is kept via PageStorageKey('product-list') so returning from detail restores it.",
+      "components": [
+        "AppBar with title and CartBadgeButton",
+        "ListView.builder with PageStorageKey('product-list')",
+        "ProductCard",
+        "ProductImage",
+        "PriceText",
+        "LoadingView",
+        "EmptyView",
+        "ErrorView"
+      ],
+      "states": [
+        "loading (progress indicator)",
+        "empty ('No products available')",
+        "error (message + Retry which invalidates productListProvider)",
+        "success (at least 8 products, scrollable, reachable by vertical scroll)"
+      ],
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "ProductDetailScreen",
+      "route": "/products/:productId",
+      "purpose": "Show product image, name, description, VAT-inclusive GBP price, variant selector and stock status of the selected variant, with an Add to cart button enabled only when an in-stock variant is selected; back via app-bar back button or system back returns to the list at the same scroll position.",
+      "components": [
+        "AppBar with back button and CartBadgeButton",
+        "ProductImage",
+        "Product name (titleLarge)",
+        "Description (bodyLarge)",
+        "PriceText (priceLarge)",
+        "VariantChoiceChips",
+        "StockStatusText",
+        "Add to cart FilledButton (minimum 48dp high, full width)",
+        "LoadingView",
+        "ErrorView"
+      ],
+      "states": [
+        "loading",
+        "not-found/error (ProductNotFound or load failure, message + Retry/back)",
+        "success with variant selected (highlighted chip, stock status shown, Add to cart enabled if in stock)",
+        "success with no variant selected (Add to cart disabled)",
+        "variant out of stock (chip disabled, labelled '<size>, out of stock', cannot be selected or added)",
+        "no selectable variant (all out of stock: shows 'Out of stock' and a disabled button)",
+        "added to cart (cart badge count increases by 1, brief SnackBar confirmation)"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Optional in-memory cart: list lines with product name, variant, unit price and quantity, adjust quantity or remove, and show a GBP total computed from integer pence. No checkout or payment control in any state; the cart is empty after app relaunch.",
+      "components": [
+        "AppBar with back button",
+        "ListView of CartLineTile",
+        "TotalRow",
+        "EmptyView with 'Browse products' button",
+        "ErrorView"
+      ],
+      "states": [
+        "empty ('Your cart is empty' with 'Browse products' button to '/', no checkout or payment control)",
+        "success (lines and 'Total £X.XX', updates immediately on increment, decrement or remove)",
+        "decrement disabled at quantity 1 (use Remove)",
+        "increment disabled at variant stock (maxQuantity)",
+        "loading (not applicable; state is synchronous in memory)",
+        "error (fallback ErrorView if state cannot be read)"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01 ProductListScreen",
+      "to_screen": "SCR-02 ProductDetailScreen",
+      "trigger": "Tap a ProductCard -> context.push('/products/<id>')"
+    },
+    {
+      "from_screen": "SCR-02 ProductDetailScreen",
+      "to_screen": "SCR-01 ProductListScreen",
+      "trigger": "App-bar back button or system back gesture (pop; list keeps same scroll position)"
+    },
+    {
+      "from_screen": "SCR-01 ProductListScreen",
+      "to_screen": "SCR-03 CartScreen",
+      "trigger": "Tap CartBadgeButton -> context.push('/cart')"
+    },
+    {
+      "from_screen": "SCR-02 ProductDetailScreen",
+      "to_screen": "SCR-03 CartScreen",
+      "trigger": "Tap CartBadgeButton -> context.push('/cart')"
+    },
+    {
+      "from_screen": "SCR-03 CartScreen",
+      "to_screen": "SCR-02 ProductDetailScreen",
+      "trigger": "App-bar back button or system back gesture (pop) when opened from detail"
+    },
+    {
+      "from_screen": "SCR-03 CartScreen",
+      "to_screen": "SCR-01 ProductListScreen",
+      "trigger": "App-bar back button or system back gesture (pop) when opened from list; or tap 'Browse products' in the empty state -> context.go('/')"
+    },
+    {
+      "from_screen": "SCR-02 ProductDetailScreen",
+      "to_screen": "SCR-01 ProductListScreen",
+      "trigger": "Retry/back on not-found error state -> pop or context.go('/')"
+    }
+  ],
+  "accessibility": [
+    "Minimum touch target 48x48dp for all interactive elements: ProductCard, CartBadgeButton, variant ChoiceChips, quantity decrement/increment IconButtons, Remove button, Add to cart, Retry and Browse products buttons.",
+    "Body text is at least 14sp (bodyMedium 14sp, bodyLarge 16sp); text scales with the system font size without clipping or overflow.",
+    "All text and icon colours meet WCAG AA contrast in light and dark themes: at least 4.5:1 for normal text and 3:1 for large text and UI components.",
+    "All images and icons have semantic labels (ProductImage uses the product name; icon-only buttons have tooltips/labels such as 'Cart, N items', 'Back', 'Decrease quantity of <name>', 'Increase quantity of <name>', 'Remove <name> from cart').",
+    "Selected variant and stock status are not conveyed by colour alone: selected chips show a check icon plus highlight, and stock status uses an icon plus text (In stock / Low stock - only N left / Out of stock).",
+    "Out-of-stock variant chips are disabled and announced as '<size>, out of stock' to screen readers.",
+    "Disabled Add to cart, decrement and increment controls are exposed as disabled to TalkBack; the disabled colours still keep readable text.",
+    "Cart total and quantity changes are announced through live-region semantics so screen readers hear updates.",
+    "Loading, empty and error states have readable text and semantic labels; Retry buttons are reachable by focus order.",
+    "Logical focus/reading order top to bottom on each screen; the back button is the first focusable element in the app bar.",
+    "Light and dark themes are both supported from a single theme definition in lib/core/theme built from design tokens; no hard-coded colours or sizes in widgets.",
+    "Prices are read as full amounts (e.g. '19 pounds 99') via semantic labels on PriceText."
+  ]
+}

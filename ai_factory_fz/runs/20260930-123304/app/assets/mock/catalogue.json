@@ -1,0 +1,182 @@
+{
+  "version": 1,
+  "currency": "GBP",
+  "products": [
+    {
+      "id": "3f9d2c1a-0001-4b6e-9a51-7c2e00000001",
+      "name": "Ceramic Coffee Mug",
+      "description": "A 350 ml stoneware mug with a matte glaze and a comfortable handle. Dishwasher and microwave safe.",
+      "price": { "amountMinor": 1299, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p001.webp",
+      "thumbnailUrl": "asset://images/products/p001_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 24,
+      "defaultVariantId": "a1c4e7b0-1001-4d2f-8e63-9b1d00000001"
+    },
+    {
+      "id": "3f9d2c1a-0002-4b6e-9a51-7c2e00000002",
+      "name": "Organic Cotton Tote Bag",
+      "description": "Sturdy natural cotton tote with long handles and an inner pocket. Holds up to 10 kg of shopping.",
+      "price": { "amountMinor": 850, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p002.webp",
+      "thumbnailUrl": "asset://images/products/p002_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 60,
+      "defaultVariantId": "a1c4e7b0-1002-4d2f-8e63-9b1d00000002"
+    },
+    {
+      "id": "3f9d2c1a-0003-4b6e-9a51-7c2e00000003",
+      "name": "Bamboo Chopping Board",
+      "description": "Large bamboo board (40 x 28 cm) with a juice groove. Naturally knife-friendly and easy to clean.",
+      "price": { "amountMinor": 2450, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p003.webp",
+      "thumbnailUrl": "asset://images/products/p003_thumb.webp",
+      "inStock": false,
+      "stockQuantity": 0,
+      "defaultVariantId": "a1c4e7b0-1003-4d2f-8e63-9b1d00000003"
+    },
+    {
+      "id": "3f9d2c1a-0004-4b6e-9a51-7c2e00000004",
+      "name": "Scented Soy Candle",
+      "description": "Hand-poured soy wax candle with notes of fig and cedar. Approximately 40 hours burn time.",
+      "price": { "amountMinor": 1800, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p004.webp",
+      "thumbnailUrl": "asset://images/products/p004_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 12,
+      "defaultVariantId": "a1c4e7b0-1004-4d2f-8e63-9b1d00000004"
+    },
+    {
+      "id": "3f9d2c1a-0005-4b6e-9a51-7c2e00000005",
+      "name": "Stainless Steel Water Bottle",
+      "description": "Double-walled insulated 750 ml bottle. Keeps drinks cold for 24 hours or hot for 12 hours.",
+      "price": { "amountMinor": 2199, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p005.webp",
+      "thumbnailUrl": "asset://images/products/p005_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 35,
+      "defaultVariantId": "a1c4e7b0-1005-4d2f-8e63-9b1d00000005"
+    },
+    {
+      "id": "3f9d2c1a-0006-4b6e-9a51-7c2e00000006",
+      "name": "Linen Tea Towel Set",
+      "description": "Set of two pure linen tea towels in natural and charcoal. Highly absorbent and lint-free.",
+      "price": { "amountMinor": 1495, "currency": "GBP" },
+      "imageUrl": null,
+      "thumbnailUrl": null,
+      "inStock": true,
+      "stockQuantity": 18,
+      "defaultVariantId": "a1c4e7b0-1006-4d2f-8e63-9b1d00000006"
+    },
+    {
+      "id": "3f9d2c1a-0007-4b6e-9a51-7c2e00000007",
+      "name": "Wireless Bluetooth Speaker",
+      "description": "Compact splash-resistant speaker with 12 hours of playback and a built-in microphone for calls.",
+      "price": { "amountMinor": 4999, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p007.webp",
+      "thumbnailUrl": "asset://images/products/p007_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 7,
+      "defaultVariantId": "a1c4e7b0-1007-4d2f-8e63-9b1d00000007"
+    },
+    {
+      "id": "3f9d2c1a-0008-4b6e-9a51-7c2e00000008",
+      "name": "Hardback Notebook A5",
+      "description": "192 pages of 100 gsm dotted paper, lay-flat binding, ribbon marker and elastic closure.",
+      "price": { "amountMinor": 999, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p008.webp",
+      "thumbnailUrl": "asset://images/products/p008_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 80,
+      "defaultVariantId": "a1c4e7b0-1008-4d2f-8e63-9b1d00000008"
+    },
+    {
+      "id": "3f9d2c1a-0009-4b6e-9a51-7c2e00000009",
+      "name": "Merino Wool Beanie",
+      "description": "Soft, breathable merino wool beanie with a ribbed knit. One size fits most.",
+      "price": { "amountMinor": 2500, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p009.webp",
+      "thumbnailUrl": "asset://images/products/p009_thumb.webp",
+      "inStock": false,
+      "stockQuantity": 0,
+      "defaultVariantId": "a1c4e7b0-1009-4d2f-8e63-9b1d00000009"
+    },
+    {
+      "id": "3f9d2c1a-0010-4b6e-9a51-7c2e00000010",
+      "name": "Glass Food Storage Set",
+      "description": "Set of four borosilicate glass containers with airtight clip lids. Oven, freezer and dishwasher safe.",
+      "price": { "amountMinor": 3275, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p010.webp",
+      "thumbnailUrl": "asset://images/products/p010_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 15,
+      "defaultVariantId": "a1c4e7b0-1010-4d2f-8e63-9b1d00000010"
+    },
+    {
+      "id": "3f9d2c1a-0011-4b6e-9a51-7c2e00000011",
+      "name": "Desk Plant in Pot",
+      "description": "Easy-care snake plant supplied in a 12 cm terracotta pot. Tolerates low light.",
+      "price": { "amountMinor": 1650, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p011.webp",
+      "thumbnailUrl": "asset://images/products/p011_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 9,
+      "defaultVariantId": "a1c4e7b0-1011-4d2f-8e63-9b1d00000011"
+    },
+    {
+      "id": "3f9d2c1a-0012-4b6e-9a51-7c2e00000012",
+      "name": "Cast Iron Skillet 26 cm",
+      "description": "Pre-seasoned cast iron pan suitable for all hobs including induction, oven and campfire.",
+      "price": { "amountMinor": 3999, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p012.webp",
+      "thumbnailUrl": "asset://images/products/p012_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 4,
+      "defaultVariantId": "a1c4e7b0-1012-4d2f-8e63-9b1d00000012"
+    },
+    {
+      "id": "3f9d2c1a-0013-4b6e-9a51-7c2e00000013",
+      "name": "Recycled Wool Throw Blanket",
+      "description": "Generous 130 x 180 cm throw woven from recycled wool in a herringbone pattern.",
+      "price": { "amountMinor": 7500, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p013.webp",
+      "thumbnailUrl": "asset://images/products/p013_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 6,
+      "defaultVariantId": "a1c4e7b0-1013-4d2f-8e63-9b1d00000013"
+    },
+    {
+      "id": "3f9d2c1a-0014-4b6e-9a51-7c2e00000014",
+      "name": "Beeswax Food Wraps",
+      "description": "Pack of three reusable beeswax wraps in small, medium and large sizes. A plastic-free alternative to cling film.",
+      "price": { "amountMinor": 1200, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p014.webp",
+      "thumbnailUrl": "asset://images/products/p014_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 40,
+      "defaultVariantId": "a1c4e7b0-1014-4d2f-8e63-9b1d00000014"
+    },
+    {
+      "id": "3f9d2c1a-0015-4b6e-9a51-7c2e00000015",
+      "name": "Espresso Machine",
+      "description": "15-bar pump espresso machine with a steam wand for milk frothing and a removable 1.2 litre water tank.",
+      "price": { "amountMinor": 123450, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p015.webp",
+      "thumbnailUrl": "asset://images/products/p015_thumb.webp",
+      "inStock": true,
+      "stockQuantity": 2,
+      "defaultVariantId": "a1c4e7b0-1015-4d2f-8e63-9b1d00000015"
+    },
+    {
+      "id": "3f9d2c1a-0016-4b6e-9a51-7c2e00000016",
+      "name": "Enamel Pin Badge",
+      "description": "Hard enamel pin with a gold-tone finish and rubber clutch back. Approximately 25 mm.",
+      "price": { "amountMinor": 5, "currency": "GBP" },
+      "imageUrl": "asset://images/products/p016.webp",
+      "thumbnailUrl": null,
+      "inStock": true,
+      "stockQuantity": 150,
+      "defaultVariantId": "a1c4e7b0-1016-4d2f-8e63-9b1d00000016"
+    }
+  ]
+}

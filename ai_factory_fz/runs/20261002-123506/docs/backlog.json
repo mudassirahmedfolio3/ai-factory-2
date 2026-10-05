@@ -1,0 +1,227 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Womens Jewellery catalog browse and detail",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Womens Jewellery session cart preview",
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Womens Jewellery OpenAPI contract and NestJS catalog/health stubs",
+      "description": "Author the M1 OpenAPI 3.1 contract and NestJS module stubs that implement getHealth (GET /health), listProducts (GET /products), and getProductById (GET /products/{productId}) under health and catalog modules, plus Prisma-shaped stubs for Category, Product, ProductVariant, Review and deferred models User, RefreshToken, Address, Cart, CartItem, Order, OrderItem, Payment so Flutter mock DTOs match the NestJS surface. Catalog ops document pagination, text search, price range, category, metal, and occasion query params. Full NestJS/Prisma runtime against PostgreSQL does not block the Flutter emulator path.",
+      "epic_id": "E-01",
+      "feature": "Catalog API",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [],
+      "modules": [
+        "health",
+        "catalog"
+      ],
+      "api_operations": [
+        "getHealth",
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [
+        "User",
+        "RefreshToken",
+        "Address",
+        "Category",
+        "Product",
+        "ProductVariant",
+        "Review",
+        "Cart",
+        "CartItem",
+        "Order",
+        "OrderItem",
+        "Payment"
+      ],
+      "screens": [],
+      "estimate_points": 3,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Three backend ops plus model stubs including Review; Flutter path stays mock-first so size stays small. | backend_developer: OpenAPI 3.1 for three catalog/health ops plus twelve aligned model schemas, Nest health/catalog stubs with filter/pagination DTOs, Prisma-shaped stubs, and Jest coverage is a solid half-day of contract discipline more than thin stubs.; concerns: Deferred auth/cart/order/payment models in the M1 contract can drift from Nest/Prisma stubs; category/metal/occasion enums and cents pricing must match Flutter mock DTOs exactly or generated clients break.",
+      "status": "todo",
+      "pm_points": 2,
+      "dev_points": 3,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-002",
+      "title": "Flutter scaffold theme and go_router",
+      "description": "Create Flutter 3.x Android-first app with Riverpod, agent-chosen design tokens in lib/core/theme (no style-approval gates), and go_router routes /products, /products/:id, /cart. Offline mock only in debug builds; no live HTTP. App launches on emulator as coding start.",
+      "epic_id": "E-01",
+      "feature": "App shell",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "modules": [
+        "core"
+      ],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 4,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Standard Flutter scaffold plus theme tokens and three named routes. | frontend_developer: Flutter 3.x Android scaffold, Riverpod root, token-based theme in lib/core/theme, go_router for /products|/products/:id|/cart, debug-only offline mock gate, 10.0.2.2 cleartext config, and emulator launch plus smoke tests to green.; concerns: Depends on WI-001 for folder/API-client layout; theme tokens are agent-chosen with no design gate, so later screens may need token tweaks.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-003",
+      "title": "Local catalog seed and ProductListScreen",
+      "description": "Add assets/data/catalog.json with ~12–20 jewellery SKUs including Tropical Earring at 1999 USD cents; LocalCatalogDataSource and CatalogRepository mirroring listProducts; ProductListNotifier (AsyncNotifier) with q, min/max priceCents, category (earrings|necklaces|bracelets|rings), metal (gold-tone|silver-tone|rose-gold), occasion (everyday|work|gift|party); SCR-01 ProductListScreen with name, primary image or placeholder, cents→USD price helper (no floats), search, combined filters, empty and error/retry states. flutter_test for price formatting and filter/search smoke.",
+      "epic_id": "E-01",
+      "feature": "Product list",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "listProducts"
+      ],
+      "data_models": [
+        "Category",
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-01"
+      ],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Seeded catalog, four filter dimensions plus search, list UI states, and integer cents price helpers. | frontend_developer: assets/data/catalog.json (~12–20 SKUs incl. Tropical Earring at 1999¢), LocalCatalogDataSource/CatalogRepository mirroring listProducts, ProductListNotifier filters (q, priceCents, category, metal, occasion), SCR-01 states, integer cents→USD helpers, and flutter_test for price + filter/search smoke.; concerns: M1 uses local mock shaped like OpenAPI without generated CatalogApi yet; primary images vs placeholders for all SKUs and filter-chip UX can expand scope.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-004",
+      "title": "ProductDetailScreen with reviews and list-detail navigation",
+      "description": "Build SCR-02 ProductDetailScreen (/products/:id) with ProductDetailNotifier loading one product shaped like getProductById: name, description, price from integer cents + USD, category, metal, occasion, stock/availability, aggregate star rating (1–5), mock review list (rating + text) or empty-reviews state; Add to cart control (≥48dp) for in-stock items. Back navigation preserves ProductListNotifier search/filter state. flutter_test for list→detail and reviews empty state.",
+      "epic_id": "E-01",
+      "feature": "Product detail",
+      "component": "frontend",
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "getProductById"
+      ],
+      "data_models": [
+        "Product",
+        "ProductVariant",
+        "Review"
+      ],
+      "screens": [
+        "SCR-02"
+      ],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "high",
+      "estimate_rationale": "Detail screen plus averageRating/reviews UI, stock gate for add-to-cart, and preserved list filter state. | frontend_developer: SCR-02 ProductDetailNotifier/getProductById shape (description, stock, averageRating, reviews empty/list), ≥48dp add-to-cart for in-stock, back preserving ProductListNotifier filters, and flutter_test for list→detail plus empty reviews.; concerns: Add-to-cart is specified here but CartNotifier lands in WI-005—need a thin cart provider stub or pull cart state forward to avoid blocked detail wiring.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 5,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-005",
+      "title": "In-memory CartNotifier and CartScreen",
+      "description": "CartNotifier session-only CartState; Add/increment from SCR-02 for in-stock items snapshots product name and unit price (cents + currency) into Cart/CartItem; SCR-03 CartScreen (/cart) shows line items with quantity steppers (≥48dp), decrease to 0 removes line, line and cart totals via integer minor units only; cart empty after cold start. No persistence, auth, payment, or backend sync.",
+      "epic_id": "E-02",
+      "feature": "Cart screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "modules": [
+        "cart"
+      ],
+      "api_operations": [],
+      "data_models": [
+        "Cart",
+        "CartItem"
+      ],
+      "screens": [
+        "SCR-03"
+      ],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "In-memory notifier, quantity steppers with integer totals, and one cart screen. | frontend_developer: Session-only CartNotifier/CartState, add/increment snapshots (name, unit cents+currency), SCR-03 steppers (≥48dp) with remove-at-0 and integer minor-unit line/cart totals, empty after cold start, plus widget tests.; concerns: No persistence by design—QA must not expect cart survival across process kill; totals must stay integer-only to avoid float bugs.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 3,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Womens Jewellery Flutter speed demo",
+      "goal": "Runnable Womens Jewellery Flutter MVP on Android emulator: browse ~12–20 local mock SKUs with search and filters, open product detail with cents-based USD prices, star ratings and mock reviews, manage in-memory cart with quantity updates; OpenAPI contract and NestJS catalog/health stubs freeze getHealth, listProducts, and getProductById for M2—no auth, payments, or live backend required for the demo path.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ],
+  "estimation_reviewed": true
+}

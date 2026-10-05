@@ -1,0 +1,62 @@
+# Client demo pipeline: one run plans and builds M1 + M2 for a showable mobile app.
+# Use from the console: set SDLC_PIPELINE=pipeline.client in ai_factory_fz/.env (restart API).
+# Delivers a polished Flutter shop on the emulator; M2 adds NestJS catalog API + integration when feasible.
+# Release/staging stays off so local runs avoid Docker + PostgreSQL preflight (enable pipeline.yaml release separately).
+
+phases:
+  discovery: true
+  planning: true
+  design: true
+  build: true
+  release: false
+
+scope:
+  guidance: >
+    CLIENT DEMO (not a speed sketch). Plan exactly two milestones and build both in this run.
+    M1 — Showable Flutter app: product list with search and filters, product detail with star ratings
+    and reviews, in-memory cart with quantity updates, cohesive design system, 12–20 seeded products
+    in local mock data (assets). The app must launch on an Android emulator and look client-ready
+    (real screens, not the default Flutter counter template). Guest shopping only; no sign-in required
+    for the demo meeting.
+    M2 — Backend slice: NestJS /api/v1 health + catalog OpenAPI implementation with stub/seed data
+    matching the same products; generate and integrate the Dart API client only when analyze/tests pass;
+    if integration blocks the demo, keep M1 mock path working and document API readiness for a follow-up.
+    Out of scope for this run: production payments, Apple/Google Pay, admin panel, marketing site, email
+    delivery in production (mock or log order confirmation is enough for demo narrative).
+    NEVER create work items that require human approval, stakeholder sign-off, or style-approval gates.
+    Style tokens are chosen by agents without waiting.
+  max_user_stories: 8
+  max_work_items: 12
+  max_milestones: 2
+  max_api_operations: 12
+  max_screens: 6
+
+planning:
+  estimation_review: true
+  big_gap_points: 3
+  big_gap_ratio: 2.0
+
+guardrails:
+  architect: [A1, A2, B1, B2, B3, B4, B5, B6, C1, C2, C3, D1, D2, D3]
+  agents: [DV1, DV2, DV3, QA1, QA2, DE1, ST1, CU1, UX1]
+
+build:
+  milestones: []
+  sandbox: local
+  check_fix_attempts: 2
+  agent_timeout_s: 3600
+
+gates:
+  prd: true
+  architecture: true
+  release: false
+
+gate_mode: auto
+
+limits:
+  clarification_rounds: 2
+  gate_rejections: 3
+  qa_fix_rounds: 2
+
+budget:
+  max_total_tokens: null

@@ -1,0 +1,53 @@
+# Product brief: ShopEase
+
+ShopEase is our own mobile shopping app for Android and iOS where customers can easily discover and buy our clothing and accessories. It should be simple, fast and easy to use. We want a first version live quickly, then grow it over time based on what customers actually do.
+
+## Target users
+- Existing customers of our clothing and accessories who want a faster, more convenient way to reorder and shop from their phones
+- New shoppers who discover our brand and want to browse and buy on mobile without friction
+- Style-conscious adults, roughly 18 to 45, comfortable with mobile apps and card payments (my working assumption on our core audience)
+- Repeat buyers who want to check past orders and see each order's status
+- Internal store staff who will fulfil orders and update statuses (secondary users, an assumption I am making for the first version)
+
+## Business goals
+- Launch a first version on Android and iOS quickly, then grow it in later releases
+- Give customers our own direct sales channel so we depend less on third-party marketplaces
+- Increase online sales and make repeat purchases easier
+- Achieve a smooth, low-friction checkout so more shoppers complete their purchase (target: a checkout completion rate that we track from day one)
+- Reduce customer support load by letting customers see their own orders and statuses
+- Build a base of registered customers we can later communicate with and reward
+- Keep the product simple and fast so it works well for a growing business with a small team
+
+## Key features
+- Account creation and sign-in, with email and password for the first version
+- Browse products by category
+- Search products
+- Product details page with photos, sizes and colors
+- Cart: add products and change quantities (including removing items)
+- Checkout with card payment through a third-party payment provider so we do not handle card data ourselves
+- Order history: past orders with each order's status (for example placed, processing, shipped, delivered)
+- Available on both Android and iOS
+- Simple, fast, easy-to-use experience with quick loading of product photos
+
+## Constraints
+- First version must be live quickly, so scope is limited to the features listed and anything extra waits for later releases
+- Must work on both Android and iOS
+- Payment by card only in the first version; card data must be handled securely by a certified payment provider
+- Keep the experience simple and fast; avoid clutter and long sign-up or checkout steps
+- We are not technical, so the team should propose the technical approach and explain trade-offs in plain language
+- Budget is limited, as we are a growing retail business; we prefer proven, off-the-shelf services over custom-built ones where possible
+- We must comply with applicable privacy and consumer protection rules for customer data and online sales
+
+## Open questions
+- Which countries and currencies will we sell in at launch, and what taxes and shipping rules apply?
+- Which delivery options and shipping prices will we offer, and do we allow returns and refunds through the app?
+- Which payment provider do we choose, and do we add Apple Pay, Google Pay or other methods after launch?
+- Do customers need to create an account before checking out, or should guest checkout be allowed?
+- Do we want social sign-in (Google, Apple) in addition to email and password?
+- Where will product data and stock levels come from, and is there an existing website or inventory system to connect to?
+- How will order statuses be updated, and by whom?
+- Do we want push notifications for order updates in the first version or later?
+- Do we need wishlists, promo codes, loyalty points or reviews, and if so in which release?
+- What is the launch date and budget, and how do we measure success in the first three months?
+- What languages does the app need at launch?
+- Who will handle customer support and how do customers reach us from the app?

@@ -1,0 +1,49 @@
+// beauty-mvp - Prisma schema (PostgreSQL 16)
+// Release 1: optional stub service only (GET /api/v1/health). These models mirror the bundled
+// catalog.json (OpenAPI Catalog schema) so a later catalog module and seed need no redesign.
+// Money is stored as integer minor units plus ISO 4217 currency code. Never floats.
+// Deferred to later phases per project conventions: User, Address, ProductVariant (stock per variant),
+// Cart, CartItem, Order, OrderItem, Payment.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String    @id @db.VarChar(64) // skincare | makeup | haircare | fragrance
+  name      String    @db.VarChar(40)
+  sortOrder Int       @default(0) @map("sort_order")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id               String   @id @db.VarChar(64) // stable slug, e.g. hydra-glow-serum
+  name             String   @db.VarChar(120)
+  brand            String   @db.VarChar(80)
+  categoryId       String   @map("category_id") @db.VarChar(64)
+  priceMinor       Int      @map("price_minor") // cents, >= 0 (enforce via CHECK in migration)
+  currency         String   @default("USD") @db.Char(3) // ISO 4217
+  shortDescription String   @map("short_description") @db.VarChar(600)
+  keyIngredients   String?  @map("key_ingredients") @db.VarChar(1000)
+  usageNotes       String?  @map("usage_notes") @db.VarChar(1000)
+  imageSrc         String   @map("image_src") @db.VarChar(500)
+  imageAlt         String   @map("image_alt") @db.VarChar(200)
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([categoryId])
+  @@index([isActive, categoryId])
+  @@map("products")
+}

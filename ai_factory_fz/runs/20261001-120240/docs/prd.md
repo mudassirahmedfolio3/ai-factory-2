@@ -1,0 +1,113 @@
+# ShirtStack — Men's Shirts Mobile Shop — Product Requirements Document (M1 Speed Demo)
+
+ShirtStack is a mobile-first Flutter e-commerce MVP focused exclusively on men's shirts, launching in the United States with USD as the sole currency. The full product vision validates demand, proves repeat purchase behavior, and delivers a credible shopping experience to investors and wholesale partners. M1 (this sprint) delivers the smallest runnable Flutter MVP: a locally seeded mock catalog (~20–40 men's shirt SKUs), a product list (browse) screen, and a product detail screen, with an optional in-memory cart. Shoppers browse curated shirts with title, price (integer cents + ISO 4217 USD), primary image, and key attributes (size, color, fit type). No authentication, payments, checkout, backend API, order history, reviews, or promo codes in M1—the app runs immediately on an emulator with mock data. Subsequent releases add signed-in carts, Stripe PaymentIntents checkout with webhook confirmation, US sales tax via Stripe Tax, flat-rate shipping ($5.99 standard; free on orders ≥ $75 before discounts), promo codes (percentage-off and fixed-amount-off), verified-purchase reviews, and order history. Operational fulfillment remains manual; returns policy is display-only with offline email processing.
+
+## Personas
+### Marcus — Casual Shirt Buyer
+A man aged 25–45 who buys casual and smart-casual shirts online at mid-range price points ($20–$45 per shirt). He shops primarily on his phone during commutes and evenings.
+- Quickly browse men's shirts by style, size, and price on mobile
+- See clear product images, prices, and fit attributes before deciding
+- Complete a purchase with minimal friction when checkout is available
+
+### Sarah — Gift Buyer
+A partner or family member shopping for men's shirts as a gift. She may not know exact preferences but needs size and style guidance.
+- Filter shirts by size, color, and shirt type to narrow gift options
+- Read reviews and star ratings to judge fit and quality
+- Save a shipping address for faster checkout on future releases
+
+### David — Repeat Customer
+A returning ShirtStack shopper who has purchased before and wants to reorder favorites without contacting support.
+- View order history with items, quantities, prices, and status
+- Reorder a previously purchased shirt quickly
+- Apply promo codes at checkout on repeat visits
+
+### Alex — Mobile-First Shopper
+A phone-first shopper who prefers browsing and buying on mobile over desktop. Expects thumb-friendly navigation and fast load times.
+- Browse and add items to cart using one-handed mobile interactions
+- Sign in quickly via Google or Apple when account is required
+- See accurate order totals including tax and shipping before paying
+
+## User stories
+### US-001 Browse men's shirts catalog (must)
+As a mobile shopper, I want to browse a curated list of men's shirts from a locally seeded catalog, so that I can discover shirts that match my style and budget without waiting for a backend.
+
+- **Given** the app is launched with a locally seeded mock catalog of 20–40 men's shirt SKUs priced in USD integer minor units (cents) **when** I open the product list (browse) screen **then** I see each shirt displayed with title, formatted price (e.g., Men Check Shirt $27.99), primary image, and key listing attributes (available sizes, color, fit type)
+- **Given** I am on the product list screen and the catalog contains shirts matching my filter criteria **when** I apply filters by size, color, price range, and/or shirt type (e.g., check, plain, formal) **then** the list updates to show only matching shirts and displays a clear empty state if no shirts match
+- **Given** I am on the product list screen **when** I enter a search term matching a product title or attribute **then** the list filters to relevant shirts in real time without requiring network connectivity
+- **Given** a product has customer reviews in a future release **when** I view that product on the listing (post-M1) **then** the average star rating (1–5) is displayed alongside the product card
+
+### US-002 View product detail (must)
+As a mobile shopper, I want to open a product detail screen for any shirt in the catalog, so that I can read the description, see available variants, and decide whether to add it to my cart.
+
+- **Given** I am on the product list screen and a shirt SKU exists in the local catalog **when** I tap a product card **then** I navigate to the product detail screen showing title, description, formatted price in USD, primary image, available sizes, available colors, and fit type
+- **Given** I am on the product detail screen **when** the screen renders **then** a sticky add-to-cart control remains visible at the bottom of the viewport on scroll, with a tap target of at least 44×44 logical pixels
+- **Given** I am on the product detail screen for a shirt with multiple size and color variants **when** I select a size and color combination **then** the selected variant is highlighted and the add-to-cart action applies to that variant
+- **Given** I am on the product detail screen **when** I view the page content area **then** a link or section displays the 30-day returns policy text (unworn items with original tags; refunds to original payment method; exchanges handled as return plus new order; contact email to initiate return)
+
+### US-003 Manage in-memory shopping cart (could)
+As a mobile shopper, I want to add shirts to a simple in-memory cart and adjust quantities, so that I can collect items while browsing before checkout is available in a later release.
+
+- **Given** I am on the product detail screen with a valid size and color selected **when** I tap the sticky add-to-cart button **then** the selected variant and quantity 1 are added to an in-memory cart and I receive brief visual confirmation without leaving the screen
+- **Given** I have one or more items in the in-memory cart **when** I open the cart view **then** I see each line item with product name, unit price (copied at add time in cents), selected size/color, quantity, and a running subtotal in USD
+- **Given** I have an item with quantity greater than 1 in the cart **when** I decrease quantity to zero or tap remove **then** the line item is removed and the subtotal recalculates immediately
+- **Given** I close and reopen the app during M1 **when** the app restarts **then** the in-memory cart is cleared (cart persistence requires signed-in user and backend in a later release)
+
+## Non-functional requirements
+- Platform: Flutter 3.x (Dart) mobile app targeting Android first, with iOS support; mobile-first UX with thumb-friendly navigation, large tap targets (minimum 44×44 logical pixels), and fast product browsing—not a web storefront for MVP
+- M1 data source: locally seeded mock catalog embedded in the Flutter app; no backend API calls required for M1 browse and detail flows; app must launch and run on an emulator without network connectivity
+- Pricing: all prices stored and displayed using integer minor units (cents) with ISO 4217 currency code USD; never use floating-point for money calculations
+- Performance: product list screen renders initial catalog within 2 seconds on a mid-range Android emulator; scrolling the list of 20–40 items maintains 60 fps without jank
+- Accessibility: all interactive elements have semantic labels; text meets WCAG 2.1 AA contrast ratios; support system font scaling without layout breakage on list and detail screens
+- Security and privacy (full product): passwords hashed with bcrypt or argon2; store minimum personal data; support account deletion—deferred to post-M1 auth release
+- Payments (full product): Stripe PaymentIntents in test mode; server creates intent; app confirms via Stripe SDK; webhook marks order paid; card data never touches our server—out of scope for M1
+- Stock (full product): stock tracked per product variant; checkout reserves stock; failed or expired payment releases reservation; manual daily stock counts with validation at add-to-cart and checkout—out of scope for M1
+- Tax (full product): US sales tax calculated and displayed at checkout based on shipping address state/ZIP using Stripe Tax—out of scope for M1
+- Shipping (full product): flat-rate $5.99 standard domestic US shipping; free shipping on orders of $75 or more before discounts—out of scope for M1
+- Order status flow (full product): pending_payment → paid → fulfilled → delivered, plus cancelled and refunded; order lines copy product name and unit price at purchase time—out of scope for M1
+- Authentication (full product): email/password plus Google Sign-In and Apple Sign-In; guest browse allowed; account required at checkout—out of scope for M1
+- Reviews (full product): verified purchasers only; 1–5 star ratings; auto-publish on submission; average rating on listings—out of scope for M1
+- Promo codes (full product): percentage-off and fixed-amount-off codes; single-use and multi-use; optional minimum order value and expiry date; discount shown in cart and checkout—out of scope for M1
+- Supported devices: Android API 24+ and iOS 15+ for Flutter MVP; optimized for phone form factors
+
+## Out of scope
+- M1: authentication (email/password, Google Sign-In, Apple Sign-In)
+- M1: backend API, NestJS server, PostgreSQL database, and OpenAPI client integration
+- M1: payments, Stripe PaymentIntents, checkout flow, shipping address capture, and sales tax calculation
+- M1: order placement, order confirmation, and order history
+- M1: product reviews and star ratings
+- M1: promo code entry and discount application
+- M1: cart persistence across app restarts (requires signed-in user and backend)
+- M1: stock validation at add-to-cart and checkout
+- M1: push notifications and email order notifications
+- M1: in-app return initiation flow (returns policy text display only on detail screen)
+- M1: admin/back-office catalog or order management UI
+- M1: free-shipping promo codes (free-shipping threshold at checkout is a later-release feature)
+- Categories beyond men's shirts (no pants, accessories, women's lines)
+- International shipping and multi-currency support
+- Weight- or zone-based shipping calculation
+- Real-time ERP/warehouse inventory sync
+- Loyalty program, AI sizing, live chat, wishlist/favorites, social sharing, and referral codes
+- Review moderation admin approval queue (manual offline moderation only in full release)
+- Professional product photoshoot; images and descriptions provided by business team
+
+## Assumptions
+- ShirtStack is the working product title unless brand identity is finalized later
+- Launch market is the United States only with USD ($) as the sole currency; domestic US shipping only
+- M1 uses a locally embedded mock catalog of approximately 20–40 men's shirt SKUs seeded by the development team; product images and descriptions are provided by the business team
+- Example listing format: Men Check Shirt at $27.99 (2799 cents USD) with title, price, primary image, size, color, and fit type
+- Product variants use single-select size and color per SKU for MVP
+- Full-release shipping model: $5.99 flat-rate standard domestic shipping; free shipping on orders of $75 or more before discounts
+- Full-release returns: 30-day returns on unworn items with original tags; refunds to original payment method after inspection; exchanges as return plus new order; policy displayed in app; manual offline processing via customer email
+- Full-release promo codes: percentage-off and fixed-amount-off only; single-use and multi-use supported; optional minimum order value and expiry date
+- Full-release reviews: verified purchasers only; auto-publish immediately; manual offline moderation for reported or abusive content
+- Full-release authentication: email/password required plus Google and Apple Sign-In on mobile; guest browse with account required at checkout
+- Full-release inventory: manual stock counts updated once daily; stock validated at add-to-cart and checkout; block checkout for out-of-stock line items with clear messaging
+- Full-release tax: US sales tax calculated via Stripe Tax based on shipping address state/ZIP and shown before payment
+- Full-release payments: Stripe in test mode with PaymentIntents; webhook confirms paid status
+- Cart belongs to a signed-in user in full release; guest carts are out of scope unless PRD is revised
+- Fulfillment is manual at launch; no complex third-party integrations until traction is proven
+- Legal pages (privacy policy, terms of service) required before public app store release; copy provided by business/legal team
+- M1 delivery target is demo-ready on Android emulator in one sprint; TestFlight/internal demo acceptable for M1; public app store release deferred
+- Customer support for MVP: email contact; no in-app phone support or live chat
+- Analytics tool selection (Firebase, Mixpanel, etc.) deferred unless team capacity allows in sprint one
+- Size guide with measurements on product pages deferred unless confirmed required for launch

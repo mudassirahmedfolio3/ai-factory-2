@@ -1,0 +1,499 @@
+openapi: 3.1.0
+info:
+  title: beauty-mvp Catalog API
+  version: 0.1.0
+  description: >-
+    Contract for the beauty-mvp catalog. In the first demo there is no running
+    backend: the Flutter app reads a bundled fixture (assets/mock/catalog.json)
+    whose category records conform to Category and whose product records conform
+    to Product. A later phase implements these operations in the NestJS catalog
+    and health modules without changing the app domain layer. Carts are held in
+    app memory only and are not part of this API. Prices are integer minor units
+    (cents) with an ISO 4217 currency code; floats are never used.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+  - url: http://10.0.2.2:3000/api/v1
+    description: Local staging from the Android emulator (debug builds only)
+tags:
+  - name: health
+    description: Infrastructure health check
+  - name: catalog
+    description: Public read-only product catalog
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [health]
+      operationId: getHealth
+      summary: Liveness and database reachability
+      description: Returns 200 when the API is running and the database is reachable.
+      security: []
+      responses:
+        '200':
+          description: API is up and the database is reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+              example:
+                status: ok
+                database: up
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /categories:
+    get:
+      tags: [catalog]
+      operationId: listCategories
+      summary: List product categories
+      description: Returns the product categories ordered by sortOrder. The All filter is a client concept and is not returned.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A page of categories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryPage'
+              example:
+                items:
+                  - id: 0b6f3a52-6c1e-4d0e-9f3a-1a2b3c4d5e01
+                    slug: skincare
+                    name: Skincare
+                    sortOrder: 1
+                  - id: 0b6f3a52-6c1e-4d0e-9f3a-1a2b3c4d5e02
+                    slug: makeup
+                    name: Makeup
+                    sortOrder: 2
+                  - id: 0b6f3a52-6c1e-4d0e-9f3a-1a2b3c4d5e03
+                    slug: haircare
+                    name: Haircare
+                    sortOrder: 3
+                  - id: 0b6f3a52-6c1e-4d0e-9f3a-1a2b3c4d5e04
+                    slug: fragrance
+                    name: Fragrance
+                    sortOrder: 4
+                total: 4
+                page: 1
+                pageSize: 20
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /products:
+    get:
+      tags: [catalog]
+      operationId: listProducts
+      summary: List active products
+      description: >-
+        Returns active products ordered by category sortOrder then product
+        sortOrder, optionally filtered by one category. Omit category to list
+        all categories.
+      security: []
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Restrict results to one category. Omit for all categories.
+          schema:
+            $ref: '#/components/schemas/CategorySlug'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A page of product summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+              example:
+                items:
+                  - id: 5a1d2c3e-4f50-4a6b-8c7d-9e0f1a2b3c01
+                    name: Hydrating Face Serum
+                    brand: Glow Lab
+                    category: skincare
+                    price:
+                      amountMinor: 2400
+                      currency: USD
+                    image:
+                      url: assets/images/products/hydrating-face-serum-1.jpg
+                      altText: Hydrating Face Serum in a 30 ml glass dropper bottle
+                      width: 800
+                      height: 800
+                total: 24
+                page: 1
+                pageSize: 20
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /products/{productId}:
+    get:
+      tags: [catalog]
+      operationId: getProduct
+      summary: Get product details
+      description: Returns one active product with its images and size or shade options.
+      security: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Product identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              example:
+                id: 5a1d2c3e-4f50-4a6b-8c7d-9e0f1a2b3c07
+                name: Velvet Matte Lipstick
+                brand: Rouge Studio
+                category: makeup
+                price:
+                  amountMinor: 1999
+                  currency: USD
+                description: A long-wearing matte lipstick with a creamy, comfortable finish.
+                images:
+                  - url: assets/images/products/velvet-matte-lipstick-1.jpg
+                    altText: Velvet Matte Lipstick, open tube
+                    width: 1200
+                    height: 1200
+                variantType: shade
+                variants:
+                  - id: 7c2e3d4f-5a6b-4c7d-8e9f-0a1b2c3d4e01
+                    label: Rose Nude
+                    sortOrder: 1
+                    isDefault: true
+                    swatchHex: '#C98A7D'
+                  - id: 7c2e3d4f-5a6b-4c7d-8e9f-0a1b2c3d4e02
+                    label: Classic Red
+                    sortOrder: 2
+                    isDefault: false
+                    swatchHex: '#B3122E'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >-
+        JWT access token (15 minutes) obtained with a refresh token. Reserved
+        for future authenticated operations; every operation in this version is
+        public and overrides security with an empty list.
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      description: 1-based page number
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Number of items per page
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 400
+            error: Bad Request
+            message: pageSize must not be greater than 100
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 404
+            error: Not Found
+            message: Product not found
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 500
+            error: Internal Server Error
+            message: An unexpected error occurred
+    ServiceUnavailable:
+      description: Database unreachable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 503
+            error: Service Unavailable
+            message: Database is unreachable
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [statusCode, error, message]
+      properties:
+        statusCode:
+          type: integer
+          format: int32
+          description: HTTP status code
+          example: 404
+        error:
+          type: string
+          description: HTTP reason phrase
+          example: Not Found
+        message:
+          type: string
+          description: Human-readable explanation; multiple validation messages are joined with '; '
+          example: Product not found
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status, database]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        database:
+          type: string
+          enum: [up]
+    CategorySlug:
+      type: string
+      description: Stable category identifier used for filtering
+      enum: [skincare, makeup, haircare, fragrance]
+    Category:
+      type: object
+      additionalProperties: false
+      required: [id, slug, name, sortOrder]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          $ref: '#/components/schemas/CategorySlug'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+          example: Skincare
+        sortOrder:
+          type: integer
+          format: int32
+          minimum: 0
+    CategoryPage:
+      type: object
+      additionalProperties: false
+      required: [items, total, page, pageSize]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Total number of categories across all pages
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+        pageSize:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+    Money:
+      type: object
+      additionalProperties: false
+      description: Monetary amount in integer minor units (cents for USD). Never a float.
+      required: [amountMinor, currency]
+      properties:
+        amountMinor:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Amount in minor units, e.g. 2400 means $24.00
+          example: 2400
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          description: ISO 4217 currency code; only USD is used in this version
+          example: USD
+    Image:
+      type: object
+      additionalProperties: false
+      required: [url, altText]
+      properties:
+        url:
+          type: string
+          format: uri-reference
+          maxLength: 500
+          description: >-
+            Absolute https URL, or a relative reference resolved against the
+            image base (the app asset bundle in the demo).
+          example: assets/images/products/hydrating-face-serum-1.jpg
+        altText:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Semantic label for accessibility
+        width:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Intrinsic width in pixels, used to size and cache images
+        height:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Intrinsic height in pixels
+    VariantType:
+      type: string
+      description: >-
+        Which selector the product uses. none means no selector and an empty
+        variants list; size is used for skincare, haircare and some fragrance
+        products; shade is used for makeup products.
+      enum: [none, size, shade]
+    ProductVariant:
+      type: object
+      additionalProperties: false
+      description: A size or shade option. Variants carry no separate price, image or stock.
+      required: [id, label, sortOrder, isDefault]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+          minLength: 1
+          maxLength: 60
+          description: Display label, e.g. '50 ml' or 'Rose Nude'
+        sortOrder:
+          type: integer
+          format: int32
+          minimum: 0
+        isDefault:
+          type: boolean
+          description: When true this option is preselected; at most one per product
+        swatchHex:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          description: Optional swatch color for shade options
+    ProductSummary:
+      type: object
+      additionalProperties: false
+      description: Product card data for the Product List screen
+      required: [id, name, brand, category, price]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        brand:
+          type: string
+          minLength: 1
+          maxLength: 80
+        category:
+          $ref: '#/components/schemas/CategorySlug'
+        price:
+          $ref: '#/components/schemas/Money'
+        image:
+          $ref: '#/components/schemas/Image'
+          description: First product image; omitted when the product has no image, in which case the client shows a neutral placeholder
+    ProductPage:
+      type: object
+      additionalProperties: false
+      required: [items, total, page, pageSize]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Total number of matching products across all pages
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+        pageSize:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+    Product:
+      type: object
+      additionalProperties: false
+      description: Full product for the Product Detail screen. variants is empty if and only if variantType is none.
+      required: [id, name, brand, category, price, description, images, variantType, variants]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        brand:
+          type: string
+          minLength: 1
+          maxLength: 80
+        category:
+          $ref: '#/components/schemas/CategorySlug'
+        price:
+          $ref: '#/components/schemas/Money'
+        description:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        images:
+          type: array
+          maxItems: 10
+          description: Ordered product images; may be empty, in which case the client shows a neutral placeholder
+          items:
+            $ref: '#/components/schemas/Image'
+        variantType:
+          $ref: '#/components/schemas/VariantType'
+        variants:
+          type: array
+          maxItems: 30
+          description: Ordered by sortOrder; empty when variantType is none
+          items:
+            $ref: '#/components/schemas/ProductVariant'

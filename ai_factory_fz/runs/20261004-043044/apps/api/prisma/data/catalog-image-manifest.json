@@ -1,0 +1,188 @@
+{
+  "sourceSite": "https://stanpro2.folio3.site/search",
+  "licenseNote": "Demo/staging use only; imagery sourced from Stanpro Folio3 staging storefront per docs/IMAGE_SOURCES.md.",
+  "images": [
+    {
+      "filename": "modern-led-ceiling-light.jpg",
+      "sku": "CL-1001-WH",
+      "productSlug": "modern-led-ceiling-light",
+      "stanproPageUrl": "https://stanpro2.folio3.site/smart-series-item",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "crystal-pendant-light.jpg",
+      "sku": "PD-2201-CH",
+      "productSlug": "crystal-pendant-light",
+      "stanproPageUrl": "https://stanpro2.folio3.site/solar-street-light",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "flush-mount-bathroom-light.jpg",
+      "sku": "CL-1002-WH",
+      "productSlug": "flush-mount-bathroom-light",
+      "stanproPageUrl": "https://stanpro2.folio3.site/recessed-step-light-001-12w-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "wall-sconce-duo.jpg",
+      "sku": "WL-3101-BN",
+      "productSlug": "wall-sconce-duo",
+      "stanproPageUrl": "https://stanpro2.folio3.site/recessed-step-light-003-3w-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "picture-light-led.jpg",
+      "sku": "WL-3102-BK",
+      "productSlug": "picture-light-led",
+      "stanproPageUrl": "https://stanpro2.folio3.site/outdoor-step-light-004-3w-brushed-nickel",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "pir-security-floodlight.jpg",
+      "sku": "OS-4101-WH",
+      "productSlug": "pir-security-floodlight",
+      "stanproPageUrl": "https://stanpro2.folio3.site/wall-step-light-005-8w-black-name",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "garden-bollard-light.jpg",
+      "sku": "OS-4102-SS",
+      "productSlug": "garden-bollard-light",
+      "stanproPageUrl": "https://stanpro2.folio3.site/fll-flood-light",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "gu10-led-bulb-5-pack.jpg",
+      "sku": "BT-5001-WW",
+      "productSlug": "gu10-led-bulb-5-pack",
+      "stanproPageUrl": "https://stanpro2.folio3.site/200000000-223",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "t8-led-tube-1200mm.jpg",
+      "sku": "BT-5002-DL",
+      "productSlug": "t8-led-tube-1200mm",
+      "stanproPageUrl": "https://stanpro2.folio3.site/recessed-step-light-057-15w-matte-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "rgb-led-strip-5m.jpg",
+      "sku": "LS-6001-RGB",
+      "productSlug": "rgb-led-strip-5m",
+      "stanproPageUrl": "https://stanpro2.folio3.site/path-light-017-20w-bronze",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "aluminium-led-profile-2m.jpg",
+      "sku": "LS-6002-AL",
+      "productSlug": "aluminium-led-profile-2m",
+      "stanproPageUrl": "https://stanpro2.folio3.site/deck-light-014-5w-matte-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "bedside-touch-lamp.jpg",
+      "sku": "LP-7001-WH",
+      "productSlug": "bedside-touch-lamp",
+      "stanproPageUrl": "https://stanpro2.folio3.site/stair-light-007-20w-silver",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "architect-desk-lamp.jpg",
+      "sku": "LP-7002-BK",
+      "productSlug": "architect-desk-lamp",
+      "stanproPageUrl": "https://stanpro2.folio3.site/recessed-step-light-089-20w-brushed-nickel",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "high-bay-ufo-led.jpg",
+      "sku": "CT-8001-150W",
+      "productSlug": "high-bay-ufo-led",
+      "stanproPageUrl": "https://stanpro2.folio3.site/tread-light-011-20w-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "panel-light-600x600.jpg",
+      "sku": "CT-8002-40W",
+      "productSlug": "panel-light-600x600",
+      "stanproPageUrl": "https://stanpro2.folio3.site/wall-step-light-030-15w-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "emergency-exit-sign.jpg",
+      "sku": "CT-8003-LED",
+      "productSlug": "emergency-exit-sign",
+      "stanproPageUrl": "https://stanpro2.folio3.site/led-step-light-008-20w-silver",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "industrial-bulkhead-light.jpg",
+      "sku": "CL-1003-IP65",
+      "productSlug": "industrial-bulkhead-light",
+      "stanproPageUrl": "https://stanpro2.folio3.site/outdoor-step-light-010-20w-matte-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "minimalist-track-spot-3.jpg",
+      "sku": "CL-1004-3SP",
+      "productSlug": "minimalist-track-spot-3",
+      "stanproPageUrl": "https://stanpro2.folio3.site/surface-step-light-025-20w-silver",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "glass-globe-pendant.jpg",
+      "sku": "PD-2202-GL",
+      "productSlug": "glass-globe-pendant",
+      "stanproPageUrl": "https://stanpro2.folio3.site/path-light-044-5w-white",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "updown-outdoor-wall-light.jpg",
+      "sku": "WL-3103-GR",
+      "productSlug": "updown-outdoor-wall-light",
+      "stanproPageUrl": "https://stanpro2.folio3.site/riser-light-031-8w-matte-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "mr16-led-bulb-6-pack.jpg",
+      "sku": "BT-5003-MR16",
+      "productSlug": "mr16-led-bulb-6-pack",
+      "stanproPageUrl": "https://stanpro2.folio3.site/deck-light-048-3w-silver",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "smart-wifi-ceiling-fan-light.jpg",
+      "sku": "CL-1005-WF",
+      "productSlug": "smart-wifi-ceiling-fan-light",
+      "stanproPageUrl": "https://stanpro2.folio3.site/smart-series-item",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "rechargeable-camping-lantern.jpg",
+      "sku": "LP-7003-RC",
+      "productSlug": "rechargeable-camping-lantern",
+      "stanproPageUrl": "https://stanpro2.folio3.site/path-light-069-3w-matte-black",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "dali-dimmable-panel-kit.jpg",
+      "sku": "CT-8004-DALI",
+      "productSlug": "dali-dimmable-panel-kit",
+      "stanproPageUrl": "https://stanpro2.folio3.site/stair-light-114-5w-white",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "winter-sale-banner.jpg",
+      "sku": null,
+      "productSlug": null,
+      "stanproPageUrl": "https://stanpro2.folio3.site/search",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    },
+    {
+      "filename": "outdoor-security-banner.jpg",
+      "sku": null,
+      "productSlug": null,
+      "stanproPageUrl": "https://stanpro2.folio3.site/fll-flood-light",
+      "sourceUrl": "https://628731-sb2.app.netsuite.com/core/media/media.nl?id=201179&c=628731_SB2&h=EsEvMrMaTip6m7q6_r__2JLVR_VHiFziv-AdAXglOXtNhbS8"
+    }
+  ]
+}

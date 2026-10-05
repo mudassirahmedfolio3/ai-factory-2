@@ -1,0 +1,18 @@
+# Static analysis configuration for the beauty-mini app.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    # Generated dart-dio client: not a dependency in M1 (ADR-002). It has its
+    # own analysis_options/pubspec and is analysed on its own once it is wired.
+    - packages/**
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    prefer_const_constructors: true
+    prefer_final_locals: true
+    always_declare_return_types: true

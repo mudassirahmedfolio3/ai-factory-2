@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  backend:
+    name: NestJS Jest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: lighting
+          POSTGRES_PASSWORD: lighting
+          POSTGRES_DB: lighting_retail
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lighting -d lighting_retail"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set DATABASE_URL
+        env:
+          POSTGRES_USER: lighting
+          POSTGRES_PASSWORD: lighting
+          POSTGRES_DB: lighting_retail
+        run: |
+          echo "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+      - run: npm run build
+      - run: npm test
+
+  flutter:
+    name: Flutter analyze & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run build_runner build
+      - run: flutter analyze
+      - run: flutter test
+
+  compose-config:
+    name: Docker Compose config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate local compose
+        env:
+          POSTGRES_USER: lighting
+          POSTGRES_PASSWORD: lighting
+          POSTGRES_DB: lighting_retail
+        run: docker compose -f docker-compose.yml config --quiet
+      - name: Validate staging compose (required env)
+        env:
+          POSTGRES_USER: lighting
+          POSTGRES_PASSWORD: ci-staging-postgres-secret
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: "5432"
+          POSTGRES_DB: lighting_retail
+          JWT_ACCESS_SECRET: ci-staging-jwt-access-secret-min-16-chars
+          JWT_REFRESH_SECRET: ci-staging-jwt-refresh-secret-min-16-chars
+        run: |
+          export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public"
+          docker compose -f docker-compose.staging.yml config --quiet

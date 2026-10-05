@@ -1,0 +1,39 @@
+// beauty-mini Prisma schema (PostgreSQL 16)
+// DESIGN ONLY for M1: the speed demo has no backend; the catalog is bundled in the Flutter app.
+// This schema fixes the future catalog shape to match the Dart model and the OpenAPI Product schema.
+// Variants/stock, users, carts, orders and payments are added contract-first in the milestones that need them.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlaceholderColor {
+  rose
+  sand
+  charcoal
+  amber
+  mint
+  lavender
+  coral
+  taupe
+}
+
+model Product {
+  id               String           @id @db.VarChar(64) // URL-safe slug, e.g. "lipstick"
+  name             String           @db.VarChar(120)
+  description      String           @db.VarChar(500)
+  priceMinor       Int              @map("price_minor") // integer minor units (cents); never float
+  currency         String           @default("USD") @db.Char(3) // ISO 4217
+  placeholderColor PlaceholderColor @map("placeholder_color")
+  isActive         Boolean          @default(true) @map("is_active")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  @@index([isActive, name])
+  @@map("products")
+}

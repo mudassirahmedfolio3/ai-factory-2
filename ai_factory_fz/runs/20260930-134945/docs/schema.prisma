@@ -1,0 +1,74 @@
+// Prisma schema for the lighting catalog (future backend; not built in M1).
+// Money: integer minor units + ISO 4217 code. Stock per product until variants arrive (ADR-005).
+// CHECK constraints are added via raw SQL in the first migration:
+//   products: "priceMinor" > 0; "salePriceMinor" IS NULL OR ("salePriceMinor" > 0 AND "salePriceMinor" < "priceMinor");
+//             "stockQuantity" >= 0; currency ~ '^[A-Z]{3}$'
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  slug      String    @unique @db.VarChar(100)
+  name      String    @db.VarChar(100)
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@map("categories")
+}
+
+model Product {
+  id             String                @id @default(uuid()) @db.Uuid
+  sku            String                @unique @db.VarChar(64)
+  name           String                @db.VarChar(200)
+  brand          String                @db.VarChar(100)
+  description    String
+  categoryId     String                @db.Uuid
+  category       Category              @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  priceMinor     Int
+  salePriceMinor Int?
+  currency       String                @default("GBP") @db.Char(3)
+  stockQuantity  Int                   @default(0)
+  imageUrl       String                @db.VarChar(2048)
+  imageAlt       String                @db.VarChar(300)
+  isActive       Boolean               @default(true)
+  specification  ProductSpecification?
+  createdAt      DateTime              @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime              @updatedAt @db.Timestamptz(3)
+
+  @@index([categoryId])
+  @@index([isActive, name, id])
+  @@map("products")
+}
+
+model ProductSpecification {
+  productId         String   @id @db.Uuid
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  wattageW          Int?
+  lumens            Int?
+  colorTemperatureK Int?
+  voltageV          Int?
+  lightType         String?  @db.VarChar(50)
+  dimmable          Boolean?
+  material          String?  @db.VarChar(100)
+  finish            String?  @db.VarChar(100)
+  widthMm           Int?
+  heightMm          Int?
+  depthMm           Int?
+  diameterMm        Int?
+  weightG           Int?
+  ipRating          String?  @db.VarChar(4)
+  bulbType          String?  @db.VarChar(20)
+  bulbIncluded      Boolean?
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("product_specifications")
+}

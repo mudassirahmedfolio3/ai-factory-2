@@ -67,6 +67,6 @@ def test_coding_worker_allows_web_for_developers_not_qa(tmp_path):
     reg = registry()
     worker = ClaudeCodeWorker(reg, load_config("tasks"), ws, SandboxRunner(ws, reg.profile.sandbox, SandboxMode.DOCKER))
     for agent, expected in (("backend_developer", True), ("qa_engineer", False)):
-        cmd = worker.build_command(Job("build", agent, "implement_work_item", {}, WorkItemResult, ".", None), "m", "s")
+        cmd = worker.build_command(Job("build", agent, "implement_work_item", {}, WorkItemResult, ".", None), "m", "s", "prompt")
         allowed = cmd[cmd.index("--allowedTools") + 1: cmd.index("--disallowedTools")]
         assert ("WebSearch" in allowed and "WebFetch" in allowed) is expected, agent

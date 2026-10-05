@@ -1,0 +1,56 @@
+# Product brief: ShopEase — Mobile Shopping App (Release 2)
+
+ShopEase is our customer-facing mobile store: a comprehensive e-commerce app that lets people discover products, shop as a guest or signed-in customer, and complete purchases with confidence. Release 2 builds on the existing app (guest catalog and API integration from M1/M2) by adding the shopper journeys we need for credible demos and early pilots—accounts, a real home experience, search and filters, wishlist, full checkout with promotions, order history, and support—while keeping payments and notifications demo-safe until we are ready for production.
+
+## Target users
+- Everyday retail shoppers who browse and buy on Android phones
+- First-time visitors who want to explore the catalog without creating an account (guest mode)
+- Returning customers who register to save cart context, wishlists, and order history across sessions
+- Price-conscious shoppers who compare by category, brand, price, and availability and use coupon codes at checkout
+- Customers who need order status visibility (processing, shipped, delivered) and a clear way to contact support
+
+## Business goals
+- Increase conversion by offering both frictionless guest shopping and signed-in persistence for cart, wishlist, and order history
+- Present a professional storefront narrative via home banners, featured products, new arrivals, and category entry—not only a flat product list
+- Improve product findability with keyword search, sort (price, newest), and filters (price, category, brand, availability where seed data supports it)
+- Drive repeat engagement through wishlist and order tracking so customers return to check status and buy again
+- Support promotional campaigns with validated coupon codes at checkout against seeded promotions
+- Deliver a client-ready demo that runs on Android emulator with passing Flutter analyze/test and server tests for new endpoints
+- Extend backend (NestJS OpenAPI + Prisma) only as needed for auth, orders, and coupons while keeping analyze and tests green
+- Document Release 2 scope in docs/PRD backlog and complete at least one QA round before calling the release done
+
+## Key features
+- Accounts (FR-01 lite): register, log in, log out; secure token storage; optional password reset stub
+- Guest + signed-in (FR-02): keep guest browse and cart; signed-in users persist cart and/or order history in session/API as feasible
+- Home (FR-03): home route with banners, featured products, new arrivals, and category entry
+- Search and filters (FR-05–FR-08): keyword search; sort by price and newest; filters for price and category plus brand and availability where seed data supports it
+- Wishlist (FR-12): save and remove favorites (local or API-backed)
+- Checkout flow (FR-13–FR-15): contact and shipping address, order review, place order with confirmation screen and order number; mock payment / PaymentIntent stub acceptable
+- Order history and tracking (FR-16–FR-17): list past orders and show status progression processing → shipped → delivered
+- Promotions (FR-19): apply coupon code at checkout validated against seed promos
+- Support (FR-20): in-app contact/support screen with a clear contact channel
+- Backend: extend NestJS OpenAPI and Prisma as needed for orders, auth slice, and coupons
+- Baseline continuity: M1 guest catalog and M2 API integration remain the foundation for all Release 2 work
+
+## Constraints
+- Continue on the existing ShopEase codebase; do not replace M1/M2 baseline behavior without explicit need
+- Flutter app must run on Android emulator (not a counter template)
+- flutter analyze and flutter test must pass; server tests must pass for new endpoints
+- Demo-safe operations only: mock payment / test gateway—no real payment processor keys
+- Production push notifications (FR-18) out of scope—log or mock only if touched
+- Full admin panel (AR-01–AR-09) out of scope for this release pass; document as follow-up unless time allows minimal read-only admin API
+- Release 2 adds shopper-facing depth and richer demo narrative; scope is fixed to the ten priority feature areas unless backlog is formally updated
+
+## Open questions
+- Brand and visual identity: official app name in stores, logo, and color palette beyond “ShopEase” working title
+- Product catalog scope: which categories, brands, and inventory rules define the seed data for filters and availability
+- Geography and fulfillment: which countries/regions we ship to, shipping rates, and tax display rules for checkout
+- Account policy: minimum password rules, email verification required or optional, and social login (Google/Apple) in a future release or now
+- Guest vs signed-in cart: on login, merge guest cart into account cart or keep separate—preferred customer experience
+- Wishlist persistence: local-only for guests and API for signed-in users, or API for both when authenticated
+- Coupon rules: single code per order, stacking, expiry, minimum order value, and category/product exclusions in seed promos
+- Order tracking detail: status labels only vs carrier name and tracking number in Release 2
+- Support channel: email, phone, web form, or chat—and expected response-time messaging on the support screen
+- Password reset stub: email link simulation only vs in-app flow with mock backend
+- Minimal read-only admin API: worth doing in this pass if time allows, and which read-only views (orders, products, coupons) matter most
+- Legal and compliance: privacy policy, terms of sale, and cookie/consent copy for demo vs pilot users

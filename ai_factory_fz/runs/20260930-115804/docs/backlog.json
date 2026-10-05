@@ -1,0 +1,115 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Browse beauty products in a grid",
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "View product detail",
+      "story_ids": [
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Add to cart with in-memory count",
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Scaffold Flutter project with basic folder structure",
+      "description": "Set up a new Flutter 3.x project with Riverpod, go_router and freezed/json_serializable dependencies. Configure Android emulator support. Structure the project with models, screens, providers and utils folders. Team picks sensible style defaults (colors, typography, spacing) without approval. Goal: `flutter run` works immediately with no extra setup.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Create hardcoded product data model and local catalog",
+      "description": "Define a Product model (id, name, priceInCents, currency code USD, shortDescription, placeholderColor). Create a hardcoded local catalog with exactly 8 beauty products: lipstick, foundation, mascara, face serum, moisturizer, perfume, nail polish and makeup brush set. Each product has a name, price in integer cents (e.g., 1999 = $19.99), short description and a placeholder color. Store in a simple Dart constant or local provider. No API calls, no persistence. Use freezed/json_serializable for type safety.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Build browse screen with product grid and navigation",
+      "description": "Create the browse screen (BrowseScreen) with a GridView of 8 product tiles. Each tile displays the product name, price formatted as USD from integer cents (e.g., 1999 cents shows $19.99), and a placeholder color block. Tiles are tappable with at least 48x48 dp touch targets. Use go_router to navigate to product detail on tap. Add app bar with title and (initially empty) cart count badge. No network calls, no images. Verify text is readable against placeholder colors. Include semantic labels for accessibility.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Build product detail screen with back navigation",
+      "description": "Create the product detail screen (ProductDetailScreen) that shows the tapped product's name, USD price (formatted from integer cents), and short description. Add a back button and support system back gesture to return to the browse screen. Ensure product name and price match the tile tapped on browse screen. Use go_router for navigation. No network calls, no images. Implement tappable buttons with at least 48x48 dp touch targets. Include semantic labels.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Implement in-memory cart with count badge and add-to-cart button",
+      "description": "Create a Riverpod provider (CartNotifier) to hold an in-memory list of cart items. Add an 'Add to cart' button on the product detail screen that increments the cart count. Update the browse screen app bar badge to show the total cart count (counting items, not quantities). Ensure the cart is cleared on app restart (in-memory only, no persistence). Ensure no badge or checkout options appear when the cart is empty. No API calls, no persistence, no quantity editing or removal.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Flutter Beauty Shop Speed Demo",
+      "goal": "Deliver a working Flutter MVP that runs on Android emulator in under 10 minutes with no backend, auth or payments. Internal team can see the core browse-to-detail-to-cart flow with 8 hardcoded beauty products, validate the experience, and decide what to build next. Developers have a clear, extensible base for future milestones.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,320 @@
+openapi: 3.1.0
+info:
+  title: ShopEase API
+  version: 0.1.0-m1
+  description: >-
+    ShopEase M1 Speed Demo contract. Contains the health check (infrastructure)
+    and two optional read-only catalog operations. The M1 Flutter app does not
+    call these operations; it reads a bundled mock catalog whose JSON shape
+    equals ProductDetail. Money is always integer minor units with an ISO 4217
+    currency code; floating-point money is never used. Errors use the shared
+    Error schema { statusCode, error, message }.
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: http://10.0.2.2:3000
+    description: Local staging from the Android emulator (debug builds only)
+tags:
+  - name: health
+    description: Infrastructure health check
+  - name: catalog
+    description: Public read-only product catalog
+security: []
+paths:
+  /api/v1/health:
+    get:
+      tags: [health]
+      operationId: getHealth
+      summary: Health check
+      description: Returns 200 when the API is up and the database is reachable, otherwise 503.
+      security: []
+      responses:
+        '200':
+          description: API is healthy and the database is reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /api/v1/products:
+    get:
+      tags: [catalog]
+      operationId: listProducts
+      summary: List active products
+      description: Paginated list of active products ordered by name ascending. Public; no authentication.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A page of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/v1/products/{productId}:
+    get:
+      tags: [catalog]
+      operationId: getProduct
+      summary: Get product detail
+      description: Product detail including all active variants with per-variant price and stock. Public; no authentication.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token (15 min). Reserved for later milestones; no M1 operation requires it.
+  parameters:
+    Page:
+      name: page
+      in: query
+      required: false
+      description: 1-based page number
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Items per page
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Product identifier
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 400
+            error: Bad Request
+            message: pageSize must not be greater than 100
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 404
+            error: Not Found
+            message: Product not found
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 500
+            error: Internal Server Error
+            message: An unexpected error occurred
+    ServiceUnavailable:
+      description: Database unreachable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            statusCode: 503
+            error: Service Unavailable
+            message: Database unreachable
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [statusCode, error, message]
+      properties:
+        statusCode:
+          type: integer
+          format: int32
+          description: HTTP status code
+          example: 404
+        error:
+          type: string
+          description: HTTP reason phrase
+          example: Not Found
+        message:
+          type: string
+          description: Human-readable message; multiple validation messages are joined with '; '
+          example: Product not found
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status, database, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        database:
+          type: string
+          enum: [up]
+        timestamp:
+          type: string
+          format: date-time
+    Money:
+      type: object
+      additionalProperties: false
+      description: Amount in integer minor units (e.g. cents) with ISO 4217 currency code. Never a float.
+      required: [amountMinor, currency]
+      properties:
+        amountMinor:
+          type: integer
+          format: int32
+          minimum: 0
+          example: 1999
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: USD
+    ProductSummary:
+      type: object
+      additionalProperties: false
+      required: [id, slug, name, imageUrl, imageAlt, priceFrom, inStock]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          example: classic-cotton-tee
+        name:
+          type: string
+          example: Classic Cotton Tee
+        imageUrl:
+          type: [string, 'null']
+          description: Image URL or bundled asset path; null means render a placeholder
+          example: assets/images/products/classic-cotton-tee.webp
+        imageAlt:
+          type: string
+          description: Accessible description of the image
+          example: White cotton t-shirt on a plain background
+        priceFrom:
+          $ref: '#/components/schemas/Money'
+        inStock:
+          type: boolean
+          description: True when at least one active variant has stockQuantity greater than 0
+    ProductPage:
+      type: object
+      additionalProperties: false
+      required: [items, total, page, pageSize]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Total number of matching products
+        page:
+          type: integer
+          format: int32
+          minimum: 1
+        pageSize:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+    ProductVariant:
+      type: object
+      additionalProperties: false
+      required: [id, sku, size, color, price, stockQuantity, inStock]
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+          example: TEE-CLS-WHT-M
+        size:
+          type: [string, 'null']
+          example: M
+        color:
+          type: [string, 'null']
+          example: White
+        price:
+          $ref: '#/components/schemas/Money'
+        stockQuantity:
+          type: integer
+          format: int32
+          minimum: 0
+        inStock:
+          type: boolean
+          description: True when stockQuantity is greater than 0
+    ProductDetail:
+      type: object
+      additionalProperties: false
+      required: [id, slug, name, description, imageUrl, imageAlt, priceFrom, inStock, sizes, colors, variants]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: [string, 'null']
+        imageAlt:
+          type: string
+        priceFrom:
+          $ref: '#/components/schemas/Money'
+        inStock:
+          type: boolean
+        sizes:
+          type: array
+          description: Distinct sizes across active variants, in display order
+          items:
+            type: string
+        colors:
+          type: array
+          description: Distinct colors across active variants, in display order
+          items:
+            type: string
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'

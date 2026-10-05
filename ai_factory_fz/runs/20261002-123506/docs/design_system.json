@@ -1,0 +1,439 @@
+{
+  "colors": [
+    {
+      "name": "primary",
+      "light": "#8B5E3C",
+      "dark": "#D4A574"
+    },
+    {
+      "name": "primary_container",
+      "light": "#F5E6D8",
+      "dark": "#3D2A1C"
+    },
+    {
+      "name": "on_primary",
+      "light": "#FFFFFF",
+      "dark": "#1A120C"
+    },
+    {
+      "name": "secondary",
+      "light": "#6B7C6E",
+      "dark": "#A8B8AB"
+    },
+    {
+      "name": "secondary_container",
+      "light": "#E4EBE5",
+      "dark": "#2A332C"
+    },
+    {
+      "name": "background",
+      "light": "#FAF8F5",
+      "dark": "#141210"
+    },
+    {
+      "name": "surface",
+      "light": "#FFFFFF",
+      "dark": "#1E1B18"
+    },
+    {
+      "name": "surface_variant",
+      "light": "#F0ECE6",
+      "dark": "#2A2622"
+    },
+    {
+      "name": "on_background",
+      "light": "#1C1917",
+      "dark": "#F5F0EB"
+    },
+    {
+      "name": "on_surface",
+      "light": "#1C1917",
+      "dark": "#F5F0EB"
+    },
+    {
+      "name": "on_surface_variant",
+      "light": "#5C5650",
+      "dark": "#B8B0A6"
+    },
+    {
+      "name": "outline",
+      "light": "#C9C2B8",
+      "dark": "#4A453F"
+    },
+    {
+      "name": "error",
+      "light": "#B3261E",
+      "dark": "#F2B8B5"
+    },
+    {
+      "name": "on_error",
+      "light": "#FFFFFF",
+      "dark": "#601410"
+    },
+    {
+      "name": "error_container",
+      "light": "#F9DEDC",
+      "dark": "#8C1D18"
+    },
+    {
+      "name": "success",
+      "light": "#2E7D4F",
+      "dark": "#81C995"
+    },
+    {
+      "name": "warning",
+      "light": "#B86E00",
+      "dark": "#F5C26B"
+    },
+    {
+      "name": "star_filled",
+      "light": "#C9A227",
+      "dark": "#E8C547"
+    },
+    {
+      "name": "star_empty",
+      "light": "#D6D0C8",
+      "dark": "#4A453F"
+    },
+    {
+      "name": "price",
+      "light": "#5A3E2B",
+      "dark": "#E8C9A8"
+    },
+    {
+      "name": "badge",
+      "light": "#8B5E3C",
+      "dark": "#D4A574"
+    },
+    {
+      "name": "scrim",
+      "light": "#00000099",
+      "dark": "#000000CC"
+    },
+    {
+      "name": "disabled",
+      "light": "#9E968C",
+      "dark": "#6B645C"
+    },
+    {
+      "name": "divider",
+      "light": "#E8E2DA",
+      "dark": "#332E29"
+    }
+  ],
+  "typography": [
+    {
+      "name": "display_large",
+      "size": 32.0,
+      "weight": 600,
+      "line_height": 40.0
+    },
+    {
+      "name": "headline_large",
+      "size": 24.0,
+      "weight": 600,
+      "line_height": 32.0
+    },
+    {
+      "name": "headline_medium",
+      "size": 20.0,
+      "weight": 600,
+      "line_height": 28.0
+    },
+    {
+      "name": "title_large",
+      "size": 18.0,
+      "weight": 600,
+      "line_height": 24.0
+    },
+    {
+      "name": "title_medium",
+      "size": 16.0,
+      "weight": 600,
+      "line_height": 22.0
+    },
+    {
+      "name": "title_small",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "body_large",
+      "size": 16.0,
+      "weight": 400,
+      "line_height": 24.0
+    },
+    {
+      "name": "body_medium",
+      "size": 14.0,
+      "weight": 400,
+      "line_height": 20.0
+    },
+    {
+      "name": "body_small",
+      "size": 12.0,
+      "weight": 400,
+      "line_height": 16.0
+    },
+    {
+      "name": "label_large",
+      "size": 14.0,
+      "weight": 600,
+      "line_height": 20.0
+    },
+    {
+      "name": "label_medium",
+      "size": 12.0,
+      "weight": 600,
+      "line_height": 16.0
+    },
+    {
+      "name": "label_small",
+      "size": 11.0,
+      "weight": 500,
+      "line_height": 14.0
+    },
+    {
+      "name": "price_large",
+      "size": 22.0,
+      "weight": 700,
+      "line_height": 28.0
+    },
+    {
+      "name": "price_medium",
+      "size": 16.0,
+      "weight": 700,
+      "line_height": 22.0
+    }
+  ],
+  "spacing": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64
+  ],
+  "corner_radii": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    24
+  ],
+  "shared_widgets": [
+    {
+      "name": "AppTopBar",
+      "description": "Material app bar with title, optional leading back (≥48dp), and trailing actions (e.g. cart icon with badge count). Uses surface/on_surface tokens; title uses title_large."
+    },
+    {
+      "name": "ProductCard",
+      "description": "Tappable catalog card (≥48dp hit area) showing primary image or ImagePlaceholder, product name (title_small, max 2 lines), formatted price via PriceText, and optional category chip. Semantics: product name + price as button label."
+    },
+    {
+      "name": "PriceText",
+      "description": "Formats integer minor units (cents) + ISO 4217 currency to display string without floats (e.g. 1999 USD → $19.99). Uses price color token and price_medium/price_large style."
+    },
+    {
+      "name": "SearchField",
+      "description": "Full-width text field for case-insensitive catalog search. Clear affordance (≥48dp) restores prior filter-only results. Hint and semantics: Search jewellery."
+    },
+    {
+      "name": "FilterChipBar",
+      "description": "Horizontal scroll of filter chips for category (earrings|necklaces|bracelets|rings), metal (gold-tone|silver-tone|rose-gold), occasion (everyday|work|gift|party), and price-range entry. Chips ≥48dp tall; selected state uses primary_container."
+    },
+    {
+      "name": "PriceRangeFilter",
+      "description": "Sheet or dialog to set minPriceCents and maxPriceCents as integers. Apply/Clear actions ≥48dp. Display bounds via PriceText."
+    },
+    {
+      "name": "StarRating",
+      "description": "Read-only 1–5 star display using star_filled/star_empty tokens. Aggregate average on detail header; per-review stars in ReviewTile. Semantic label includes numeric rating."
+    },
+    {
+      "name": "ReviewTile",
+      "description": "List row for one mock review: StarRating + review body (body_medium). Used in ProductDetailScreen review list."
+    },
+    {
+      "name": "PrimaryButton",
+      "description": "Filled CTA (e.g. Add to cart) min height 48dp, full-width on mobile. Disabled when out of stock using disabled token. Semantics match visible label."
+    },
+    {
+      "name": "QuantityStepper",
+      "description": "Minus / quantity / plus controls, each touch target ≥48dp. Decrease to 0 removes cart line. Never allows quantity below 0. Semantics: Decrease quantity, Increase quantity, Quantity N."
+    },
+    {
+      "name": "CartLineItem",
+      "description": "Cart row: product name, unit PriceText snapshot (cents+currency at add time), QuantityStepper, line total (qty × unitPriceCents integer math)."
+    },
+    {
+      "name": "CartBadge",
+      "description": "Overlay badge on cart icon showing sum of line quantities; hidden when cart empty. Contrast WCAG AA on badge/on_primary."
+    },
+    {
+      "name": "ImagePlaceholder",
+      "description": "Neutral surface_variant block with jewellery icon when asset missing. Requires semanticLabel (product name or Jewellery image placeholder)."
+    },
+    {
+      "name": "EmptyState",
+      "description": "Centered illustration/icon + title (title_medium) + body (body_medium) + optional clear-filters action. Used for zero search/filter results, empty reviews, empty cart."
+    },
+    {
+      "name": "ErrorState",
+      "description": "Error message with Retry button (≥48dp). Shown when mock catalog load fails or product id not found."
+    },
+    {
+      "name": "LoadingState",
+      "description": "Centered CircularProgressIndicator with optional label Loading jewellery… Semantics: busy."
+    },
+    {
+      "name": "StockBadge",
+      "description": "Chip showing In stock (success) or Out of stock (error/on_surface_variant). Controls Add to cart enabled state."
+    },
+    {
+      "name": "MetaChip",
+      "description": "Read-only chip for category, metal, or occasion labels on detail and optionally on cards."
+    },
+    {
+      "name": "CartSummaryBar",
+      "description": "Bottom sticky bar on cart with item count and cart total PriceText (sum of line totals in cents). Min height 48dp content area."
+    }
+  ],
+  "screens": [
+    {
+      "id": "SCR-01",
+      "name": "ProductListScreen",
+      "route": "/products",
+      "purpose": "Browse the seeded local mock Womens Jewellery catalog (~12–20 SKUs including Tropical Earring at 1999 USD cents). Supports case-insensitive search on name/searchable text and AND filters for price range (min/max cents), category, metal, and occasion. Preserves search/filter state when returning from detail. Initial route of the M1 demo.",
+      "components": [
+        "AppTopBar",
+        "CartBadge",
+        "SearchField",
+        "FilterChipBar",
+        "PriceRangeFilter",
+        "ProductCard",
+        "PriceText",
+        "ImagePlaceholder",
+        "LoadingState",
+        "EmptyState",
+        "ErrorState"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "empty",
+        "error"
+      ],
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "SCR-02",
+      "name": "ProductDetailScreen",
+      "route": "/products/:id",
+      "purpose": "Show a single mock product: name, description, price (cents + USD via PriceText), category, metal, occasion, stock/availability, aggregate star rating (1–5), and mock review list (or empty reviews). Add to cart (≥48dp) for in-stock items increments in-memory cart quantity. System/in-app back returns to list with search/filter preserved.",
+      "components": [
+        "AppTopBar",
+        "CartBadge",
+        "ImagePlaceholder",
+        "PriceText",
+        "StarRating",
+        "ReviewTile",
+        "MetaChip",
+        "StockBadge",
+        "PrimaryButton",
+        "LoadingState",
+        "EmptyState",
+        "ErrorState"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "empty_reviews",
+        "error",
+        "out_of_stock"
+      ],
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "SCR-03",
+      "name": "CartScreen",
+      "route": "/cart",
+      "purpose": "Session-only in-memory cart: line items with name, unit price snapshot (cents + currency), QuantityStepper (≥48dp); decrease to 0 removes line; line and cart totals use integer minor-unit math only. Empty on cold start; no persistence, auth, or checkout in M1.",
+      "components": [
+        "AppTopBar",
+        "CartLineItem",
+        "QuantityStepper",
+        "PriceText",
+        "CartSummaryBar",
+        "EmptyState",
+        "LoadingState",
+        "ErrorState"
+      ],
+      "states": [
+        "loading",
+        "success",
+        "empty",
+        "error"
+      ],
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "navigation": [
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-02",
+      "trigger": "Tap ProductCard for a listed SKU (e.g. Tropical Earring) → go_router push /products/:id"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-01",
+      "trigger": "System back or AppTopBar back → pop; ProductListNotifier retains q and filter state for the session"
+    },
+    {
+      "from_screen": "SCR-01",
+      "to_screen": "SCR-03",
+      "trigger": "Tap cart action with CartBadge in AppTopBar → go_router push /cart"
+    },
+    {
+      "from_screen": "SCR-02",
+      "to_screen": "SCR-03",
+      "trigger": "Tap cart action in AppTopBar, or after Add to cart optionally open cart → push /cart"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-01",
+      "trigger": "System/AppTopBar back from cart → pop to previous (typically ProductListScreen); continue shopping empty-state CTA → go /products"
+    },
+    {
+      "from_screen": "SCR-03",
+      "to_screen": "SCR-02",
+      "trigger": "Optional tap on CartLineItem name → push /products/:id for that product id"
+    }
+  ],
+  "accessibility": [
+    "Minimum interactive touch target 48×48 dp for Add to cart, filter chips, search clear, cart icon, quantity steppers, Retry, and Clear filters",
+    "Text and icon contrast meet WCAG AA: on_background/on_surface vs background/surface ≥4.5:1 for body; large text ≥3:1; primary CTA on_primary vs primary ≥4.5:1",
+    "All images and icons expose semantic labels (product name for catalog/detail imagery; Cart, Search, Clear search, Back, Decrease quantity, Increase quantity)",
+    "ProductCard announces as button with name and formatted price; StarRating announces average or review rating numerically (e.g. 4.5 out of 5 stars)",
+    "LoadingState sets Semantics busy; ErrorState and EmptyState expose readable titles and actionable Retry/Clear labels",
+    "QuantityStepper never allows values below 0; removing a line announces item removed where platform semantics allow",
+    "Focus order: search → filters → product grid → cart; on detail: image → meta → reviews → Add to cart; support screen readers and TalkBack/VoiceOver",
+    "Do not rely on color alone for stock or filter selection: StockBadge and selected chips include text labels",
+    "PriceText uses locale-aware currency formatting from integer cents only—no float money math affecting announced values"
+  ]
+}

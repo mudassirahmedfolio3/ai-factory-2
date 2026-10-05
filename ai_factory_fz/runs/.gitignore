@@ -1,0 +1,12 @@
+# Run workspaces: track source, docs, and state; omit heavy/generated trees.
+**/node_modules/
+**/.dart_tool/
+**/build/
+**/.gradle/
+**/android/.gradle/
+**/android/app/build/
+**/ios/Pods/
+**/.env
+**/.env.local
+**/*.log
+**/.git/

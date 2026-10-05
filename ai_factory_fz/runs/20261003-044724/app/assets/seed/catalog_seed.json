@@ -1,0 +1,112 @@
+{
+  "products": [
+    {
+      "id": "seed-product-1",
+      "name": "Citrus Hand Soap",
+      "categorySlug": "personal-care",
+      "imageUrl": "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 799,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-2",
+      "name": "Aroma Candle",
+      "categorySlug": "home-lifestyle",
+      "imageUrl": "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 2499,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-3",
+      "name": "Bamboo Toothbrush Set",
+      "categorySlug": "everyday-essentials",
+      "imageUrl": "https://images.unsplash.com/photo-1583947581924-a09ef8d9020c?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 1299,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-4",
+      "name": "Silk Sleep Mask",
+      "categorySlug": "gift-friendly",
+      "imageUrl": "https://images.unsplash.com/photo-1641533444891-f1b645dd5bb6?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 1899,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-5",
+      "name": "Ceramic Pour-Over Kit",
+      "categorySlug": "home-lifestyle",
+      "imageUrl": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 4599,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-6",
+      "name": "Hydrating Face Serum",
+      "categorySlug": "personal-care",
+      "imageUrl": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 5299,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-7",
+      "name": "Linen Table Runner",
+      "categorySlug": "home-lifestyle",
+      "imageUrl": "https://images.unsplash.com/photo-1616628182509-6f228f77f3f6?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 3199,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-8",
+      "name": "Travel Wellness Gift Box",
+      "categorySlug": "gift-friendly",
+      "imageUrl": "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 6899,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-9",
+      "name": "Compact Picnic Set",
+      "categorySlug": "gift-friendly",
+      "imageUrl": "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 7999,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-10",
+      "name": "Premium Scented Diffuser",
+      "categorySlug": "home-lifestyle",
+      "imageUrl": "https://images.unsplash.com/photo-1601506521937-0121fc6b9ee9?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 9999,
+      "currency": "USD",
+      "isAvailable": false
+    },
+    {
+      "id": "seed-product-11",
+      "name": "Deluxe Grooming Kit",
+      "categorySlug": "personal-care",
+      "imageUrl": "https://images.unsplash.com/photo-1621607512214-68297480165e?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 11999,
+      "currency": "USD",
+      "isAvailable": true
+    },
+    {
+      "id": "seed-product-12",
+      "name": "Signature Celebration Hamper",
+      "categorySlug": "gift-friendly",
+      "imageUrl": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80",
+      "priceMinor": 14999,
+      "currency": "USD",
+      "isAvailable": true
+    }
+  ]
+}

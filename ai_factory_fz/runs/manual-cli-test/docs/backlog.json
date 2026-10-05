@@ -1,0 +1,217 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "User Authentication (Sign In & Register)",
+      "story_ids": [
+        "US-001"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Product Catalog & Search",
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "E-03",
+      "title": "Product Detail & Variants",
+      "story_ids": [
+        "US-004"
+      ]
+    },
+    {
+      "id": "E-04",
+      "title": "Shopping Cart",
+      "story_ids": [
+        "US-005",
+        "US-006"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Backend: User registration and sign-in with JWT auth",
+      "description": "Implement POST /auth/register and POST /auth/signin endpoints with email/password validation, password hashing (bcrypt/argon2), JWT token generation with expiry, and session persistence. Include field-level validation for email format, uniqueness, and password length (min 8 chars). Return generic error message for incorrect credentials.",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Frontend: Sign in and register screens with form validation",
+      "description": "Create Sign in/Register screen in Flutter using Riverpod for state management. Implement email, password and name input fields with local validation feedback. Handle sign-in/register form submission, display error messages for invalid input or auth failure. Persist JWT token to secure device storage (flutter_secure_storage). Auto-restore session on app launch.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Backend: Product catalog endpoints (list by category, pagination, detail)",
+      "description": "Implement GET /categories, GET /categories/{id}/subcategories, GET /products?category={id}&subcategory={id}&page={page} (paginated, 20 per page), and GET /products/{id} endpoints. Return product name, main photo URL, price (in cents USD), description, available sizes/colors, and stock status per variant. Include error handling for not found and network errors.",
+      "epic_id": "E-02",
+      "component": "backend",
+      "story_ids": [
+        "US-002",
+        "US-004"
+      ],
+      "depends_on": [],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Backend: Product search endpoint",
+      "description": "Implement GET /products/search?q={keyword}&page={page} endpoint supporting case-insensitive keyword search on product name and description. Return paginated results in the same format as category list. Validate input to reject empty or whitespace-only queries without running a search.",
+      "epic_id": "E-02",
+      "component": "backend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Frontend: Category browse, product list, and search screens",
+      "description": "Implement Browse screen with category/subcategory selection leading to product list. Display product cards with main photo, name, and price (formatted as $X.XX). Implement infinite scroll pagination on product list. Add search input field with keyword search, handling empty queries and no-results state. Implement sorting UI (price low-high, high-low, newest) with local state management.",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003",
+        "WI-004"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-006",
+      "title": "Backend: Product detail with variants and stock status",
+      "description": "Ensure GET /products/{id} endpoint returns all variant combinations (sizes, colors) with individual stock levels. Mark out-of-stock variants distinctly. Return up to 6 photo URLs per product for gallery display. Include error handling for product not found.",
+      "epic_id": "E-03",
+      "component": "backend",
+      "story_ids": [
+        "US-004"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 2,
+      "status": "todo"
+    },
+    {
+      "id": "WI-007",
+      "title": "Frontend: Product detail screen with photo gallery and variant selection",
+      "description": "Implement Product detail screen displaying product name, description, price in USD (before tax), photo gallery with swipe navigation, and size/color selectors. Disable out-of-stock variant combinations (grey out visually and block selection). Disable Add to cart button until a valid in-stock variant is selected. Show 'Out of stock' label when all variants are out of stock. Handle product not found error.",
+      "epic_id": "E-03",
+      "component": "frontend",
+      "story_ids": [
+        "US-004"
+      ],
+      "depends_on": [
+        "WI-006",
+        "WI-002"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-008",
+      "title": "Backend: Cart endpoints (GET, POST add/update, DELETE remove)",
+      "description": "Implement GET /cart (requires auth), POST /cart/items (add variant with quantity, requires auth), PATCH /cart/items/{id} (update quantity, requires auth), DELETE /cart/items/{id} (remove line, requires auth). Validate that quantities never exceed available stock. Return full cart with all lines (product name, photo, size, color, unit price in cents, quantity, line total in cents) and summary (subtotal, shipping, tax, total). Apply $5.00 shipping for subtotals under $75.00, free shipping for $75.00+. Calculate tax as flat rate applied to subtotal. Prevent unsigned-in users from accessing cart.",
+      "epic_id": "E-04",
+      "component": "backend",
+      "story_ids": [
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-001",
+        "WI-003"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-009",
+      "title": "Frontend: Add to cart flow with auth redirect",
+      "description": "Implement Add to cart button on Product detail screen. When user not signed in, redirect to Sign in/Register screen, then return to product detail after auth success. When signed in, POST variant selection to /cart/items, increment quantity if variant already in cart, display confirmation message, update cart badge count. Handle out-of-stock quantity limit (show message if max quantity reached).",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-005"
+      ],
+      "depends_on": [
+        "WI-008",
+        "WI-007",
+        "WI-002"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-010",
+      "title": "Frontend: Cart screen view and edit with live summary",
+      "description": "Implement Cart screen showing all cart lines with product name, photo, size, color, unit price (formatted as $X.XX), quantity selector, and line total. Display cart summary with subtotal, shipping (conditional $5.00 or free), sales tax (flat configured rate), and total, all formatted in USD cents. Implement quantity increase/decrease and remove item actions with immediate persistence and summary update. Show empty-cart state with continue shopping button. Ensure cart persists across sign out/sign in.",
+      "epic_id": "E-04",
+      "component": "frontend",
+      "story_ids": [
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-008",
+        "WI-002"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "User Authentication",
+      "goal": "End-to-end user registration, sign-in, and session persistence. Verify user can register with email/password, sign in, maintain session across app close/reopen, and see auth errors.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Product Catalog, Search, Cart and Complete Core Flow",
+      "goal": "Verify user can browse products by category/subcategory, search by keyword, view product details with photos and variants, add items to cart, view cart with pricing calculations, and edit cart quantities. Confirm all 10 API operations work and core journey is testable end-to-end.",
+      "work_item_ids": [
+        "WI-003",
+        "WI-004",
+        "WI-005",
+        "WI-006",
+        "WI-007",
+        "WI-008",
+        "WI-009",
+        "WI-010"
+      ]
+    }
+  ]
+}

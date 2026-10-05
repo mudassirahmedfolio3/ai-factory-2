@@ -1,0 +1,57 @@
+# Release 2 on lighting-retail run (Pass 2 after pipeline.client M1+M2).
+# Set via merge_release2_brief.py --pipeline pipeline.client.release2.lighting
+
+phases:
+  discovery: true
+  planning: true
+  design: true
+  build: true
+  release: false
+
+scope:
+  guidance: >
+    RELEASE 2 on the existing lighting-retail (Lumen) workspace. Pass 1 delivered M1 Flutter guest
+    shop + M2 NestJS catalog API + Dart client (WI-001..WI-012 done). Do NOT replan M1/M2.
+    Plan exactly ONE milestone M3 "Release 2 — shopper depth & production catalog" with NEW work items
+    from WI-013 upward. Implement the Release 2 section of the run brief: accounts, guest+signed-in,
+    merchandised home, search/sort/filters, wishlist, UK checkout with mock payment, orders/history/
+    tracking, coupons, support, and API/Prisma extensions. REQUIRED: replace placeholder catalog imagery
+    with real lighting product photos — source from https://stanpro2.folio3.site/search and product pages,
+    download into app/assets (and/or API static seed), document in docs/IMAGE_SOURCES.md, 18-30 SKUs.
+    Quality: flutter analyze/test green, server tests for new endpoints, one M3 QA round. Out of scope:
+    full admin UI, production payments, push production.
+  max_user_stories: 14
+  max_work_items: 14
+  max_milestones: 1
+  max_api_operations: 28
+  max_screens: 14
+
+planning:
+  estimation_review: true
+  big_gap_points: 3
+  big_gap_ratio: 2.0
+
+guardrails:
+  architect: [A1, A2, B1, B2, B3, B4, B5, B6, C1, C2, C3, D1, D2, D3]
+  agents: [DV1, DV2, DV3, QA1, QA2, DE1, ST1, CU1, UX1]
+
+build:
+  milestones: []
+  sandbox: local
+  check_fix_attempts: 2
+  agent_timeout_s: 3600
+
+gates:
+  prd: true
+  architecture: true
+  release: false
+
+gate_mode: auto
+
+limits:
+  clarification_rounds: 2
+  gate_rejections: 3
+  qa_fix_rounds: 2
+
+budget:
+  max_total_tokens: null

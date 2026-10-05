@@ -1,0 +1,199 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Catalog Browse and Product Discovery",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "Shopping Cart Management",
+      "story_ids": [
+        "US-004",
+        "US-005",
+        "US-006"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Project setup, CI/CD pipeline and health check",
+      "description": "Initialize Flutter and NestJS projects, set up GitHub Actions for automated testing and Docker builds, implement GET /health endpoint, configure docker-compose for local staging, establish development and testing environments",
+      "epic_id": "E-01",
+      "component": "infra",
+      "story_ids": [],
+      "depends_on": [],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Data model, seed catalog import and database schema",
+      "description": "Design and implement Prisma schema for products, variants, categories, prices and inventory; create TypeScript domain models and DTOs; load seed catalog data (150-200 shirts) into PostgreSQL with variants keyed by SKU, sizes, colors, stock counts and pricing; ensure integer cent storage for prices",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Catalog and category API endpoints",
+      "description": "Implement GET /categories, GET /products with filtering (category, search, size, color, price range), sorting and pagination (20 items per page); support sale price display; implement OpenAPI documentation; add server-side validation and error handling",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Product detail API endpoint",
+      "description": "Implement GET /products/{id} returning product details, fabric and care information, fit type, all size and color variants with stock status, sale prices; include accessibility metadata; add 404 handling for missing products",
+      "epic_id": "E-01",
+      "component": "backend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Product List screen with category filtering and pagination",
+      "description": "Build Flutter Product List screen with swipeable categories, product cards showing image, name and formatted price (integer cents to USD), infinite scroll pagination (20 items), category filtering with visual highlight, empty state and error handling with retry button, loading state",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-006",
+      "title": "Search and filter sheet with sort capability",
+      "description": "Implement search text input on Product List, create filter/sort bottom sheet with size, color, price range (6000 cents = $60.00 max), sort by price ascending/descending, apply/clear filters, show active filter chips as removable buttons, implement no-results state, integrate with pagination",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-005"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-007",
+      "title": "Product Detail screen with variant selection",
+      "description": "Build Product Detail screen with swipeable photo gallery, product name, price, sale price, description, fabric and care details, fit type, size and color variant selectors with disabled state for out-of-stock variants, accessibility labels for screen readers, dynamic text sizing support, 404 handling",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-008",
+      "title": "Cart API endpoints (create, retrieve, add, update, remove items)",
+      "description": "Implement POST /carts (create guest cart, return unguessable cart identifier), GET /carts/{id} (retrieve cart with current prices and availability), POST /carts/{id}/items (add variant with quantity, validate stock, increment quantity if variant exists), PATCH /carts/{id}/items/{itemId} (update quantity, validate stock), DELETE /carts/{id}/items/{itemId} (remove line); return 404 for missing carts, validate cart identifier, server-side stock validation, handle quantity cap of 10",
+      "epic_id": "E-02",
+      "component": "backend",
+      "story_ids": [
+        "US-004",
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    },
+    {
+      "id": "WI-009",
+      "title": "Add to cart flow and cart badge",
+      "description": "Implement Add to cart button on Product Detail requiring size selection, validate selection before API call, display confirmation toast, create or retrieve guest cart automatically without personal data collection, update cart badge count on Product List and navigation, handle stock validation errors and quantity cap errors",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-004"
+      ],
+      "depends_on": [
+        "WI-007",
+        "WI-008"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-010",
+      "title": "Cart screen with line editing, persistence and current data",
+      "description": "Build Cart screen showing items (image, name, size, color, unit price, quantity, line total), implement quantity increase/decrease within stock limits, swipe-to-delete and Remove button, display subtotal in USD (integer cents), show message about shipping and tax at checkout, persist cart locally with storage plugin, load cart on app launch, handle out-of-stock variants (flag and exclude from subtotal), refresh current prices and availability, handle empty cart and server cart not found, integration tests and demo build",
+      "epic_id": "E-02",
+      "component": "frontend",
+      "story_ids": [
+        "US-005",
+        "US-006"
+      ],
+      "depends_on": [
+        "WI-009"
+      ],
+      "estimate_points": 5,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Catalog Browse, Search and Product Detail",
+      "goal": "Ship a testable first slice: users can browse products by category, search and filter, and view product details with variant selection. API returns catalog with pagination, search, filters and product details; mobile screens display products, search/filter sheet, and product detail with variant availability.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005",
+        "WI-006",
+        "WI-007"
+      ]
+    },
+    {
+      "id": "M2",
+      "name": "Shopping Cart and Guest Checkout Readiness",
+      "goal": "Ship a testable cart slice: users can add shirts to a guest cart, view and edit cart lines, and see a subtotal. Cart persists across app restarts, reflects current prices and stock, and is ready for checkout in the next release. All 6 user stories complete, full test coverage, demo-ready build.",
+      "work_item_ids": [
+        "WI-008",
+        "WI-009",
+        "WI-010"
+      ]
+    }
+  ]
+}

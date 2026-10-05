@@ -1,0 +1,404 @@
+openapi: 3.1.0
+info:
+  title: Simple Ecommerce API
+  version: 1.0.0
+  description: |
+    Simple ecommerce API contract for the M1 Speed Demo and later milestones.
+    M1 Flutter app uses local mock data only and does not call this API.
+    This document covers must-have catalog stories (US-001 browse, US-002 detail):
+    health probe plus three public catalog read operations. Cart is in-memory on
+    the client in M1 (US-003) and has no API operations here. Auth, payments,
+    checkout, and orders are deferred.
+  contact:
+    name: Engineering
+servers:
+  - url: http://10.0.2.2:3000/api/v1
+    description: Android emulator → local staging
+  - url: https://api.staging.example.com/api/v1
+    description: Staging
+  - url: https://api.example.com/api/v1
+    description: Production
+tags:
+  - name: Health
+    description: Service health checks
+  - name: Catalog
+    description: Product browse and detail (public)
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: getHealth
+      summary: Health check
+      description: Returns 200 when the service and database are reachable.
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable (database unreachable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /categories:
+    get:
+      tags:
+        - Catalog
+      operationId: listCategories
+      summary: List product categories
+      description: |
+        Returns retail categories used for browse filters (e.g. Apparel,
+        Accessories, Home, Essentials). Public endpoint; supports US-001 filters.
+      security: []
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryListResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products:
+    get:
+      tags:
+        - Catalog
+      operationId: listProducts
+      summary: List products
+      description: |
+        Paginated product listing with optional category filter and search.
+        Supports US-001 browse requirements. Public endpoint; no authentication required.
+        Prices are tax-inclusive integer minor units with ISO 4217 currency.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: q
+          in: query
+          description: Case-insensitive search against product name and description
+          schema:
+            type: string
+            maxLength: 100
+        - name: categorySlug
+          in: query
+          description: Filter by category slug (e.g. apparel, accessories, home, essentials)
+          schema:
+            type: string
+            maxLength: 100
+            example: apparel
+        - name: inStockOnly
+          in: query
+          description: When true, exclude products with no in-stock active variants
+          schema:
+            type: boolean
+            default: false
+        - name: sort
+          in: query
+          description: Sort order for results
+          schema:
+            type: string
+            enum:
+              - priceAsc
+              - priceDesc
+              - nameAsc
+              - newest
+            default: newest
+      responses:
+        '200':
+          description: Paginated product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{productId}:
+    get:
+      tags:
+        - Catalog
+      operationId: getProductById
+      summary: Get product detail
+      description: |
+        Returns full product detail including category and active variants with
+        per-variant stock. Supports US-002. Public endpoint.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token (15-minute TTL). Declared for M2+ protected endpoints.
+        Catalog and health operations in this document do not require a bearer token.
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: 1-based page number
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Product UUID
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - degraded
+        database:
+          type: string
+          enum:
+            - up
+            - down
+        timestamp:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example: Invalid query parameter pageSize
+    Money:
+      type: object
+      additionalProperties: false
+      required:
+        - amountCents
+        - currency
+      properties:
+        amountCents:
+          type: integer
+          description: Amount in minor units (cents); tax-inclusive for display
+          minimum: 0
+          example: 2499
+        currency:
+          type: string
+          description: ISO 4217 currency code
+          pattern: '^[A-Z]{3}$'
+          example: USD
+    Category:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - slug
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Apparel
+        slug:
+          type: string
+          example: apparel
+    CategoryListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        total:
+          type: integer
+          minimum: 0
+    ProductSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - category
+        - price
+        - primaryImageUrl
+        - inStock
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Classic Cotton Tee
+        category:
+          $ref: '#/components/schemas/Category'
+        price:
+          allOf:
+            - $ref: '#/components/schemas/Money'
+          description: Display price (default or lowest active variant), tax-inclusive
+        primaryImageUrl:
+          type: string
+          format: uri
+        inStock:
+          type: boolean
+          description: True when at least one active variant has stockQuantity > 0
+    ProductListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+    ProductVariant:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - sku
+        - name
+        - price
+        - stockQuantity
+        - isDefault
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+          example: APP-TEE-BLK-M
+        name:
+          type: string
+          description: Variant label (e.g. Default, Size M / Black)
+          example: Medium / Black
+        price:
+          $ref: '#/components/schemas/Money'
+        stockQuantity:
+          type: integer
+          minimum: 0
+          description: Available stock for this variant
+        imageUrl:
+          type: string
+          format: uri
+        isDefault:
+          type: boolean
+          description: Default variant used for list/detail availability when none selected
+    ProductDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - description
+        - category
+        - price
+        - primaryImageUrl
+        - inStock
+        - variants
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          $ref: '#/components/schemas/Category'
+        price:
+          allOf:
+            - $ref: '#/components/schemas/Money'
+          description: Display price from default variant (tax-inclusive)
+        primaryImageUrl:
+          type: string
+          format: uri
+        inStock:
+          type: boolean
+        variants:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+        returnsPolicyText:
+          type: string
+          description: Optional return policy note for later UI (e.g. 14-day returns)
+          example: |
+            14-day returns on unused items in original condition.
+            Refunds to the original payment method once checkout is available.

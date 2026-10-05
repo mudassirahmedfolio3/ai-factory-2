@@ -1,0 +1,68 @@
+# Product brief: ShopEase Mobile App
+
+A comprehensive ecommerce mobile app that lets our customers discover, buy and receive our products quickly and confidently from their phones, while giving our growing retail business a direct, profitable sales channel and a lasting relationship with shoppers that does not depend on third-party marketplaces.
+
+## Target users
+- Existing in-store and website customers aged 18-55 who shop regularly and prefer buying on their phones
+- New online shoppers acquired through social media and search ads who want fast, simple checkout
+- Repeat/loyalty customers who want reorder shortcuts, order tracking and member rewards
+- Guest shoppers who want to buy without creating an account
+- Internal store staff and operations team who manage catalog, inventory, orders, returns and promotions through an admin back office
+- Customer support agents who handle order, delivery and refund enquiries
+
+## Business goals
+- Launch a first version (MVP) on iOS and Android within about 6 months, with a phased rollout after a small beta
+- Grow online revenue by 30% within 12 months of launch, with the app producing at least 40% of online orders within 18 months
+- Reach 50,000 app installs and 15,000 monthly active users in the first 12 months
+- Achieve a mobile checkout conversion rate of at least 3% and keep cart abandonment below 65%
+- Increase repeat purchase rate to at least 35% through loyalty rewards, push notifications and easy reordering
+- Reduce dependence on third-party marketplaces and their commission fees by moving customers to our own channel
+- Keep customer support contacts per order low through clear order tracking, self-service returns and order status notifications
+- Collect first-party customer data (with consent) to improve marketing, merchandising and stock planning
+
+## Key features
+- Account registration and login via email, phone number, Apple and Google sign-in, plus guest checkout
+- Product catalog with categories, search with filters and sorting, autocomplete and recently viewed items
+- Product detail pages with multiple images, descriptions, size/variant selection, stock availability and customer ratings and reviews
+- Shopping cart and wishlist/saved items that sync between app and website
+- Simple checkout with saved addresses, multiple payment methods (credit/debit cards, Apple Pay, Google Pay, PayPal), promo codes and gift cards
+- Delivery options including standard, express and in-store/click-and-collect pickup, with shipping cost and delivery date estimates
+- Order history, real-time order tracking and order status notifications
+- Returns and refund requests started from within the app
+- Push notifications for order updates, back-in-stock, price drops, abandoned cart reminders and promotions (opt-in)
+- Loyalty program with points, tiers and member-only offers
+- Personalized home screen with featured products, recommendations, banners and seasonal campaigns
+- Store locator with store stock check
+- Customer support via in-app help center/FAQ, contact form and live chat or chatbot handoff
+- Admin back office to manage products, prices, inventory, orders, promotions, banners, reviews and basic sales reports
+- Integration with existing inventory/POS system, payment provider, shipping carriers and email/SMS marketing tools
+- Analytics and event tracking for funnels, sales and campaign performance
+- Multi-language and multi-currency readiness, with initial launch in our home market and one language
+
+## Constraints
+- Initial budget is limited and set for the MVP; the scope must be phased, with advanced features such as AI recommendations and live chat possibly deferred to later releases
+- Target launch within about 6 months, ideally ahead of the next peak shopping season
+- Must comply with payment security standards (PCI-DSS) by using a certified payment provider rather than storing card data ourselves
+- Must comply with data protection and privacy laws (such as GDPR/CCPA), including consent for marketing and tracking, and the right to delete accounts and data
+- Must integrate with our existing inventory, POS and fulfillment systems so stock levels and prices stay accurate across channels
+- App must be available on both iOS and Android, meeting App Store and Google Play guidelines
+- Must perform well on mid-range phones and slow mobile connections, and meet basic accessibility standards
+- Brand look and feel must match our existing brand and website
+- Small internal team with no technical staff, so we depend on the vendor for delivery, documentation, training and post-launch maintenance
+- Ongoing running costs (hosting, payment fees, third-party services) must be predictable and transparent
+
+## Open questions
+- What exact budget ceiling and ongoing maintenance/support budget should we commit to?
+- Which countries, currencies and languages will be supported at launch versus later?
+- Which payment methods and payment provider should we finalize, and do we want buy-now-pay-later options?
+- Should we use native apps (Swift/Kotlin) or a cross-platform approach, and what does that mean for cost and speed?
+- Which existing systems (POS, inventory, ERP, CRM) exactly need to be integrated, and what are their technical capabilities?
+- How will the loyalty program work in detail (earn rates, reward thresholds, expiry) and will it be shared with in-store purchases?
+- Which delivery carriers and shipping rates will we offer, and will we offer free shipping thresholds?
+- What is our returns policy (window, who pays return shipping, refund method) in the app?
+- Do we want a marketplace model with third-party sellers in the future, or only our own products?
+- Do we want live chat with human agents at launch, or an FAQ and email form only?
+- How large is the catalog at launch (number of products and variants) and who will prepare product content and photos?
+- What level of personalization and recommendations is worth paying for in version one?
+- What are the legal requirements for age-restricted or regulated products, if any are in our range?
+- Who internally will own the app after launch (product owner, support, content updates)?

@@ -1,0 +1,156 @@
+{
+  "title": "ShopEase Mobile App - M1 Speed Demo PRD (Browse, Product Detail, In-Memory Cart)",
+  "summary": "M1 is a SPEED DEMO: the smallest runnable Flutter app that runs on an Android emulator immediately, using a local/mock catalog bundled in the app. It has at most 3 screens: product list (browse), product detail, and an optional simple in-memory cart. There is no authentication, no payments, no checkout and no backend API work in M1. The full ShopEase MVP (accounts incl. guest checkout, Stripe PaymentIntents payments with cards/Apple Pay/Google Pay, POS/inventory sync, delivery options, returns, loyalty, push, admin back office, reviews, store locator) is described in the product brief and clarifications and is deferred to later milestones. Conventions still apply to the demo data: prices are integer minor units (cents) with ISO 4217 currency code USD, never floats; stock is per variant (size/color); the English (US) strings are kept in a single place, with no hard-coded currency symbols, for readiness. Style tokens (colors, typography, spacing) are chosen by the agent without waiting for any approval. The demo is one milestone with at most 5 work items, starting with code in the first build items. The API contract for this run is limited to the health check infrastructure endpoint plus at most 4 operations, which are optional and not required because the demo reads the local mock catalog.",
+  "personas": [
+    {
+      "name": "Mobile Shopper (Nina)",
+      "description": "Existing or new online shopper aged 18-55 who prefers browsing and buying on her phone, on a mid-range Android device and sometimes a slow connection.",
+      "goals": [
+        "Quickly browse products in a clear list",
+        "See product details, variants and price before deciding",
+        "Collect items in a simple cart to see what she would buy"
+      ]
+    },
+    {
+      "name": "Demo Reviewer (Sam)",
+      "description": "Internal stakeholder or team member who launches the app on an emulator to see the core journey working, without any setup or login.",
+      "goals": [
+        "Run the app on an Android emulator immediately with no backend",
+        "See the browse-to-detail journey working end to end"
+      ]
+    }
+  ],
+  "user_stories": [
+    {
+      "id": "US-001",
+      "title": "Browse product list",
+      "as_a": "Mobile Shopper",
+      "i_want": "to see a scrollable list of products with image, name and price when the app opens",
+      "so_that": "I can quickly discover products to look at",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the app is installed on an Android emulator with no network and no backend",
+          "when": "I launch the app",
+          "then": "the product list screen is the first screen shown and displays products loaded from the bundled local mock catalog (at least 12 products)"
+        },
+        {
+          "given": "the product list is displayed",
+          "when": "I look at any product row or card",
+          "then": "it shows a product image (or placeholder), the product name and the price formatted from integer cents with currency USD (for example 1999 cents is shown as $19.99), with the formatting derived from the currency code rather than a hard-coded symbol"
+        },
+        {
+          "given": "the product list is displayed",
+          "when": "I scroll through the list",
+          "then": "all mock products are reachable and scrolling stays smooth on a mid-range device without visible jank"
+        },
+        {
+          "given": "a product has every variant out of stock",
+          "when": "it appears in the list",
+          "then": "it is clearly marked as out of stock"
+        }
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "View product detail",
+      "as_a": "Mobile Shopper",
+      "i_want": "to open a product and see its image, description, price and variant options (size and color) with availability",
+      "so_that": "I can decide whether the product is right for me",
+      "priority": "must",
+      "acceptance_criteria": [
+        {
+          "given": "the product list is displayed",
+          "when": "I tap a product",
+          "then": "the product detail screen opens showing the product name, image, description and price formatted from integer cents in USD"
+        },
+        {
+          "given": "the product detail screen is displayed for a product with size and color variants",
+          "when": "I select a size and a color",
+          "then": "the selected variant is highlighted, and the variant's own price and in-stock or out-of-stock status are shown, with stock tracked per variant in the mock data"
+        },
+        {
+          "given": "the product detail screen is displayed",
+          "when": "I press the back control or system back",
+          "then": "I return to the product list at the same scroll position"
+        },
+        {
+          "given": "the selected variant is out of stock",
+          "when": "I view the detail screen",
+          "then": "the out-of-stock status is shown and the add to cart action is disabled"
+        }
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Simple in-memory cart",
+      "as_a": "Mobile Shopper",
+      "i_want": "to add a selected variant to a cart and see the items and subtotal",
+      "so_that": "I can see what I would buy, without any sign-in or payment in this demo",
+      "priority": "could",
+      "acceptance_criteria": [
+        {
+          "given": "I am on the product detail screen with an in-stock variant selected",
+          "when": "I tap add to cart",
+          "then": "the variant is added to an in-memory cart, a cart item count indicator updates, and adding the same variant again increases its quantity"
+        },
+        {
+          "given": "the cart contains items",
+          "when": "I open the cart screen",
+          "then": "each line shows product name, variant, unit price, quantity and line total, and a subtotal is shown, all computed in integer cents and displayed in USD"
+        },
+        {
+          "given": "the cart contains items",
+          "when": "I remove a line or change its quantity to zero",
+          "then": "the line disappears and the subtotal updates, and an empty cart shows an empty-state message"
+        },
+        {
+          "given": "the cart screen is displayed",
+          "when": "I look for checkout or payment actions",
+          "then": "none exist in M1, and the cart is lost when the app process is closed"
+        }
+      ]
+    }
+  ],
+  "non_functional_requirements": [
+    "Platforms: Flutter 3.x (Dart) app, Android first; must run on an Android emulator (minimum Android 9 / API 28) with a single command after dependencies are installed. iOS is not verified in M1.",
+    "Runnable immediately: the app must start and show the product list using only the bundled local mock catalog, with no backend, network, login or environment secrets required.",
+    "Performance: cold start to first rendered product list in under 3 seconds on a mid-range device or emulator; list scrolling stays smooth; images are small bundled assets or placeholders so the app works offline and on slow connections.",
+    "Money: all prices are integer minor units (cents) with ISO 4217 currency code USD; floating-point money is never used; display formatting is derived from the currency code.",
+    "Data model readiness: mock catalog models products with variants (size, color), per-variant price and stock; order-line-style cart lines copy name and unit price when added.",
+    "Localization readiness: all user-visible text is in a single English (US) string source with no scattered hard-coded text or currency symbols.",
+    "Accessibility: interactive elements have at least 48x48 dp touch targets and semantic labels, text respects system font scaling, and color contrast meets WCAG AA for the chosen style tokens.",
+    "Style: the agent chooses style tokens (colors, typography, spacing) in code without waiting for any approval or sign-off.",
+    "Security and privacy: the demo collects no personal data, has no authentication, no payment data and no analytics or tracking; no secrets are committed.",
+    "Quality: a small number of flutter_test tests cover price formatting, catalog loading and cart subtotal; the app builds with no analyzer errors.",
+    "Scope limits: at most 3 user stories, 5 work items, 1 milestone, 4 API operations and 3 app screens. The /health infrastructure endpoint is included in the contract and does not count toward the API operation limit."
+  ],
+  "out_of_scope": [
+    "Authentication of any kind (email/password, Apple, Google, phone, password reset, account deletion) and guest checkout flows",
+    "Payments, Stripe PaymentIntents, Apple Pay, Google Pay, PayPal, gift cards, buy-now-pay-later",
+    "Checkout, order creation, order history, order tracking and order status flow",
+    "Backend API work in M1 (NestJS, Prisma, PostgreSQL) beyond an optional health check; real API integration",
+    "POS/inventory/ERP sync, stock reservation, fulfillment and carrier integration",
+    "Delivery options, shipping costs, click-and-collect, store locator and store stock check",
+    "Promo codes, loyalty points and tiers",
+    "Returns and refunds",
+    "Push notifications",
+    "Wishlist, recently viewed, ratings and reviews, search, filters, sorting, autocomplete and recommendations",
+    "Personalized home screen, banners and campaigns",
+    "Admin back office and staff roles",
+    "Help center, FAQ, contact form, live chat and chatbot",
+    "Cart persistence and cart/wishlist sync with the website",
+    "iOS release, multi-currency and multi-language beyond readiness, analytics and consent management",
+    "Any work item requiring human approval, stakeholder sign-off or style approval"
+  ],
+  "assumptions": [
+    "The scope rules for this SPEED DEMO take priority over the full brief; the broader MVP decisions from the clarifications remain the direction for later milestones.",
+    "The demo uses a bundled local mock catalog of roughly 12-20 products with size and color variants, prices in integer cents in USD, and per-variant stock; no network is needed.",
+    "Product images are bundled small assets or generated placeholders chosen by the agent.",
+    "The cart is in memory only (Riverpod state) and is cleared when the app restarts; it is optional and lowest priority if time is short.",
+    "Navigation is handled with go_router across at most 3 screens: product list, product detail and cart.",
+    "The optional health check /health is part of the API contract but the app does not depend on it in M1.",
+    "Android is the verification platform for the demo; minimum Android 9 (API 28) is used, to be refined later from website analytics.",
+    "Style tokens are selected by the agent without waiting for approval."
+  ]
+}

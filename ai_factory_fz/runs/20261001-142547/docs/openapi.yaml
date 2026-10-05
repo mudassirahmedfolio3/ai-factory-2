@@ -1,0 +1,352 @@
+openapi: 3.1.0
+info:
+  title: PulsePhones API
+  version: 1.0.0
+  description: |
+    PulsePhones smartphone storefront API.
+    M1 mobile app uses local mock data only and does not call this API.
+    This contract covers M1 must-have stories (US-001 browse, US-002 detail):
+    health probe plus two public catalog read operations. Auth, cart, orders,
+    and payments are deferred to later milestones. Optional US-003 cart is
+    in-memory on device and has no API operations in M1.
+  contact:
+    name: PulsePhones Engineering
+servers:
+  - url: http://10.0.2.2:3000/api/v1
+    description: Android emulator → local staging
+  - url: https://api.staging.pulsephones.example/api/v1
+    description: Staging
+  - url: https://api.pulsephones.example/api/v1
+    description: Production
+tags:
+  - name: Health
+    description: Service health checks
+  - name: Catalog
+    description: Smartphone browse and detail (public)
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: getHealth
+      summary: Health check
+      description: Returns 200 when the service and database are reachable.
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service unavailable (database unreachable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products:
+    get:
+      tags:
+        - Catalog
+      operationId: listProducts
+      summary: List smartphones
+      description: |
+        Paginated smartphone product listing.
+        Supports US-001 browse requirements. Public endpoint; no authentication required.
+        M1 Flutter uses an embedded mock shaped like ProductListResponse.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /products/{productId}:
+    get:
+      tags:
+        - Catalog
+      operationId: getProductById
+      summary: Get smartphone product detail
+      description: |
+        Returns full product detail including key details, star rating, and variants.
+        Supports US-002 product detail requirements. Public endpoint.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token (15-minute TTL). Declared for M2+ protected endpoints.
+        Catalog and health operations in this document do not require a bearer token.
+  parameters:
+    Page:
+      name: page
+      in: query
+      description: 1-based page number
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Product UUID
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - database
+        - timestamp
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - degraded
+        database:
+          type: string
+          enum:
+            - up
+            - down
+        timestamp:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      additionalProperties: false
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example: Invalid query parameter pageSize
+    Money:
+      type: object
+      required:
+        - amountCents
+        - currency
+      additionalProperties: false
+      properties:
+        amountCents:
+          type: integer
+          description: Amount in minor units (USD cents). Example 89999 = $899.99
+          minimum: 0
+          example: 89999
+        currency:
+          type: string
+          description: ISO 4217 currency code
+          pattern: '^[A-Z]{3}$'
+          example: USD
+    KeyDetail:
+      type: object
+      required:
+        - label
+        - value
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+          example: Display
+        value:
+          type: string
+          example: 6.1-inch OLED
+    ProductSummary:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - averageRating
+        - primaryImageUrl
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: iPhone X
+        price:
+          $ref: '#/components/schemas/Money'
+          description: Display price from default or lowest active variant (integer cents)
+        averageRating:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 5
+          description: Seeded star rating for list/detail display (M1); not user-posted reviews
+          example: 4.5
+        ratingCount:
+          type: integer
+          minimum: 0
+          description: Optional count of ratings for social proof display
+          example: 128
+        primaryImageUrl:
+          type: string
+          description: Absolute URL or asset path for list imagery
+          example: assets/images/iphone-x.png
+        shortSpecs:
+          type: array
+          description: Optional short spec chips for list cards
+          items:
+            type: string
+          example:
+            - 64GB
+            - OLED
+    ProductListResponse:
+      type: object
+      required:
+        - items
+        - total
+        - page
+        - pageSize
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+    ProductVariant:
+      type: object
+      required:
+        - id
+        - sku
+        - storageGb
+        - color
+        - price
+        - stockQuantity
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+          example: PP-IPX-64-SLV
+        storageGb:
+          type: integer
+          minimum: 1
+          example: 64
+        color:
+          type: string
+          example: Silver
+        price:
+          $ref: '#/components/schemas/Money'
+        stockQuantity:
+          type: integer
+          minimum: 0
+          description: Stock tracked per variant (assumed available in M1 mock; enforced M2+)
+        imageUrl:
+          type: string
+          description: Optional variant-specific image
+    ProductDetail:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - price
+        - averageRating
+        - primaryImageUrl
+        - keyDetails
+        - variants
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: iPhone X
+        description:
+          type: string
+          example: Flagship smartphone with OLED display and Face ID.
+        price:
+          $ref: '#/components/schemas/Money'
+          description: Default display price (integer cents, never a float)
+        averageRating:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 5
+          example: 4.5
+        ratingCount:
+          type: integer
+          minimum: 0
+          example: 128
+        primaryImageUrl:
+          type: string
+          example: assets/images/iphone-x.png
+        keyDetails:
+          type: array
+          description: Key specs shown on detail screen
+          items:
+            $ref: '#/components/schemas/KeyDetail'
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'

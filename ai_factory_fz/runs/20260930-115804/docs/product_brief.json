@@ -1,0 +1,39 @@
+{
+  "product_name": "beauty-mini",
+  "vision": "The smallest possible Flutter beauty shop demo that runs on an Android emulator in under 10 minutes. It lets us show the core shopping experience (browse products, view a product, add to cart) using hard-coded local data, so we can get a quick, tangible feel for the app before investing in a full build.",
+  "target_users": [
+    "Me and my internal team (business owner, merchandising and marketing staff) who need to see a working beauty shopping app quickly",
+    "Developers and designers who will run the demo on an Android emulator and build on it in later milestones",
+    "Future shoppers: beauty-conscious customers browsing on their phones (not served by this demo, but it informs the layout and flow)"
+  ],
+  "business_goals": [
+    "Get a working, runnable demo in under 10 minutes so we can validate the basic browse-to-detail-to-cart flow",
+    "Prove the Flutter approach works with zero backend, so `flutter run` works immediately after scaffold",
+    "Keep scope as small as possible: only the listed requirements, nothing extra",
+    "Give us something concrete to react to so we can decide what to build in the next milestone",
+    "Avoid any work item that waits on human, style or stakeholder approval; the team makes sensible decisions and keeps moving"
+  ],
+  "key_features": [
+    "Browse screen: a grid of 6-8 hard-coded beauty products, each showing name, price, and an image URL or placeholder color. My decision: 8 products with placeholder colors as the default so it works offline, with prices in USD, e.g. lipstick, foundation, mascara, face serum, moisturizer, perfume, nail polish, and a makeup brush set",
+    "Product detail screen: tap a product on the grid to see its name, price, and a short description",
+    "Optional: Add to cart button on the detail screen that keeps items in memory only and shows a cart count (for example a badge on the browse screen app bar); no checkout",
+    "Mock/local data only, so the app runs immediately after scaffold with no setup"
+  ],
+  "constraints": [
+    "Flutter-only for the first milestone; no NestJS or backend required to run the demo",
+    "No auth, payments, accounts, or API integration",
+    "No checkout flow; cart is in memory only and resets when the app restarts",
+    "Must run on an Android emulator in under 10 minutes from start",
+    "Use only hard-coded mock/local data so `flutter run` works right after scaffold",
+    "Do NOT create any work item waiting on human, style or stakeholder approval",
+    "Scope is limited to the three listed requirements only"
+  ],
+  "open_questions": [
+    "Should we use real product images via URLs in a later milestone, or keep placeholder colors? Not decided; placeholder colors for now",
+    "Should the cart count be tappable to show a cart contents screen in a later milestone? Not decided",
+    "Should the cart support quantities and removing items? Not decided; out of scope for this milestone",
+    "What currency, pricing and real product catalog will we use once the demo moves beyond mock data? Not decided",
+    "When do we add a backend, accounts and payments, and in what order? Not decided; to be revisited after the demo",
+    "Do we need iOS support or only Android for the next milestone? Not decided"
+  ]
+}

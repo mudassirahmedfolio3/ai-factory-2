@@ -95,8 +95,8 @@ guardrails:
   min_adrs: 3
   # Agent guardrails (DV3: copies of the approved contract must not drift)
   contract_copies:
-    docs/openapi.yaml: [server/openapi.yaml, app/openapi.yaml]
-    docs/schema.prisma: [server/prisma/schema.prisma]
+    docs/openapi.yaml: [server/openapi.yaml, apps/api/openapi.yaml, app/openapi.yaml]
+    docs/schema.prisma: [server/prisma/schema.prisma, apps/api/prisma/schema.prisma]
   scope_also_allowed: []        # extra paths any coding item may change (e.g. [.github/])
   secret_scan_ignore: []        # paths skipped by the secret scan
 

@@ -1,0 +1,221 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Local catalog browse and product detail",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ]
+    },
+    {
+      "id": "E-02",
+      "title": "In-memory cart preview",
+      "story_ids": [
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "NestJS health and catalog API",
+      "description": "Implement NestJS health and catalog modules with Prisma models so getHealth, listCategories, listProducts, and getProductById are real backend operations (GET /health, /categories, /products, /products/{productId}). Seed Category, Product, ProductVariant with per-variant stock and integer cents USD; include Prisma stubs for User, Address, Cart, CartItem, Order, OrderItem, Payment for later milestones. Flutter M1 still demos from an identical local mock so emulator browse is not blocked by deploy.",
+      "epic_id": "E-01",
+      "feature": "Catalog API",
+      "component": "backend",
+      "story_ids": [
+        "US-001",
+        "US-002"
+      ],
+      "depends_on": [],
+      "modules": [
+        "health",
+        "catalog"
+      ],
+      "api_operations": [
+        "getHealth",
+        "listCategories",
+        "listProducts",
+        "getProductById"
+      ],
+      "data_models": [
+        "User",
+        "Address",
+        "Category",
+        "Product",
+        "ProductVariant",
+        "Cart",
+        "CartItem",
+        "Order",
+        "OrderItem",
+        "Payment"
+      ],
+      "screens": [],
+      "estimate_points": 6,
+      "complexity": "medium",
+      "risk": "medium",
+      "confidence": "medium",
+      "estimate_rationale": "Four NestJS ops plus Prisma seed and deferred model stubs; Flutter stays mock-backed for the demo path. | backend_developer: Four contract-aligned NestJS ops plus Prisma schema/seed (active catalog models and deferred stubs), env-validated config, and Jest/Supertest coverage to green drive a full focused day-plus of work.; concerns: Assumes Nest bootstrap, OpenAPI response shapes (pagination/errors), and a reachable Postgres for health/e2e are already defined; stub relations for User/Cart/Order/Payment can still create migration churn if not aligned to later milestones.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 6,
+      "estimated_by": "backend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-002",
+      "title": "Flutter scaffold theme go_router and Dio stub",
+      "description": "Create Flutter 3.x Android-first app with Riverpod, shared theme tokens in lib/core/theme, go_router shell with routes /products, /products/:productId, /cart, and optional Dio/api_client stub wired to the OpenAPI shapes from WI-001. M1 browse path uses offline mock only; no live HTTP required to launch. App launches on emulator as coding start.",
+      "epic_id": "E-01",
+      "feature": "App shell",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "modules": [],
+      "api_operations": [],
+      "data_models": [],
+      "screens": [],
+      "estimate_points": 4,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Standard Flutter scaffold plus theme tokens, three named routes, and Dio stub. | frontend_developer: Flutter 3.x Android scaffold plus Riverpod, token-based theme, go_router shell for three routes, Dio/api_client stub aligned to WI-001 shapes, and debug-only 10.0.2.2 cleartext so the emulator launch is green.; concerns: Depends on WI-001 OpenAPI shapes being stable enough to stub models; first-time package/Android toolchain friction on a clean machine can stretch the emulator-green path.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-003",
+      "title": "Local mock catalog and ProductListScreen",
+      "description": "Add local/mock catalog seed shaped like listCategories and listProducts responses (Category, Product, ProductVariant with per-variant stock and integer cents USD), LocalCatalogDataSource and CatalogRepository, ProductListNotifier (Riverpod AsyncNotifier) with loading/empty/error, and SCR-01 ProductListScreen (/products) showing name, cents→USD price helper (no floats), and primary image or placeholder. flutter_test for price formatting and list smoke. No network call to a real API.",
+      "epic_id": "E-01",
+      "feature": "Product list",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "listCategories",
+        "listProducts"
+      ],
+      "data_models": [
+        "Category",
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-01"
+      ],
+      "estimate_points": 5,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Mock seed, repository/notifier, list UI states, and cents price formatting tests. | frontend_developer: Offline mock seed matching listCategories/listProducts (Category, Product, ProductVariant with cents/stock), LocalCatalogDataSource + CatalogRepository, ProductListNotifier AsyncNotifier with loading/empty/error, SCR-01 list UI with cents→USD helper, and flutter_test for price formatting plus list smoke.; concerns: Seed must stay shape-identical to the eventual Nest responses so later swapping mock for generated client does not rewrite the UI layer.",
+      "status": "todo",
+      "pm_points": 5,
+      "dev_points": 5,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    },
+    {
+      "id": "WI-004",
+      "title": "ProductDetailScreen variants stock and navigation",
+      "description": "Build SCR-02 ProductDetailScreen (/products/:productId) with ProductDetailNotifier loading one product shaped like getProductById: name, description, unit price from integer cents + USD, photo or placeholder, available variants, and clear stock/availability for the selected variant. Tap from SCR-01 navigates; system/in-app back returns to list without losing catalog view. flutter_test for list→detail navigation.",
+      "epic_id": "E-01",
+      "feature": "Product detail",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "modules": [
+        "catalog"
+      ],
+      "api_operations": [
+        "getProductById"
+      ],
+      "data_models": [
+        "Product",
+        "ProductVariant"
+      ],
+      "screens": [
+        "SCR-02"
+      ],
+      "estimate_points": 4,
+      "complexity": "medium",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "Single detail screen plus variant/stock UI and go_router param navigation test. | frontend_developer: SCR-02 ProductDetailScreen with ProductDetailNotifier (getProductById shape), cents pricing, image/placeholder, variant picker with clear stock/availability, go_router :productId navigation, and flutter_test covering list→detail and back without losing catalog view.; concerns: Variant selection state and back-stack behavior with go_router are easy to under-test if only a happy-path navigation smoke is written.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 4,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "builder's estimate adopted"
+    },
+    {
+      "id": "WI-005",
+      "title": "In-memory CartNotifier and CartScreen",
+      "description": "Optional M1 cart: Riverpod Notifier holds session-only CartState; Add to cart on SCR-02 for in-stock variants snapshots product name, variantLabel, quantity, unitPriceCents, and currencyCode USD into Cart/CartItem; SCR-03 CartScreen (/cart) shows line items with lineTotalCents = unitPriceCents * quantity using integer math. Not persisted; may be empty after process restart. No auth, payment, checkout, or backend sync.",
+      "epic_id": "E-02",
+      "feature": "Cart screen",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-004"
+      ],
+      "modules": [],
+      "api_operations": [],
+      "data_models": [
+        "Cart",
+        "CartItem"
+      ],
+      "screens": [
+        "SCR-03"
+      ],
+      "estimate_points": 3,
+      "complexity": "low",
+      "risk": "low",
+      "confidence": "high",
+      "estimate_rationale": "In-memory notifier plus one cart screen and snapshot-on-add integer line totals. | frontend_developer: In-memory CartNotifier/CartState, Add to cart from SCR-02 for in-stock variants snapshotting name/variantLabel/quantity/unitPriceCents/USD, SCR-03 CartScreen with integer lineTotalCents, plus basic widget coverage for empty cart and line totals.; concerns: Explicitly session-only and non-persisted; clarify empty-cart UX after restart so QA does not treat that as a defect.",
+      "status": "todo",
+      "pm_points": 3,
+      "dev_points": 3,
+      "estimated_by": "frontend_developer",
+      "estimate_notes": "PM and builder agree"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Flutter browse MVP speed demo",
+      "goal": "Runnable Flutter MVP on Android emulator: browse local/mock catalog, open product detail with variants stock and cents-based USD prices, optional in-memory cart; NestJS health/catalog API implemented and frozen for later wiring—no auth, payments, or checkout required for the demo path.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ],
+  "estimation_reviewed": true
+}

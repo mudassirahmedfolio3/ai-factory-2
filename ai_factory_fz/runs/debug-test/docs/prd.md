@@ -1,0 +1,122 @@
+# Men's Shirts Shopping App: First UI Demo (Browse, Product Detail, Cart)
+
+A first demo slice of the men's shirts mobile app (Flutter, Android first) that proves the core shopping journey: browse and search the shirt catalog, open a product detail page, choose a size and color variant, and manage a shopping cart. Scope is limited to 3 app screens (Product List with search and a filter sheet, Product Detail, Cart), 6 user stories, 2 milestones and 8 API operations plus a health check. Catalog data is loaded from seed data supplied by the client team (initial catalog about 150-200 shirts; a smaller subset is enough for the demo). Prices are integer cents with currency USD (US launch, English only, prices shown excluding tax). Stock is tracked per variant (size and color, keyed by inventory SKU). The cart is a guest cart: the client has explicitly approved guest carts as an exception to the project convention that carts belong to signed-in users. Checkout, payments, sales tax, shipping, accounts and sign-in are not part of this run. The cart screen shows the item subtotal only and states that shipping and tax are calculated at checkout in a later release.
+
+## Personas
+### Working professional (25-45)
+Needs smart and business-casual shirts and wants to shop quickly from a phone.
+- Find formal and smart-casual shirts fast using category, size and color filters
+- See fit, fabric and size availability on one screen
+- Add the right size to the cart in a few taps
+
+### Younger shopper (18-25)
+Looks for affordable casual and trend-led shirts and is price-sensitive.
+- Browse casual shirts and narrow by price
+- Spot sale prices clearly
+- Compare colors quickly
+
+### Classic-style customer (45+)
+Prefers classic styles, reliable sizing and simple, uncluttered screens.
+- Use large, readable text and clear buttons
+- Find classic styles without complex filters
+- Understand exactly what is in the cart and what it costs
+
+### Gift buyer
+Buys shirts for partners or family and is unsure about sizes; may not want to create an account.
+- Add items to a cart without signing up
+- See which sizes are in stock
+- Review cart contents and subtotal before continuing
+
+## User stories
+### US-001 Browse shirts by category (must)
+As a shopper, I want to browse a list of shirts and switch between categories (formal, casual, linen, polo, t-shirts), so that I can quickly find the type of shirt I need.
+
+- **Given** the app is open and the catalog has products **when** I open the Product List screen **then** I see a scrollable list of shirts showing main image, name, and price in USD formatted from integer cents (e.g. 4500 cents is shown as $45.00), loaded 20 items at a time with more loaded as I scroll
+- **Given** the Product List is displayed **when** I select a category chip such as Linen **then** only shirts in that category are listed and the selected chip is visibly highlighted
+- **Given** a product has a sale price lower than its regular price **when** it appears in the list **then** the sale price is shown prominently with the regular price struck through
+- **Given** the selected category has no products **when** the list loads **then** an empty-state message is shown with an option to clear the category
+- **Given** the product list request fails (no connection or server error) **when** the screen tries to load **then** an error message with a Retry button is shown and tapping Retry reloads the list
+
+### US-002 Search and filter shirts (should)
+As a shopper, I want to search by keyword and filter by size, color and price range, and sort results, so that I can narrow the catalog to shirts that fit my needs and budget.
+
+- **Given** I am on the Product List screen **when** I type a keyword such as oxford into the search field and submit **then** only products whose name or description matches the keyword are listed, and if none match a no-results message is shown
+- **Given** I open the filter sheet **when** I choose size M, color Blue and a maximum price of $60.00 and apply **then** only products that have an in-stock variant in size M and color Blue and a current price of 6000 cents or less are listed, and the active filters are shown as removable chips
+- **Given** filters are applied **when** I tap Clear all **then** all filters are removed and the full list for the selected category is shown
+- **Given** the product list is displayed **when** I choose sort by price low to high **then** products are ordered by current price ascending (sale price if on sale)
+
+### US-003 View product details (must)
+As a shopper, I want to open a product and see photos, price, fabric and care details, fit description and size availability, so that I can decide whether the shirt suits me before adding it to the cart.
+
+- **Given** I am on the Product List **when** I tap a product **then** the Product Detail screen opens showing a swipeable photo gallery, name, price, description, fabric and care details, and fit type (slim, regular or relaxed)
+- **Given** the product has several size and color variants **when** the detail screen loads **then** all sizes and colors are shown as selectable options, and any size that is out of stock for the selected color is shown as disabled and labelled unavailable
+- **Given** I open a product that has been removed or does not exist **when** the detail request returns not found **then** a not-found message is shown with a button back to the Product List
+- **Given** a screen reader is enabled **when** I navigate the detail screen **then** images, size and color options and buttons have descriptive labels and text respects the device font size setting
+
+### US-004 Add a shirt to the cart (must)
+As a shopper (guest or otherwise), I want to select a size and color and add the shirt to my cart without signing in, so that I can collect the shirts I want to buy.
+
+- **Given** I am on the Product Detail screen and no size is selected **when** I tap Add to cart **then** the item is not added and a message asks me to select a size
+- **Given** I have selected an in-stock size and color **when** I tap Add to cart **then** the variant is added with quantity 1, a confirmation is shown, and the cart badge count increases by 1
+- **Given** the same variant is already in my cart **when** I add it again **then** the existing cart line quantity increases by 1 instead of creating a duplicate line
+- **Given** the variant has only N units in stock and my cart already holds N units of it **when** I tap Add to cart **then** the request is rejected and a message says no more units are available, and the cart is unchanged
+- **Given** this is my first add-to-cart and I have no cart yet **when** I add an item **then** a guest cart is created automatically without requiring sign-in or any personal data
+
+### US-005 View and edit the cart (must)
+As a shopper, I want to see my cart lines, change quantities, remove items and see the subtotal, so that I know exactly what I am about to buy and what it costs.
+
+- **Given** my cart has items **when** I open the Cart screen **then** each line shows image, product name, size, color, unit price, quantity and line total, and the screen shows an item subtotal in USD equal to the sum of line totals, calculated in integer cents
+- **Given** a cart line is displayed **when** I increase its quantity within available stock **then** the line total and subtotal update immediately and the change is saved on the server
+- **Given** a cart line has quantity 1 **when** I tap Remove (or swipe to delete) **then** the line is removed and the subtotal updates; if the cart becomes empty an empty-cart message with a Continue shopping button is shown
+- **Given** I try to set a quantity higher than the variant's available stock **when** I confirm the change **then** the quantity stays at the previous value and a message states the maximum available
+- **Given** the Cart screen is displayed **when** I look at the totals area **then** it states that shipping and sales tax are calculated at checkout, and no payment or checkout action is functional in this release
+
+### US-006 Cart persistence and current stock and price (should)
+As a shopper, I want my cart to still be there after I close the app and to reflect current prices and availability, so that I do not lose my selections and do not get surprised later.
+
+- **Given** I have items in my guest cart **when** I close and reopen the app **then** the same cart and its items are shown on the Cart screen
+- **Given** a variant in my cart has since gone out of stock **when** I open the Cart screen **then** that line is flagged as unavailable, is excluded from the subtotal, and I can remove it
+- **Given** the price of a product in my cart has changed since I added it **when** I open the Cart screen **then** the line shows the current price and the subtotal uses the current price
+- **Given** my stored cart no longer exists on the server **when** I open the Cart screen **then** an empty cart is shown and a new cart is created on the next add, with no crash
+
+## Non-functional requirements
+- Performance (average 4G connection): app cold start under 3 seconds; product list first load under 2 seconds; product detail under 2 seconds; product images optimized and lazily loaded.
+- Platforms: Flutter cross-platform codebase, Android first (minimum Android 8.0, API 26); iOS 15+ is supported by the codebase but iOS release and verification are not part of this run.
+- Money: all prices stored, transmitted and calculated as integer minor units (cents) with ISO 4217 currency code USD; never floating point. The app only formats values for display.
+- Stock: stock is tracked per product variant (size and color) keyed by inventory SKU. The cart does not reserve stock (reservation happens at checkout, out of scope). Add-to-cart and quantity changes are validated server-side against available stock.
+- Order-related data: no orders are created in this run; the catalog and cart data model must not block later order lines copying product name and unit price at purchase time.
+- Security: all traffic over HTTPS; guest carts are identified by an unguessable cart identifier/token and one cart cannot be read or changed with another cart's identifier; server-side validation of all inputs; no card data is handled or stored.
+- Privacy: no personal data is collected in this run (guest cart holds only product variants and quantities); no analytics or marketing tracking is enabled until consent features are built; a cart and its data must be deletable.
+- Accessibility: WCAG AA color contrast, screen reader labels on all interactive elements and images, dynamic text sizing supported, touch targets large enough for easy tapping.
+- Reliability and UX: loading, empty and error states (with retry) on all three screens; the app does not crash on network loss.
+- API: the backend exposes an OpenAPI description (/api/docs-json) and a /health check; both are infrastructure endpoints and not counted in the API operation limit.
+- Testability: each acceptance criterion is covered by automated tests (Flutter widget and integration tests, Jest and Supertest API tests) where practical.
+
+## Out of scope
+- Checkout, payments, Stripe PaymentIntents, Apple Pay and Google Pay, saved payment methods
+- Sales tax calculation (Stripe Tax), shipping rates, shipping address entry and validation, delivery partners
+- Orders, order history and tracking, order status flow, stock reservation
+- Promotions: discount codes, free-shipping threshold, seasonal sale sections and sale flagging beyond displaying a sale price present in the data
+- User accounts, sign-up, sign-in (email and password, Apple, Google), merging a guest cart into an account, account deletion
+- Wishlist, back-in-stock alerts, customer reviews
+- Size guide and fit helper questionnaire
+- Returns and exchanges
+- Push notifications, emails, abandoned cart reminders
+- Admin back office (roles, product/price/stock editing, reports), CSV export; catalog data is loaded from seed data for the demo
+- Live synchronization with the existing inventory REST API (15-minute sync and live checkout check); the demo uses stock values loaded from seed data keyed by SKU
+- Firebase Analytics and Crashlytics, consent prompts
+- iOS release, other countries and currencies, languages other than English
+- Cash on delivery, phone OTP login, loyalty program, live chat, made-to-measure, products other than shirts
+- Customer support pages (FAQ, contact details), privacy policy and terms screens
+
+## Assumptions
+- The client team supplies seed catalog data (names, descriptions, photos, fabric, fit, category, price in cents, optional sale price in cents, variants with SKU, size, color and stock count); the initial catalog is about 150-200 shirts, and a subset is enough for this demo.
+- Launch market is the United States, USD only, English only; prices are shown excluding tax.
+- Guest carts are explicitly approved by the client as an exception to the convention that carts belong to signed-in users; the cart is identified by a cart identifier the app stores on the device.
+- Maximum quantity per cart line is the lesser of available stock for the variant and 10 units (the cap of 10 is a demo assumption to be confirmed).
+- Screens (3 of the maximum 5): Product List (with category chips, search field and filter/sort sheet), Product Detail, Cart.
+- API operations (8 of the maximum 10) plus GET /health: GET /categories; GET /products (category, search, size, color, price range, sort, pagination); GET /products/{id}; POST /carts; GET /carts/{id}; POST /carts/{id}/items; PATCH /carts/{id}/items/{itemId}; DELETE /carts/{id}/items/{itemId}.
+- Milestone 1: catalog browse, search/filter and product detail (US-001, US-002, US-003). Milestone 2: cart (US-004, US-005, US-006).
+- Work items (within the maximum of 10): 1) project setup and CI; 2) data model and seed data import; 3) catalog and category API; 4) product list screen; 5) search and filter sheet; 6) product detail screen; 7) cart API; 8) add to cart flow; 9) cart screen; 10) cart persistence, tests and demo build.
+- Filtering by fit and fabric, and size availability by color, use the variant and product data supplied in the seed; only category, search, size, color, price and sort are required for this run.
+- Open business items that do not block this demo and are to be resolved later: the states where sales tax must be collected (accountant to confirm nexus), final brand assets, and the final launch date (target before mid-November, quality over date).

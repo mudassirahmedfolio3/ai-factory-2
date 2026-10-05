@@ -1,0 +1,108 @@
+{
+  "epics": [
+    {
+      "id": "E-01",
+      "title": "Mobile Speed Demo - Browse, Detail, Cart",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ]
+    }
+  ],
+  "work_items": [
+    {
+      "id": "WI-001",
+      "title": "Set up Flutter project structure and mock catalogue data",
+      "description": "Initialize a new Flutter 3.x project with Dart, configure Android emulator build target, create the mock product catalogue with at least 8 products each having variants and stock values, all prices stored as integer minor units (pence) in GBP, and verify the project builds and runs cleanly on the emulator with no network backend required.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-002",
+      "title": "Build product list screen and mock data provider",
+      "description": "Implement the product list screen (home screen) with lazy-loading product images, product cards displaying name and VAT-inclusive price formatted from integer minor units (pence), scrollable ListView for 8+ products, and navigation to product detail screen on tap. Create a Riverpod provider to serve mock catalogue data. Ensure list renders within 3 seconds on emulator launch and scrolling remains smooth.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001"
+      ],
+      "depends_on": [
+        "WI-001"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-003",
+      "title": "Build product detail screen with variant selection and stock status",
+      "description": "Implement the product detail screen showing product image, full name, description, VAT-inclusive price in GBP, variant selector (e.g. sizes) with visual highlighting of selected variant, and stock status per variant (in stock, low stock, out of stock). Prevent selection and cart addition of out-of-stock variants. Implement back button and back gesture to return to product list at the same scroll position.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-002"
+      ],
+      "depends_on": [
+        "WI-002"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    },
+    {
+      "id": "WI-004",
+      "title": "Implement in-memory cart state management and cart screen",
+      "description": "Create a Riverpod cart state provider to manage cart items in memory, including add/remove logic, quantity updates with validation (min 1, max available stock). Build the cart screen displaying cart items with product name, variant, unit price, and quantity controls. Calculate and display total in GBP from integer minor units without floating-point arithmetic. Show empty state when cart is empty with no checkout control. Ensure cart clears on app restart.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-003"
+      ],
+      "estimate_points": 4,
+      "status": "todo"
+    },
+    {
+      "id": "WI-005",
+      "title": "Apply theme tokens, finalize accessibility and test",
+      "description": "Define and apply style tokens (colours, typography, spacing) in a single theme definition chosen by the build agent with no approval step. Ensure text is readable (minimum 14sp body text), colour contrast is sufficient, all tap targets are at least 48x48dp, and images and controls have semantic labels for screen readers. Write flutter_test widget tests for product list, detail, and cart flows. Verify the app builds, launches cleanly, and the complete browse-detail-cart journey works end-to-end on the Android emulator.",
+      "epic_id": "E-01",
+      "component": "frontend",
+      "story_ids": [
+        "US-001",
+        "US-002",
+        "US-003"
+      ],
+      "depends_on": [
+        "WI-002",
+        "WI-003",
+        "WI-004"
+      ],
+      "estimate_points": 3,
+      "status": "todo"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "Mobile Speed Demo - Browse, Detail, Cart",
+      "goal": "Deliver a small runnable Flutter MVP running on Android emulator with a local mock catalogue, product list screen, product detail screen, optional in-memory cart, and all must-have stories (US-001, US-002) plus could-have cart (US-003) working end-to-end with no backend API, no authentication, and no payments. The app launches within 3 seconds, all prices are displayed as VAT-inclusive GBP from integer minor units, and the complete shopping journey is testable by the product team on an emulator.",
+      "work_item_ids": [
+        "WI-001",
+        "WI-002",
+        "WI-003",
+        "WI-004",
+        "WI-005"
+      ]
+    }
+  ]
+}
