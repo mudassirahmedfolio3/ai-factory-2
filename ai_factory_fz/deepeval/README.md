@@ -5,6 +5,28 @@ This folder is its own `uv` project, so it does not touch the main project's dep
 
 **Status:** DeepEval 4.2.7 is installed. There is one `test_<agent>.py` per agent (11 agent files, 33 tests) plus one end-to-end flow file (12 tests), 45 tests in total. They have been run end to end only against the hand-written sample run `../runs/sample-manual` (see [Trying the tests without a pipeline run](#trying-the-tests-without-a-pipeline-run)), not yet against real pipeline output. Each test skips when the files it needs are missing.
 
+## Quick start (Windows PowerShell)
+
+```powershell
+cd ai_factory_fz\deepeval
+uv sync                                   # once
+$env:PYTHONUTF8=1                         # stops the Windows console crashing on emoji
+
+# Which run to score. Without it, the newest folder in ..\runs is used.
+$env:DEEPEVAL_RUN_DIR="..\samples\20261002-120919"
+
+uv run pytest flow_test_writeup/test_end_to_end_flow.py -v    # the whole flow: 12 tests, about 2 minutes
+uv run pytest agent_test_writeup -v                           # every agent: 33 tests, about 5 minutes
+uv run pytest agent_test_writeup/test_architect.py -v         # one agent
+```
+
+- Every test is one judge call (Claude if `ANTHROPIC_API_KEY` is in `.env`), so a run costs tokens. A test passes at a score of 0.6 or above.
+- The run folder needs the files the tests read (see [Input: a pipeline run](#input-a-pipeline-run)). A test whose files are missing is **skipped**, not failed. The sample folder above has only `docs/`, so about 20 of the 45 tests run.
+- Each run prints a pass/fail table with a confidence per agent and writes `eval_report_flow.*`, `eval_report_agents.*` or `eval_report.*` (`.md`, `.json`, `.html`) into the run folder.
+- To start the Project Manager process after the report, set `$env:DEEPEVAL_REMEDIATE=1` first (see [Remediation](#remediation-project-manager)).
+- `uv run deepeval test run <path>` works too, but on Windows it can crash on emoji output; plain `pytest` is the verified way.
+- Test the evaluation code itself (no model calls, no tokens): `uv run pytest remediation/tests unit_tests`.
+
 ## Setup
 
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.10-3.13 (3.12 is pinned in `.python-version`).
