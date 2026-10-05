@@ -22,8 +22,11 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for staging}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set JWT_ACCESS_SECRET for staging}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET for staging}
       PORT: "3000"
       NODE_ENV: staging
+      RUN_DB_SEED: ${RUN_DB_SEED:-true}
     ports:
       - "3000:3000"
     depends_on:

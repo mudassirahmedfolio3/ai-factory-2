@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shopease_app/features/cart/presentation/cart_notifier.dart';
-import 'package:shopease_app/features/catalog/data/catalog_providers.dart';
-import 'package:shopease_app/features/catalog/data/local_catalog_data_source.dart';
-import 'package:shopease_app/features/catalog/data/seed/default_catalog_seed.dart';
+import '../../helpers/catalog_test_overrides.dart';
 import 'package:shopease_app/features/catalog/domain/models/product.dart';
 import 'package:shopease_app/features/catalog/domain/models/product_variant.dart';
 import 'package:shopease_app/features/catalog/presentation/product_detail_notifier.dart';
@@ -15,11 +13,7 @@ void main() {
 
   ProviderContainer buildContainer() {
     return ProviderContainer(
-      overrides: [
-        localCatalogDataSourceProvider.overrideWithValue(
-          LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
-        ),
-      ],
+      overrides: localCatalogOverrides(),
     );
   }
 

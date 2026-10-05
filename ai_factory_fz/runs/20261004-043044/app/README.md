@@ -1,17 +1,21 @@
 # shopease_app
 
-A new Flutter project.
+Lighting Retail UK Flutter app (M1 local catalog, M2 catalog API, M3 shopper depth).
 
-## Getting Started
+## Catalog data sources
 
-This project is a starting point for a Flutter application.
+- **M1 default:** `LocalCatalogDataSource` (`assets/data/catalog.json`).
+- **M2 API:** Generated `packages/api_client` (dart-dio) via `ApiCatalogDataSource`, selected when `GET /health` succeeds.
+- **Demo fallback:** Automatic switch back to local mocks if the API is down.
 
-A few resources to get you started if this is your first Flutter project:
+See [docs/API_READINESS.md](docs/API_READINESS.md) for stakeholder demo notes, OpenAPI regeneration, and dart-define flags.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Commands
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Run from this directory:
+
+```text
+flutter pub get
+flutter analyze
+flutter test
+```

@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -494,7 +495,12 @@ def resume_fz_run_unlocked(run_id: str, *, force: bool = True) -> dict[str, Any]
     if existing:
         if force:
             _terminate_fz_worker_pids(existing)
+            time.sleep(1.5)
             reconcile_fz_run_state()
+            existing = _worker_pids_for_run(run_id)
+            if existing:
+                _terminate_fz_worker_pids(existing)
+                time.sleep(0.5)
         else:
             info = read_worker_info() or {}
             return {

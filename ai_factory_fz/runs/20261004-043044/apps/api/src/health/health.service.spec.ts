@@ -31,8 +31,12 @@ describe('HealthService', () => {
 
   it('throws 503 when database is unreachable', async () => {
     prisma.pingDatabase.mockRejectedValue(new Error('connection refused'));
-    await expect(service.getHealth()).rejects.toBeInstanceOf(
-      ServiceUnavailableException,
-    );
+    await expect(service.getHealth()).rejects.toMatchObject({
+      response: {
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: 'Database unreachable',
+      },
+    });
   });
 });

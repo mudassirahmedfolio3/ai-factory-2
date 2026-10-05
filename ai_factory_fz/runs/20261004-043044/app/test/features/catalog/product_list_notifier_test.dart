@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shopease_app/features/catalog/data/catalog_providers.dart';
-import 'package:shopease_app/features/catalog/data/local_catalog_data_source.dart';
-import 'package:shopease_app/features/catalog/data/seed/default_catalog_seed.dart';
+import '../../helpers/catalog_test_overrides.dart';
 import 'package:shopease_app/features/catalog/domain/catalog_list_query.dart';
 import 'package:shopease_app/features/catalog/domain/models/product.dart';
 import 'package:shopease_app/features/catalog/presentation/product_list_notifier.dart';
@@ -10,11 +8,7 @@ import 'package:shopease_app/features/catalog/presentation/product_list_notifier
 void main() {
   test('ProductListNotifier search and clear search', () async {
     final container = ProviderContainer(
-      overrides: [
-        localCatalogDataSourceProvider.overrideWithValue(
-          LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
-        ),
-      ],
+      overrides: localCatalogOverrides(),
     );
     addTearDown(container.dispose);
 
@@ -37,11 +31,7 @@ void main() {
 
   test('ProductListNotifier category route context filters listing', () async {
     final container = ProviderContainer(
-      overrides: [
-        localCatalogDataSourceProvider.overrideWithValue(
-          LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
-        ),
-      ],
+      overrides: localCatalogOverrides(),
     );
     addTearDown(container.dispose);
 
@@ -58,11 +48,7 @@ void main() {
     'ProductListNotifier reset filters keeps search and category route',
     () async {
       final container = ProviderContainer(
-        overrides: [
-          localCatalogDataSourceProvider.overrideWithValue(
-            LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
-          ),
-        ],
+        overrides: localCatalogOverrides(),
       );
       addTearDown(container.dispose);
 
@@ -90,11 +76,7 @@ void main() {
 
   test('ProductListNotifier reset filters restores popularity listing order', () async {
     final container = ProviderContainer(
-      overrides: [
-        localCatalogDataSourceProvider.overrideWithValue(
-          LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
-        ),
-      ],
+      overrides: localCatalogOverrides(),
     );
     addTearDown(container.dispose);
 

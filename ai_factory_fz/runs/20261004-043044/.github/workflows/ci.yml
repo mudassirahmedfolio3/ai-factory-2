@@ -65,3 +65,27 @@ jobs:
       - run: dart run build_runner build
       - run: flutter analyze
       - run: flutter test
+
+  compose-config:
+    name: Docker Compose config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate local compose
+        env:
+          POSTGRES_USER: lighting
+          POSTGRES_PASSWORD: lighting
+          POSTGRES_DB: lighting_retail
+        run: docker compose -f docker-compose.yml config --quiet
+      - name: Validate staging compose (required env)
+        env:
+          POSTGRES_USER: lighting
+          POSTGRES_PASSWORD: ci-staging-postgres-secret
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: "5432"
+          POSTGRES_DB: lighting_retail
+          JWT_ACCESS_SECRET: ci-staging-jwt-access-secret-min-16-chars
+          JWT_REFRESH_SECRET: ci-staging-jwt-refresh-secret-min-16-chars
+        run: |
+          export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?schema=public"
+          docker compose -f docker-compose.staging.yml config --quiet

@@ -182,3 +182,23 @@ dialog.gate-dialog{width:min(920px,calc(100% - 32px));max-height:min(860px,calc(
 .mock-form i{display:block;height:32px;border-radius:10px;background:#eef1f6}
 .mock-form b,.mock-cta{display:inline-block;margin-top:8px;background:var(--indigo);color:white;border-radius:10px;padding:8px 12px;font-size:12px}
 @media(max-width:720px){.code-review{grid-template-columns:1fr;max-height:52vh}.file-tree{max-height:140px}.gate-toolbar{flex-direction:column;align-items:stretch}.mockup-stage{gap:8px}}
+
+/* Full-viewport shell (react-base): dashboard fits one screen without page scroll */
+html,body,#root{height:100dvh;max-height:100dvh;overflow:hidden}
+body{margin:0}
+#root{display:flex;flex-direction:column;min-height:0}
+.app-shell{display:flex;flex-direction:column;flex:1;min-height:0;max-height:100dvh;overflow:hidden}
+.app-shell-scroll{overflow:auto}
+.app-shell-scroll .history{min-height:0;flex:1}
+.dashboard-header,.intake-header{flex:0 0 auto;min-height:0}
+.header.dashboard-header{align-items:flex-start;padding:clamp(12px,1.8vh,24px)}
+.demo-controls{flex:0 0 auto}
+.dashboard{flex:1;min-height:0;width:100%;overflow:hidden;display:grid;grid-template-columns:55% 45%;grid-template-rows:minmax(0,1fr)}
+.factory-floor{min-height:0;height:100%}
+.agent-scene{flex:1 1 auto;min-height:0;aspect-ratio:auto;max-height:none}
+.application-studio{min-height:0;height:100%;overflow:hidden;gap:clamp(8px,1.2vh,16px);padding:clamp(12px,2vh,24px)}
+.device-area{flex:1;min-height:0}
+.dashboard-loading{display:flex;align-items:center;justify-content:center;padding:24px}
+.intake{flex:1;min-height:0;overflow:hidden;padding:clamp(8px,2.2vh,28px) 24px;min-height:unset}
+@media(min-width:1700px){.dashboard{min-height:0}}
+@media(max-width:900px){.dashboard{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}}

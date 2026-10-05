@@ -75,7 +75,7 @@ export default function History({ onOpenRun, onNewProject, onGenerateRelease }) 
   const [emulatorBusyId, setEmulatorBusyId] = useState(null);
   const [releaseBusyId, setReleaseBusyId] = useState(null);
   const [emulatorMsg, setEmulatorMsg] = useState('');
-  const [dossierBusyId, setDossierBusyId] = useState(null);
+  const [dossierBusy, setDossierBusy] = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -127,17 +127,18 @@ export default function History({ onOpenRun, onNewProject, onGenerateRelease }) 
     }
   }
 
-  async function handleDownloadDossier(run) {
-    if (!run?.run_id || dossierBusyId) return;
-    setDossierBusyId(run.run_id);
+  async function handleDownloadDossier(run, format = 'pdf') {
+    if (!run?.run_id || dossierBusy) return;
+    setDossierBusy({ runId: run.run_id, format });
     setEmulatorMsg('');
     try {
-      await downloadRunDossier(run.run_id);
-      setEmulatorMsg(`Downloaded SDLC dossier for ${run.run_id}.`);
+      await downloadRunDossier(run.run_id, format);
+      const label = format === 'html' ? 'HTML' : 'PDF';
+      setEmulatorMsg(`Downloaded SDLC dossier (${label}) for ${run.run_id}.`);
     } catch (err) {
       setEmulatorMsg(err.message || 'Could not download dossier.');
     } finally {
-      setDossierBusyId(null);
+      setDossierBusy(null);
     }
   }
 
@@ -286,12 +287,32 @@ export default function History({ onOpenRun, onNewProject, onGenerateRelease }) 
                   <button
                     type="button"
                     className="icon-btn secondary"
+                    title="Download SDLC dossier (HTML)"
+                    aria-label="Download SDLC dossier HTML"
+                    onClick={() => handleDownloadDossier(run, 'html')}
+                    disabled={
+                      !run.run_id ||
+                      (dossierBusy?.runId === run.run_id && Boolean(dossierBusy))
+                    }
+                  >
+                    {dossierBusy?.runId === run.run_id && dossierBusy?.format === 'html'
+                      ? '…'
+                      : '↓ HTML'}
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-btn secondary"
                     title="Download SDLC dossier (PDF)"
                     aria-label="Download SDLC dossier PDF"
-                    onClick={() => handleDownloadDossier(run)}
-                    disabled={!run.run_id || dossierBusyId === run.run_id}
+                    onClick={() => handleDownloadDossier(run, 'pdf')}
+                    disabled={
+                      !run.run_id ||
+                      (dossierBusy?.runId === run.run_id && Boolean(dossierBusy))
+                    }
                   >
-                    {dossierBusyId === run.run_id ? '…' : '↓ PDF'}
+                    {dossierBusy?.runId === run.run_id && dossierBusy?.format === 'pdf'
+                      ? '…'
+                      : '↓ PDF'}
                   </button>
                   <button
                     type="button"

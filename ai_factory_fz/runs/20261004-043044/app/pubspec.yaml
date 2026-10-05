@@ -39,12 +39,18 @@ dependencies:
   intl: ^0.20.3
   api_client:
     path: packages/api_client
+  built_collection: ^5.1.1
+  dio: ^5.9.0
   flutter_secure_storage: ^11.2.0
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
+  webview_flutter: ^4.14.1
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -71,6 +77,8 @@ flutter:
   assets:
     - assets/data/catalog.json
     - assets/images/products/placeholder.png
+    - assets/catalog/images/
+    - assets/support/faq.html
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

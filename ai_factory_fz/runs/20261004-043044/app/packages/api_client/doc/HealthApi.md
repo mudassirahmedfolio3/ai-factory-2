@@ -17,8 +17,6 @@ Method | HTTP request | Description
 
 Health check
 
-Returns 200 when the API process and PostgreSQL are reachable.
-
 ### Example
 ```dart
 import 'package:api_client/api.dart';

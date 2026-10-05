@@ -12,9 +12,8 @@ Name | Type | Description | Notes
 **sku** | **String** |  | 
 **label** | **String** |  | 
 **price** | [**Money**](Money.md) |  | 
-**compareAtPrice** | [**Money**](Money.md) |  | [optional] 
 **stockQuantity** | **int** |  | 
-**availableQuantity** | **int** | stockQuantity minus active reservations | 
+**availableQuantity** | **int** |  | 
 **finish** | **String** |  | [optional] 
 **wattageW** | **int** |  | [optional] 
 **colorTemperatureK** | **int** |  | [optional] 

@@ -21,9 +21,12 @@ import {
 import { displayAgentName } from './agentLabels.js';
 import {
   buildClientBrief,
+  buildProgressFooterLine,
   deliveryStageCopy,
   filterUsageForStage,
   flutterRunReadyFromState,
+  fzCurrentWorkLabel,
+  fzStudioSubtitle,
   runStateToDashboard,
   slugProjectName,
 } from './phaseMap.js';
@@ -212,7 +215,7 @@ function Intake({ onStart, onOpenHistory }) {
   }
 
   return (
-    <>
+    <div className="app-shell">
       {liveRun && (
         <div className="live-run-banner" role="status">
           <span>
@@ -357,7 +360,7 @@ function Intake({ onStart, onOpenHistory }) {
         </p>
         <p className="demo-note">Live run · Powered by CrewAI</p>
       </main>
-    </>
+    </div>
   );
 }
 
@@ -628,7 +631,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
   const [journeyLoading, setJourneyLoading] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [dossierBusy, setDossierBusy] = useState(false);
+  const [dossierBusy, setDossierBusy] = useState(null);
   const navRef = useRef();
   const detailScrollRef = useRef(null);
 
@@ -873,6 +876,10 @@ function Dashboard({ project, onReset, onOpenHistory }) {
             : 'Awaiting approval'
           : 'In progress';
 
+  const fzWorkLabel = fzCurrentWorkLabel(runState);
+  const footerProgress = buildProgressFooterLine(runState, project);
+  const studioSubtitle = fzStudioSubtitle(runState, stage, stageIndex, lastStage, done);
+
   function review(i) {
     setView(i === run.active ? null : i);
   }
@@ -902,20 +909,20 @@ function Dashboard({ project, onReset, onOpenHistory }) {
 
   if (runLoading && !runState) {
     return (
-      <>
+      <div className="app-shell">
         <header className="header dashboard-header">
           <Brand />
         </header>
         <main className="dashboard dashboard-loading">
           <p role="status">Connecting to factory run…</p>
         </main>
-      </>
+      </div>
     );
   }
 
   if (!runState) {
     return (
-      <>
+      <div className="app-shell">
         <header className="header dashboard-header">
           <Brand />
         </header>
@@ -927,12 +934,12 @@ function Dashboard({ project, onReset, onOpenHistory }) {
             Back to intake
           </button>
         </main>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="app-shell">
       {run.failed && (
         <div className="error-banner" role="alert">
           {runState?.status === 'stale'
@@ -1123,7 +1130,11 @@ function Dashboard({ project, onReset, onOpenHistory }) {
             <div className="context-grid">
               <div>
                 <small>{done ? 'Latest milestone' : 'Currently working on'}</small>
-                <p>{stage.check[Math.min(4, Math.floor(progress / 20))]}</p>
+                <p>
+                  {fzWorkLabel && !viewing && !done
+                    ? fzWorkLabel
+                    : stage.check[Math.min(4, Math.floor(progress / 20))]}
+                </p>
               </div>
               <div>
                 <small>Input</small>
@@ -1136,26 +1147,48 @@ function Dashboard({ project, onReset, onOpenHistory }) {
             </div>
             <div className="detail-actions">
               {isFzEngine && project.runId ? (
-                <button
-                  type="button"
-                  className="icon-btn secondary"
-                  title="Download SDLC dossier (PDF)"
-                  aria-label="Download SDLC dossier PDF"
-                  disabled={dossierBusy}
-                  onClick={async () => {
-                    if (!project.runId || dossierBusy) return;
-                    setDossierBusy(true);
-                    try {
-                      await downloadRunDossier(project.runId);
-                    } catch {
-                      /* user can retry from History */
-                    } finally {
-                      setDossierBusy(false);
-                    }
-                  }}
-                >
-                  {dossierBusy ? '…' : '↓ PDF'}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="icon-btn secondary"
+                    title="Download SDLC dossier (HTML)"
+                    aria-label="Download SDLC dossier HTML"
+                    disabled={Boolean(dossierBusy)}
+                    onClick={async () => {
+                      if (!project.runId || dossierBusy) return;
+                      setDossierBusy('html');
+                      try {
+                        await downloadRunDossier(project.runId, 'html');
+                      } catch {
+                        /* user can retry from History */
+                      } finally {
+                        setDossierBusy(null);
+                      }
+                    }}
+                  >
+                    {dossierBusy === 'html' ? '…' : '↓ HTML'}
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-btn secondary"
+                    title="Download SDLC dossier (PDF)"
+                    aria-label="Download SDLC dossier PDF"
+                    disabled={Boolean(dossierBusy)}
+                    onClick={async () => {
+                      if (!project.runId || dossierBusy) return;
+                      setDossierBusy('pdf');
+                      try {
+                        await downloadRunDossier(project.runId, 'pdf');
+                      } catch {
+                        /* user can retry from History */
+                      } finally {
+                        setDossierBusy(null);
+                      }
+                    }}
+                  >
+                    {dossierBusy === 'pdf' ? '…' : '↓ PDF'}
+                  </button>
+                </>
               ) : null}
               <button
                 type="button"
@@ -1172,12 +1205,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
           <div className="studio-heading">
             <div>
               <h2>{displayName}</h2>
-              <p>
-                {stage.key} ·{' '}
-                {stageIndex === lastStage && !done
-                  ? 'Packaging the application for delivery'
-                  : stage.right}
-              </p>
+              <p>{studioSubtitle}</p>
             </div>
             <span className={`status ${done ? 'success' : run.failed ? 'error' : ''}`}>● {status}</span>
           </div>
@@ -1289,7 +1317,7 @@ function Dashboard({ project, onReset, onOpenHistory }) {
         <span>
           <i className={run.complete ? 'complete-dot' : 'live-dot'} />
           {run.failed ? 'Run failed' : run.complete ? 'Run complete' : 'Live run'}
-          {project.estimatedMinutes ? ` · ~${project.estimatedMinutes} min` : ''}
+          {footerProgress ? ` · ${footerProgress}` : ''}
         </span>
         <div>
           {viewing && (
@@ -1480,7 +1508,7 @@ flutter run`}</pre>
           onReject={() => setGateOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 }
 
@@ -1521,11 +1549,13 @@ export default function App() {
 
   if (view === 'history') {
     return (
-      <History
-        onOpenRun={openRun}
-        onNewProject={openIntake}
-        onGenerateRelease={openRun}
-      />
+      <div className="app-shell app-shell-scroll">
+        <History
+          onOpenRun={openRun}
+          onNewProject={openIntake}
+          onGenerateRelease={openRun}
+        />
+      </div>
     );
   }
 

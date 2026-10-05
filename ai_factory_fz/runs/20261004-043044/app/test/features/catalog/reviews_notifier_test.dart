@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shopease_app/features/catalog/data/catalog_providers.dart';
-import 'package:shopease_app/features/catalog/data/local_catalog_data_source.dart';
-import 'package:shopease_app/features/catalog/data/seed/default_catalog_seed.dart';
+
+import '../../helpers/catalog_test_overrides.dart';
 import 'package:shopease_app/features/catalog/presentation/reviews_notifier.dart';
 
 void main() {
@@ -10,11 +10,7 @@ void main() {
 
   test('ReviewsNotifier paginates locally', () async {
     final container = ProviderContainer(
-      overrides: [
-        localCatalogDataSourceProvider.overrideWithValue(
-          LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
-        ),
-      ],
+      overrides: localCatalogOverrides(),
     );
     addTearDown(container.dispose);
 
@@ -35,11 +31,7 @@ void main() {
 
   test('ReviewsNotifier loadMore with smaller page size', () async {
     final container = ProviderContainer(
-      overrides: [
-        localCatalogDataSourceProvider.overrideWithValue(
-          LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
-        ),
-      ],
+      overrides: localCatalogOverrides(),
     );
     addTearDown(container.dispose);
 

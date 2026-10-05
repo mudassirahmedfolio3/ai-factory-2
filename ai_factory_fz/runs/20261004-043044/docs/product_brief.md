@@ -1,96 +1,87 @@
-# Product brief: Lighting e-commerce mobile app (MVP) — lighting-retail-mvp
+# Product brief: Lumen — Lighting Retail Mobile App (MVP + Release 2)
 
-Build a mobile-first lighting retail store (Android + iOS) with guest shopping, accounts, catalog, cart, checkout, orders, and an admin slice for catalog and order operations. Product domain is lighting (LED fixtures, wattage, lumens, color temperature, IP rating, etc.). MVP user journey: Open app → browse/search → product detail → select variants → add to cart → checkout → shipping & payment → place order → confirmation → track order. Customers must be able to browse, search, and filter lighting products; see product details and variants; use cart and checkout with supported payment methods; view order history and tracking. Admins must manage products, categories, variants, and inventory; view and process orders. The system must reliably handle payment errors, network failures, and duplicate submissions. Prioritize a runnable Flutter app on Android emulator plus NestJS API with OpenAPI. Use a realistic lighting seed catalog (15–30 SKUs) with the lighting-specific attributes defined for detail pages. Phase admin as API plus minimal admin UI or documented API if mobile scope is tight; do not leave the shopper path as a counter demo. Guest path must work end-to-end for demo; auth for accounts and order history.
+Give UK customers a mobile-first way to discover, compare, and buy professional and residential lighting—from LED fixtures and step lights to emergency and indoor ranges—with the same confidence they expect in a specialist store. Shoppers can browse as guests or create an account for saved carts, order history, and wishlists. The MVP demo must feel like a real lighting retailer: accurate specs (wattage, lumens, color temperature, IP rating, dimmable, finish), real product photography, UK shipping and checkout, and reliable order confirmation and tracking. Admin operations stay API-first for now so we do not delay the shopper experience that drives revenue.
 
 ## Target users
-- Residential customers shopping for LED fixtures, bulbs, and accessories for home renovation and room upgrades
-- Trade and semi-professional buyers (electricians, small contractors, interior designers) who need spec-rich listings (wattage, lumens, IP rating, dimming)
-- Guest shoppers who want to complete a purchase without creating an account (MVP demo must support this path end-to-end)
-- Registered customers who want order history, tracking, wishlists, and password recovery
-- Internal store administrators who manage catalog, inventory, orders, promotions, and homepage content
+- Homeowners and DIY buyers upgrading indoor lighting, ceiling fixtures, and dimmable LED products
+- Trade customers (electricians, small contractors) ordering repeat SKUs by brand, wattage, and IP rating
+- Facilities and commercial buyers sourcing emergency lighting and compliance-oriented products
+- Guest shoppers who want to complete a purchase quickly without creating an account
+- Registered customers who want order history, saved wishlists, and a cart that persists across sessions
+- Internal catalog and order staff (Release 2: API-backed operations; full admin UI deferred)
 
 ## Business goals
-- Launch an MVP that proves we can sell lighting products on mobile with a complete guest checkout path suitable for stakeholder demo
-- Increase online revenue by making it easy to discover products by category, search, filters (price, brand, category, wattage, color, availability), and sorting (price, newest, popularity)
-- Reduce support load by showing accurate stock, lighting specifications on product detail pages, and self-service order tracking with notifications for confirmation and shipping updates
-- Operate efficiently with admin product management (add, edit, deactivate), catalog structure (categories, brands, images, specifications), variants (SKUs, prices, availability), inventory (stock quantities, out-of-stock handling), order management (view, search, manage; statuses processing, shipped, delivered), customer profiles and order history, promotions (discount coupons), and homepage banners and featured products
-- Meet non-functional expectations: efficient screen and product loads; agreed minimum Android and iOS versions; secure auth, HTTPS, access controls; secure payment gateway with no raw card storage; simple, intuitive, mobile-friendly usability; network/payment/checkout failure handling; scalability for growth in products, customers, and orders; accessibility (readable text, accessible controls, contrast); data integrity (correct prices, no overselling, no duplicate orders); analytics (product views, cart adds, purchases)
+- Launch a runnable Android demo (Flutter) with NestJS API and OpenAPI so stakeholders can walk the full guest and signed-in shopper journey end-to-end
+- Increase conversion by making lighting specs easy to compare (filters for brand, wattage, finish, availability; sort by price, newest, popularity)
+- Support both guest checkout and registered accounts with cart merge on login to reduce abandoned carts
+- Present a credible UK lighting catalog of 18–30 SKUs with at least one real product photo each, bundled for offline emulator demo
+- Enable promotions via coupon codes at checkout against seeded promos to validate discount logic before production
+- Provide order history and status progression (processing → shipped → delivered) so customers trust post-purchase experience
+- Maintain payment security: secure gateway pattern, no raw card storage; mock payment acceptable for MVP demo
+- Lay backend foundation (auth, orders, coupons, home merchandising) with tests and OpenAPI parity for future admin panel and iOS release
+- Meet MVP completion criteria: browse/search/filter, variants, cart/checkout, orders/tracking, admin product/order management via API (minimal UI optional)
+- Instrument basic analytics hooks (product views, cart adds, purchases) aligned with NFR-10 for later optimization
 
 ## Key features
-- FR-01 User Account: Register, log in, log out, reset passwords
-- FR-02 Guest Access: Browse and shop without an account
-- FR-03 Home: Banners, featured products, new arrivals, categories
+- FR-01 User Account: Register, log in, log out, reset passwords; Release 2 adds secure token storage and password-reset stub (email deep link or in-app “check your email” demo)
+- FR-02 Guest Access: Browse and shop without an account; signed-in users get persisted cart merge on login and order history
+- FR-03 Home: Banners, featured products, new arrivals, categories—API-backed when health OK (Pass 1 baseline extended in Release 2)
 - FR-04 Categories: Browse lighting by category and subcategory
 - FR-05 Search: Search by name, SKU, brand, keywords
-- FR-06 Product Listing: Images, names, prices, discounts, availability
-- FR-07 Filters: Price, brand, category, wattage, color, availability
+- FR-06 Product Listing: Images, names, prices, discounts, availability—with real lighting photos in list, home carousels, and cart line items (Release 2)
+- FR-07 Filters: Price, brand, category, wattage, color/finish, availability where seed supports
 - FR-08 Sorting: Price, newest, popularity
-- FR-09 Product Details: Images, descriptions, prices, specs, stock
+- FR-09 Product Details: Images, descriptions, prices, specs, stock; lighting attributes shown only when relevant per product type
 - FR-10 Product Variants: Color, size, wattage, finish
-- FR-11 Cart: Add, update qty, remove, totals
-- FR-12 Wishlist: Save and remove favorites
-- FR-13 Checkout: Contact, shipping address, order review
-- FR-14 Payment: Secure payment (no raw card storage)
-- FR-15 Order Placement: Place order + confirmation with order number
-- FR-16 Order History: View past orders
-- FR-17 Order Tracking: Order status and shipment info
-- FR-18 Notifications: Order confirmation and shipping updates
-- FR-19 Promotions: Coupon codes
-- FR-20 Customer Support: Contact info and basic support channel
-- AR-01 Product Management: Add, edit, deactivate products
-- AR-02 Product Catalog: Categories, brands, images, specifications
-- AR-03 Variants: Variants, SKUs, prices, availability
-- AR-04 Inventory: Stock quantities, out-of-stock handling
-- AR-05 Order Management: View, search, manage orders
-- AR-06 Order Status: Processing, shipped, delivered
-- AR-07 Customer Management: Profiles and order history
-- AR-08 Promotions: Discount coupons
-- AR-09 Content Management: Homepage banners and featured products
-- Lighting-specific product attributes on detail page (show only relevant specs per product type): Product Name, SKU, Wattage, Lumens, Color Temperature, Light Type, Voltage, Dimmable, Material, Finish, Dimensions, IP Rating, Bulb Included, Installation Type. Example: Modern LED Ceiling Light, SKU CL-1001, 24W, 2400 lm, 3000K, LED, 220–240V, Dimmable Yes, Aluminum, Matte Black, 600×300 mm, IP44, Bulb Included Yes, Ceiling Mounted.
-- Seed catalog: 15–30 realistic lighting SKUs covering common categories (e.g. ceiling lights, pendant, wall, outdoor, bulbs, strips) with variant combinations where commercially typical (finish, wattage, color temperature)
-- Business decision — brand positioning for MVP: Single-brand storefront experience (“our store”) with multiple manufacturer brands in catalog (customers filter by brand; we are the retailer, not a marketplace with third-party sellers)
-- Business decision — geography for MVP demo: One primary market with domestic shipping addresses; prices shown in local currency with tax displayed as a single line at checkout review (exact tax rules can follow standard e-commerce practice for that market)
-- Business decision — out of stock: Products remain visible in listing with “Out of stock” badge; add-to-cart disabled when no stock; admins can deactivate products instead of deleting for history integrity
-- Business decision — guest orders: Guest checkout collects email and phone for confirmation and support; order lookup for guests via order number plus email (registered users see full history in account)
-- Business decision — customer support channel for MVP: In-app display of business hours, phone, email, and FAQ link; no live chat bot required for MVP
-- Business decision — promotions: Percentage or fixed-amount coupon codes entered at checkout; one coupon per order for MVP unless we decide otherwise later
+- FR-11 Cart: Add, update quantity, remove, totals
+- FR-12 Wishlist: Save and remove favorites; API sync when signed in
+- FR-13 Checkout: Contact, UK shipping address, order review
+- FR-14 Payment: Secure payment (no raw card storage); mock payment for demo
+- FR-15 Order Placement: Place order plus confirmation with order number
+- FR-16 Order History: View past orders for signed-in users
+- FR-17 Order Tracking: Order status and shipment info (processing, shipped, delivered)
+- FR-18 Notifications: Order confirmation and shipping updates—mock/log only in this pass (no production push)
+- FR-19 Promotions: Coupon codes at checkout against seed promos
+- FR-20 Customer Support: In-app support/contact screen (hours, phone, email, FAQ link)
+- Lighting-specific detail attributes: Product Name, SKU, Wattage, Lumens, Color Temperature, Light Type, Voltage, Dimmable, Material, Finish, Dimensions, IP Rating, Bulb Included, Installation Type
+- Real product imagery (Release 2): 18–30 SKUs sourced primarily from https://stanpro2.folio3.site/search and linked detail pages; images downloaded into app/assets/catalog/images/ and/or API seed static paths; provenance in docs/IMAGE_SOURCES.md; catalog.json, Prisma seed, and API mappers aligned with Flutter and NestJS
+- Backend (Release 2 M3): Extend Prisma seed, NestJS modules, OpenAPI for auth, orders, coupons, home merchandising; Jest/e2e green; docs/openapi.yaml parity
+- Pass 1 shipped baseline (do not replan WI-001–WI-012): Flutter guest catalog with local/API fallback, NestJS /api/v1 health + catalog OpenAPI, Dart client
+- Milestone M3 — Release 2 — shopper depth & production catalog: new work items WI-013 upward only
+- Admin (MVP scope): AR-01–AR-09 via API + minimal admin UI or documented API; full admin panel UI out of scope for Release 2 pass
+- NFR alignment: Performance, Android/iOS minimum versions (prioritize Android emulator), HTTPS/security, usability, failure handling for network/payment/checkout and duplicate submissions, scalability, accessibility, data integrity (correct prices, no overselling, no duplicate orders), analytics
 
 ## Constraints
-- NFR-01 Performance — efficient screen and product loads
-- NFR-02 Compatibility — agreed minimum Android and iOS versions
-- NFR-03 Security — secure auth, HTTPS, access controls
-- NFR-04 Payments — secure gateway, no raw card storage
-- NFR-05 Usability — simple, intuitive, mobile-friendly
-- NFR-06 Reliability — network/payment/checkout failure handling
-- NFR-07 Scalability — growth in products, customers, orders
-- NFR-08 Accessibility — readable text, accessible controls, contrast
-- NFR-09 Data Integrity — correct prices, no overselling, no duplicate orders
-- NFR-10 Analytics — product views, cart adds, purchases
-- Delivery: Prioritize a runnable Flutter app on Android emulator plus NestJS API with OpenAPI
-- Delivery: Realistic lighting seed catalog (15–30 SKUs) with attributes above
-- Delivery: Phase admin as API + minimal admin UI or documented API if mobile scope is tight; do not leave the shopper path as a counter demo
-- Delivery: Guest path must work end-to-end for demo; auth for accounts and order history
-- Business constraint — MVP scope: Mobile shopper experience is the priority; admin may be minimal UI but catalog and order operations must be achievable for demo via API or light admin screens
-- Business constraint — payments: No storage of raw card data on our systems; use a recognized payment gateway integration pattern suitable for mobile
-- Business constraint — inventory: No overselling at order placement; stock decremented or reserved according to a single clear rule implemented consistently
+- Delivery priority: Runnable Flutter app on Android emulator plus NestJS API with OpenAPI—not a counter demo; guest path must work end-to-end for demo
+- Catalog size: Realistic lighting seed of 15–30 SKUs (Release 2 target 18–30) with lighting specs consistent with modeled attributes
+- Imagery: Do not rely on hotlinking alone for demo; bundled assets must work offline on emulator; demo/staging use only until license review for production redistribution
+- Payments: No production payment keys; no raw card storage; mock payment acceptable
+- Notifications: FR-18 mock/log only—no production push in this pass
+- Platform: iOS store submission out of scope; compatibility NFR still applies for agreed minimum versions
+- Admin: Full admin panel UI (AR-01–AR-09) out of scope—optional read-only admin API docs only if time remains
+- Quality bar: flutter analyze and flutter test green; server unit + Supertest e2e for new endpoints; one QA round on M3 before Release 2 done; update PRD/backlog for M3 scope
+- Do not duplicate or replan Pass 1 work items WI-001 through WI-012 unless a small delta fix is required for Release 2
+- UK lighting retail positioning for shipping address, support contact, and merchandising copy
+- Phase admin as API + minimal UI or documented API if mobile scope is tight
 
 ## Open questions
-- What are the agreed minimum Android and iOS OS versions (NFR-02)?
-- Which primary country/market, currency, and language(s) are in scope for launch vs demo-only?
-- Which payment gateway and which payment methods (cards only, wallets, buy-now-pay-later) must be live in MVP?
-- Shipping: flat rate, free over threshold, weight-based, or carrier-calculated? Which carriers and which delivery speed options?
-- Returns and refunds policy for MVP — display-only text or integrated return requests in app/admin?
-- Tax: single VAT/GST rate for demo vs full address-based tax calculation?
-- Notifications: email only, push only, or both for order confirmation and shipping updates (FR-18)?
-- Analytics: which platform or events schema (NFR-10) — and what is acceptable for MVP without privacy review delay?
-- Admin access: single admin role for MVP or separate roles (catalog vs orders vs super-admin)?
-- Product content: who supplies photography and long descriptions for seed SKUs — stock placeholders acceptable for MVP?
-- Wishlist (FR-12): require login to persist wishlist, or allow guest wishlist on device only?
-- Popularity sort (FR-08): defined by sales volume, views, or manual merchandising flag for MVP?
-- Categories taxonomy: final top-level and subcategory list for lighting (e.g. indoor/outdoor, room type, fixture type) — need merchandising sign-off
-- International: ship cross-border in MVP or domestic only?
-- Legal: terms of service, privacy policy, and cookie/consent requirements for target market — who provides copy?
-- Coupon rules (FR-19 / AR-08): stackable with sale prices, expiry dates, minimum order value, single-use per customer?
-- Order tracking (FR-17): manual status updates by admin only, or carrier tracking number integration in MVP?
-- Accessibility (NFR-08): target compliance level (e.g. WCAG 2.1 AA) for MVP vs best-effort?
-- iOS delivery timing: Android emulator first is agreed — is iOS build/test required before MVP sign-off or parallel phase 2?
+- Brand and trading name for customer-facing app store listing and support screen (working name “Lumen” vs final retail brand)
+- Exact UK shipping zones, carriers, and flat-rate vs weight-based shipping rules for production (MVP may use simplified UK domestic rules)
+- VAT display and invoicing requirements for B2C vs trade accounts
+- Which payment providers and methods beyond mock checkout (card, Apple Pay, Google Pay, trade credit) for production
+- Return, refund, and warranty policy text and flows for lighting products (especially emergency and installed fixtures)
+- Trade account pricing, volume discounts, and whether coupons stack with trade rates
+- Minimum supported Android and iOS OS versions for NFR-02 (business sign-off pending)
+- Production image licensing strategy after demo use of Stanpro-style and supplemental manufacturer/retailer sources
+- Email/SMS provider and templates for real password reset, order confirmation, and shipping updates (currently stub/mock)
+- Push notification strategy and opt-in compliance (GDPR/marketing vs transactional)
+- Admin panel priority order when UI work resumes (catalog vs orders vs promotions vs content)
+- Analytics platform and KPI targets (conversion rate, AOV, search zero-results) beyond event hooks
+- Accessibility conformance target (e.g. WCAG 2.1 AA) and audit timeline
+- Inventory sync source of truth (ERP, WMS, or manual admin) for live stock beyond seeded quantities
+- Handling of oversized or fragile lighting SKUs (delivery surcharges, click-and-collect)
+- Multi-currency or Ireland/EU expansion timeline if any
+- Customer support channel SLA (phone hours, live chat vs email-only) and FAQ ownership
+- Popularity sort definition (sales volume, views, manual merchandising weight)
+- Emergency lighting compliance disclaimers and buyer qualifications required in copy
+- Data retention and account deletion policy under UK GDPR

@@ -11,6 +11,13 @@ jest.mock('@nestjs/common', () => ({
   },
 }));
 
+jest.mock('@nestjs/swagger', () => ({
+  ApiTags: () => () => undefined,
+  ApiOperation: () => () => undefined,
+  ApiResponse: () => () => undefined,
+  ApiProperty: () => () => undefined,
+}));
+
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 

@@ -86,6 +86,13 @@ def test_falls_back_to_next_model_when_primary_fails():
     assert result.usage.model == "fake/b"
 
 
+def test_parse_structured_output_from_final_answer_fence():
+    from agentic_sdlc.crews.base import parse_structured_output
+
+    raw = 'Thought: done.\nFinal Answer:\n```json\n{"items": ["x"]}\n```'
+    assert parse_structured_output(Answer, raw).items == ["x"]
+
+
 def test_raises_when_every_model_fails():
     runner, _ = make_runner({"fake/a": [RuntimeError("down")] * 5, "fake/b": [RuntimeError("down")] * 5})
     with pytest.raises(PhaseError, match="failed on all models"):

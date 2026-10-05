@@ -106,12 +106,161 @@ def _milestone_qa_in_progress(state: Any) -> bool:
     return False
 
 
+def _milestone_qa_in_progress_dict(data: dict[str, Any]) -> bool:
+    backlog = data.get("backlog")
+    build = data.get("build") or {}
+    milestones = build.get("milestones") or {}
+    items = build.get("items") or {}
+    if not backlog or not isinstance(backlog, dict):
+        return False
+    for ms in backlog.get("milestones") or []:
+        if not isinstance(ms, dict):
+            continue
+        mid = ms.get("id")
+        wids = ms.get("work_item_ids") or []
+        if not mid or not wids:
+            continue
+        mp = milestones.get(str(mid)) if isinstance(milestones, dict) else None
+        if mp is None:
+            continue
+        mstat = mp.get("status") if isinstance(mp, dict) else "todo"
+        if mstat == "done":
+            continue
+        if all(_item_status(items, str(w)) in ("done", "blocked") for w in wids):
+            return True
+    return False
+
+
+def build_progress_summary_from_dict(data: dict[str, Any]) -> dict[str, Any]:
+    """Work-item counts from raw state.json (no ProjectState import)."""
+    build = data.get("build") or {}
+    items = build.get("items") or {}
+    if not isinstance(items, dict):
+        items = {}
+
+    titles: dict[str, str] = {}
+    ordered_ids: list[str] = []
+    milestone_rows: list[dict[str, Any]] = []
+
+    backlog = data.get("backlog")
+    if isinstance(backlog, dict):
+        for wi in backlog.get("work_items") or []:
+            if not isinstance(wi, dict):
+                continue
+            wid = wi.get("id")
+            if not wid:
+                continue
+            wid = str(wid)
+            titles[wid] = str(wi.get("title") or wid)
+            if wid not in ordered_ids:
+                ordered_ids.append(wid)
+
+        milestones = build.get("milestones") or {}
+        for ms in backlog.get("milestones") or []:
+            if not isinstance(ms, dict):
+                continue
+            mid = ms.get("id")
+            wids = ms.get("work_item_ids") or []
+            if not mid:
+                continue
+            wids = [str(w) for w in wids]
+            done_ms = sum(1 for w in wids if _item_status(items, w) == "done")
+            mp = milestones.get(str(mid)) if isinstance(milestones, dict) else None
+            mstat = "todo"
+            if isinstance(mp, dict):
+                mstat = mp.get("status") or "todo"
+            milestone_rows.append(
+                {
+                    "id": str(mid),
+                    "done": done_ms,
+                    "total": len(wids),
+                    "status": str(mstat or "todo"),
+                }
+            )
+
+    for wid in sorted(items.keys()):
+        ws = str(wid)
+        if ws.startswith("WI-") and ws not in ordered_ids:
+            ordered_ids.append(ws)
+            titles.setdefault(ws, ws)
+
+    if not ordered_ids:
+        ordered_ids = [str(k) for k in sorted(items.keys()) if str(k).startswith("WI-")]
+
+    done = sum(1 for wid in ordered_ids if _item_status(items, wid) == "done")
+    total = len(ordered_ids)
+
+    active_id: str | None = None
+    active_status: str | None = None
+    for wid in ordered_ids:
+        st = _item_status(items, wid)
+        if st == "done":
+            continue
+        active_id = wid
+        active_status = st
+        break
+
+    run_status = str(data.get("status") or "running")
+    fz_phase = "complete" if run_status == "completed" else ("build" if _any_incomplete_work_items(items) else "complete")
+
+    return {
+        "total": total,
+        "done": done,
+        "remaining": max(0, total - done),
+        "active_work_item_id": active_id,
+        "active_work_item_title": titles.get(active_id, active_id) if active_id else None,
+        "active_work_item_status": active_status,
+        "qa_in_progress": _milestone_qa_in_progress_dict(data),
+        "milestones": milestone_rows,
+        "fz_phase": fz_phase,
+    }
+
+
+def build_progress_summary(state: Any) -> dict[str, Any]:
+    """Work-item counts and active task for the React console (read-only)."""
+    if isinstance(state, dict):
+        return build_progress_summary_from_dict(state)
+    if hasattr(state, "model_dump"):
+        return build_progress_summary_from_dict(state.model_dump(mode="json"))
+    data = {
+        "status": getattr(state, "status", "running"),
+        "build": {"items": getattr(state.build, "items", {}), "milestones": getattr(state.build, "milestones", {})},
+        "backlog": getattr(state, "backlog", None),
+    }
+    if data["backlog"] is not None and hasattr(data["backlog"], "model_dump"):
+        data["backlog"] = data["backlog"].model_dump(mode="json")
+    summary = build_progress_summary_from_dict(data)
+    try:
+        summary["fz_phase"] = infer_ui_phase(state)
+    except Exception:
+        pass
+    summary["qa_in_progress"] = _milestone_qa_in_progress(state)
+    return summary
+
+
+def pipeline_steps_for_state(state: Any, ui_status: str) -> list[dict[str, str]]:
+    phase = infer_ui_phase(state)
+    return [
+        {
+            "id": step["id"],
+            "label": step["label"],
+            "status": _step_status(phase, step["phases"], ui_status),
+        }
+        for step in PIPELINE_STEPS
+    ]
+
+
+def _release_replanning(state: Any) -> bool:
+    """Pass 2+ replan: PRD kept while backlog (and often architecture) are regenerated."""
+    return bool(getattr(state, "prd", None)) and getattr(state, "backlog", None) is None
+
+
 def infer_ui_phase(state: Any) -> str:
     """Best-effort phase label for the React pipeline step map (not the 11-stage carousel)."""
     status = getattr(state, "status", "running")
-    if status == "completed":
+    if status == "completed" and not _release_replanning(state):
         return "complete"
-    if status == "stopped":
+    if status == "stopped" and not _release_replanning(state):
         return "failed"
 
     if state.prd and not state.gate_approved("prd"):
@@ -120,6 +269,13 @@ def infer_ui_phase(state: Any) -> str:
     items = getattr(state.build, "items", {}) or {}
     if _any_incomplete_work_items(items):
         return "build"
+
+    if _release_replanning(state):
+        if not state.architecture:
+            return "planning"
+        if not state.design:
+            return "design"
+        return "sprint_planning"
 
     if items and _milestone_qa_in_progress(state):
         return "qa"
@@ -168,10 +324,15 @@ def _infer_build_stage_index(state: Any) -> int:
 def infer_ui_stage_index(state: Any) -> int:
     """Index 0–10 matching React `UI_STAGE_AGENTS` / journey carousel order."""
     status = getattr(state, "status", "running")
-    if status == "completed":
+    if status == "completed" and not _release_replanning(state):
         return 10
 
     phase = infer_ui_phase(state)
+
+    if phase == "planning":
+        return 2
+    if phase == "sprint_planning":
+        return 4
 
     if phase in ("discovery", "kickoff"):
         return 0 if state.product_brief is None else 1
@@ -451,14 +612,7 @@ def publish_fz_run_state(
 
     phase = infer_ui_phase(state)
     ui_active_stage = infer_ui_stage_index(state)
-    steps = [
-        {
-            "id": step["id"],
-            "label": step["label"],
-            "status": _step_status(phase, step["phases"], ui_status),
-        }
-        for step in PIPELINE_STEPS
-    ]
+    steps = pipeline_steps_for_state(state, ui_status)
 
     app_dir = FZ_RUNS_DIR / state.run_id / "app"
     server_dir = FZ_RUNS_DIR / state.run_id / "server"
@@ -491,6 +645,7 @@ def publish_fz_run_state(
         "estimated_minutes": COMPLEXITY_MINUTES.get(complexity, 90),
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "pipeline_steps": steps,
+        "build_progress": build_progress_summary(state),
         "factory_engine": "fz",
         "flutter_project_dir": flutter_dir,
         "server_project_dir": str(server_dir.resolve()) if server_dir.is_dir() else None,

@@ -13,22 +13,22 @@ Architect guardrails enforced: A1, A2, B1, B2, B3, B4, B5, B6, C1, C2, C3, D1, D
 | Milestone | Status | QA rounds |
 |---|---|---|
 | M1 | done | 3 |
-| M2 | partial | 0 |
+| M2 | done | 1 |
 
 | Work item | Status | Attempts | Notes |
 |---|---|---|---|
 | WI-006 | done | 1 | Implemented session-only cart domain models (Cart, CartItem) with variant-keyed merge-on-add and pence subtotals; CartNotifier snapshots merchandising fields at |
-| WI-010 | blocked | 0 | depends on WI-009, which is blocked |
-| WI-009 | blocked | 0 | depends on WI-008, which is blocked |
+| WI-010 | done | 1 | Implemented WI-010 catalog slice: GET /api/v1/catalog/facets, GET /api/v1/products (search, multi-filter, popularity/price/newest sort), GET /api/v1/products/:p |
+| WI-009 | done | 1 | Implemented the catalog read slice for WI-009: GET /api/v1/home (top-level categories plus featured products from seed flags), GET /api/v1/categories with depth |
 | WI-002 | done | 1 | Implemented the UK lighting design system (colour tokens, spacing, typography extensions, light/dark ThemeData), Riverpod + go_router StatefulShellRoute AppShel |
-| WI-011 | blocked | 0 | depends on WI-010, which is blocked |
-| WI-012 | blocked | 0 | depends on WI-011, which is blocked |
+| WI-011 | done | 1 | Integrated the committed OpenAPI dart-dio client (packages/api_client) via ApiCatalogDataSource and DTO-to-domain mappers for all eight catalog/health operation |
+| WI-012 | done | 1 | Delivered M2 demo verification (WI-012): expanded NestJS Supertest coverage for all eight catalog/health operationIds with 404 cases, added OpenAPI contract uni |
 | WI-004 | done | 2 | Exploring the codebase and design docs to implement HomeScreen and ProductListingScreen.   Implementing core widgets, notifiers, screens, and tests.   {"summary |
 | WI-005 | done | 1 | Implemented SCR-03 ProductDetailScreen and SCR-04 ProductReviewsScreen with design-system widgets (gallery, variant chips, lighting specs table, star ratings, r |
 | WI-003 | done | 2 | Implemented M1 local catalog with 16 seeded lighting products (19 variants) across the full UK taxonomy, OpenAPI-aligned freezed domain models, assets/data/cata |
-| WI-008 | blocked | 0 | depends on WI-007, which is failed |
+| WI-008 | done | 2 | Resolved guardrail DV2 by removing hardcoded PostgreSQL URLs that looked like credentials from health e2e tests. Test DATABASE_URL is now set once in jest.setup |
 | WI-001 | done | 3 | Delivered the WI-001 monorepo bootstrap: Flutter 3.x app with Riverpod, go_router, dio, and freezed/json_serializable sample models; NestJS API under /api/v1 wi |
-| WI-007 | failed | 3 | still failing after 3 attempt(s); changes discarded. Last output: DV3: apps/api/prisma/data/catalog.json is outside this work item's component (server/); undo t |
+| WI-007 | done | 2 | Resolved DV3 by making apps/api/prisma/schema.prisma byte-identical to docs/schema.prisma (the only drift was Prisma format/alignment in the Product model). Reg |
 
 ## Token usage by agent
 | Agent | Model | Calls | Tokens | Uncached |
@@ -42,8 +42,8 @@ Architect guardrails enforced: A1, A2, B1, B2, B3, B4, B5, B6, C1, C2, C3, D1, D
 | frontend_developer | anthropic/claude-haiku-4-5-20251001 | 1 | 0 | 0 |
 | backend_developer | anthropic/claude-haiku-4-5-20251001 | 1 | 0 | 0 |
 | deployment_engineer | composer-2.5-fast | 3 | 0 | 0 |
-| frontend_developer | composer-2.5-fast | 7 | 0 | 0 |
-| qa_engineer | composer-2.5-fast | 3 | 0 | 0 |
-| backend_developer | composer-2.5-fast | 3 | 0 | 0 |
+| frontend_developer | composer-2.5-fast | 8 | 0 | 0 |
+| qa_engineer | composer-2.5-fast | 4 | 0 | 0 |
+| backend_developer | composer-2.5-fast | 10 | 0 | 0 |
 
 Total tokens: 0 (0 uncached; the budget counts uncached)

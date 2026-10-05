@@ -120,9 +120,10 @@ export async function downloadCombinedDossier(runIds) {
   URL.revokeObjectURL(a.href);
 }
 
-/** Download SDLC dossier PDF (read-only; safe during active runs). */
-export async function downloadRunDossier(runId) {
-  const res = await fetch(`${BASE}/runs/${encodeURIComponent(runId)}/dossier?format=pdf`, {
+/** Download SDLC dossier (read-only; safe during active runs). @param {'pdf'|'html'} format */
+export async function downloadRunDossier(runId, format = 'pdf') {
+  const fmt = format === 'html' ? 'html' : 'pdf';
+  const res = await fetch(`${BASE}/runs/${encodeURIComponent(runId)}/dossier?format=${fmt}`, {
     signal: AbortSignal.timeout(120000),
   });
   if (!res.ok) {
@@ -140,7 +141,7 @@ export async function downloadRunDossier(runId) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `ai-factory-dossier-${runId}.pdf`;
+  a.download = `ai-factory-dossier-${runId}.${fmt === 'html' ? 'html' : 'pdf'}`;
   document.body.appendChild(a);
   a.click();
   a.remove();

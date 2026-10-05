@@ -97,6 +97,8 @@ jobs:
             export API_IMAGE="${{ env.IMAGE_NAME }}:staging"
             export POSTGRES_PASSWORD="${{ secrets.STAGING_POSTGRES_PASSWORD }}"
             export DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}"
+            export JWT_ACCESS_SECRET="${{ secrets.STAGING_JWT_ACCESS_SECRET }}"
+            export JWT_REFRESH_SECRET="${{ secrets.STAGING_JWT_REFRESH_SECRET }}"
             cd "${{ secrets.STAGING_DEPLOY_PATH }}"
             docker compose -f docker-compose.staging.yml pull api
             docker compose -f docker-compose.staging.yml up -d
@@ -124,6 +126,8 @@ jobs:
             export API_IMAGE="${{ env.IMAGE_NAME }}:production"
             export POSTGRES_PASSWORD="${{ secrets.PRODUCTION_POSTGRES_PASSWORD }}"
             export DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}"
+            export JWT_ACCESS_SECRET="${{ secrets.PRODUCTION_JWT_ACCESS_SECRET }}"
+            export JWT_REFRESH_SECRET="${{ secrets.PRODUCTION_JWT_REFRESH_SECRET }}"
             cd "${{ secrets.PRODUCTION_DEPLOY_PATH }}"
             docker compose -f docker-compose.staging.yml pull api
             docker compose -f docker-compose.staging.yml up -d

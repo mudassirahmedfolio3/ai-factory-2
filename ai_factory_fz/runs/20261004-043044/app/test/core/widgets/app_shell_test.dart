@@ -23,6 +23,7 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Products'), findsOneWidget);
     expect(find.text('Cart'), findsOneWidget);
+    expect(find.text('Account'), findsOneWidget);
     expect(find.text('Flutter Demo'), findsNothing);
   });
 

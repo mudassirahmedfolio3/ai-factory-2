@@ -1,9 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { readFileSync } from 'fs';
-import { load } from 'js-yaml';
-import { join } from 'path';
 import { AppModule } from './app.module';
+import { setupOpenApi } from './openapi/openapi.setup';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -16,16 +14,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  const openApiPath = join(process.cwd(), 'openapi.yaml');
-  const openApiDocument = load(readFileSync(openApiPath, 'utf8')) as Record<
-    string,
-    unknown
-  >;
-
-  const expressApp = app.getHttpAdapter().getInstance();
-  expressApp.get('/api/docs-json', (_req: unknown, res: { json: (body: unknown) => void }) => {
-    res.json(openApiDocument);
-  });
+  setupOpenApi(app);
 
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port, '0.0.0.0');

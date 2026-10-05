@@ -21,6 +21,6 @@ def artifact_guardrail(model: type[BaseModel], check: Callable[[Any], list[str]]
         errors = check(artifact)
         if errors:
             return False, "Fix these problems and return the full corrected output:\n- " + "\n- ".join(errors)
-        return True, output
+        return True, artifact.model_dump_json()
 
     return guardrail

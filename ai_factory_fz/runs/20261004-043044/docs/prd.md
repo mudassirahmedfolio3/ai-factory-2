@@ -1,133 +1,171 @@
-# Lighting Retail Mobile App (MVP) — Product Requirements Document
+# Lumen — Lighting Retail Mobile App: Product Requirements Document (Release 2 / Milestone M3)
 
-Mobile-first lighting e-commerce for the United Kingdom (GBP, en-GB, domestic shipping only). This PRD defines a client-demo release in two milestones: M1 — a showable Flutter app on Android (API 26+) with guest shopping, 12–20 seeded lighting SKUs in local mock data, cohesive design system, product listing with search and filters, product detail with star ratings and reviews, lighting-specific specifications, and an in-memory cart with quantity updates; M2 — a NestJS /api/v1 slice with health check and catalog OpenAPI backed by stub/seed data matching the same products, with Dart API client integration when analyze/tests pass (M1 mock path remains if integration blocks the demo). Full MVP (post-demo) extends the same journey with registered accounts, guest checkout with Stripe PaymentIntents, order history, email notifications, coupons, wishlists, and admin catalog/order operations. Prices are integer minor units (pence) with ISO 4217 GBP; stock is per variant with reservation at checkout in production; order lifecycle pending_payment → paid → fulfilled → delivered plus cancelled/refunded when those features ship.
+Release 2 (Milestone M3 — shopper depth & production catalog) extends the Pass 1 baseline (WI-001–WI-012: Flutter guest catalog with local/API fallback, NestJS /api/v1 health + catalog OpenAPI, Dart client) with registered accounts, guest and signed-in shopping, API-backed home merchandising, search with filters and sorting, registered-user wishlist, UK domestic checkout with simplified shipping, mock secure payment (no Stripe integration in this release), coupon codes for guests and signed-in users, order history and status tracking, customer support, and a production-style lighting catalog of 18–30 SKUs with bundled real product photography sourced per docs/IMAGE_SOURCES.md. All shoppers use one VAT-inclusive B2C price list. Prices are stored as integer minor units (GBP pence) with ISO 4217 currency code GBP. Stock is tracked per product variant; checkout reserves stock and failed or expired mock payment releases it. Carts belong to signed-in users when authenticated; guests use session-scoped carts until login, when cart merge applies. Order status flow: pending_payment → paid → fulfilled → delivered, plus cancelled and refunded (staff/API-only display where seeded; no shopper self-service cancel/return/refund). Order lines snapshot product name and unit price at purchase time. Mock payment follows a secure pattern: no raw card data on server; order marked paid only after successful mock confirmation. Pass 1 work is not replanned; new delivery work starts at WI-013. Quality bar: flutter analyze and flutter test green; Jest/Supertest for new API endpoints; one M3 QA round before Release 2 complete.
 
 ## Personas
-### Guest Shopper (Demo Primary)
-Residential customer browsing and buying without creating an account; primary persona for stakeholder demo sign-off on Android emulator.
-- Discover lighting products by category, search, and filters
-- Compare specifications (wattage, lumens, color temperature, IP rating) on product detail
-- Build a cart and adjust quantities before a future checkout step
-- Trust accurate availability and pricing shown in GBP
+### Guest Shopper (DIY Homeowner)
+A UK homeowner upgrading indoor or ceiling lighting who wants to compare wattage, lumens, and finish quickly and complete a purchase without creating an account.
+- Browse categories and featured products on home
+- Filter and sort the catalog by price, brand, and lighting specs
+- Add variants to cart and check out with UK address and mock payment
+- Apply a coupon code at checkout
+- Receive order confirmation with order number
 
 ### Registered Customer
-Homeowner or trade buyer who creates an account for order history, persisted wishlist, and password recovery (post-demo MVP).
-- Register, sign in, and reset password securely
-- Complete checkout with UK shipping and Stripe card payment
-- View order history and track status with optional carrier tracking number
-- Save favorites to a wishlist synced across devices
+A repeat buyer who creates an account for a persistent cart, order history, and wishlist synced via API.
+- Register, log in, and log out securely
+- Merge guest cart into account on login
+- Save favorites to wishlist and manage cart across sessions
+- View past orders and track status (processing, shipped, delivered)
+- Reset password via demo-friendly flow (stub email/deep link acceptable)
 
-### Trade / Semi-Professional Buyer
-Electrician, small contractor, or interior designer who needs spec-rich listings and filters (wattage, dimming, IP rating).
-- Filter catalog by technical attributes relevant to installation
-- Read full lighting specifications on product detail pages
-- Identify in-stock variants quickly for job quoting
+### Trade Buyer (Electrician / Small Contractor)
+A professional who orders repeat SKUs by brand, wattage, and IP rating using the same app experience as consumers for Release 2.
+- Search by SKU, brand, and keywords
+- Compare technical specs on product detail (IP rating, dimmable, color temperature)
+- Place orders quickly with standard UK shipping rules
+- Rely on accurate stock and variant selection
 
-### Store Administrator
-Internal operator with a single admin role managing catalog, inventory, orders, promotions, and homepage content (API or minimal UI; not in this demo run).
-- Add, edit, and deactivate products without deleting historical records
-- Manage variants, SKUs, prices, and stock quantities
-- Update order status (processing, shipped, delivered) and optional tracking
-- Configure coupons, banners, and featured products
+### Internal Catalog / Order Staff (API Consumer)
+Operations staff who manage catalog, orders, and promotions via API (and optional minimal admin UI or documented API); full admin panel UI is deferred.
+- Maintain seeded catalog and promos consistent with OpenAPI
+- Update order statuses for demo tracking flows
+- Verify data integrity (prices, stock, no duplicate orders)
 
 ## User stories
-### US-001 Browse lighting catalog on home and product listing (must)
-As a guest shopper, I want to open the app and browse a curated list of lighting products with images, names, prices, and availability, so that I can quickly find fixtures and accessories for my project without signing in.
+### US-001 Discover products on home and by category (must)
+As a shopper (guest or signed-in), I want to open a merchandised home screen and browse lighting by category and subcategory, so that I can find relevant fixtures and fittings like a specialist UK retailer.
 
-- **Given** the app is installed and launched on Android API 26 or higher with 12–20 seeded products in local mock data **when** I land on the home or primary product listing screen **then** I see a client-ready UI (not the default Flutter counter template) showing product cards with image, name, price in GBP (pence stored as integer minor units, displayed formatted), and an Out of stock badge when applicable
-- **Given** seed data includes products across the default taxonomy (Ceiling Lights, Wall Lights, Outdoor & Security, Bulbs & Tubes, LED Strips & Profiles, Lamps & Portable, Commercial & Trade) **when** I navigate from home into a category or subcategory browse path exposed in the demo (within the six-screen limit) **then** the listing filters to products in that category and remains scrollable with stable layout on emulator
-- **Given** a product has a sale or list price **when** it appears on the listing **then** the displayed price reflects the catalog price in GBP minor units without floating-point rounding errors in stored values
+- **Given** the API health check succeeds and home merchandising data is seeded **when** I open the app home screen **then** I see API-backed banners, featured products, new arrivals, and category entry points
+- **Given** the API is unavailable or health fails **when** I open the app home screen **then** I see the Pass 1 local/API fallback catalog so I can still browse offline on the Android emulator demo
+- **Given** I am on the categories screen **when** I select a category and optional subcategory **then** I see a product listing scoped to that category with image, name, price in GBP (VAT-inclusive), and availability indicator where seed supports it
 
-### US-002 Search products by name, SKU, brand, and keywords (must)
-As a guest shopper, I want to search the catalog by text, so that I can find a specific fixture or bulb quickly.
+### US-002 Search, filter, and sort the lighting catalog (must)
+As a shopper, I want to search by name, SKU, brand, or keywords and refine results with filters and sorting, so that I can compare professional and residential lighting efficiently.
 
-- **Given** I am on the product listing or search entry point included in the demo screens **when** I enter a query matching a product name (e.g. "Modern LED Ceiling Light") **then** the list shows matching products and hides non-matching items
-- **Given** seed products include SKUs and brand attributes (e.g. SKU CL-1001) **when** I search by SKU or brand keyword **then** relevant products appear in results with no sign-in required
-- **Given** I enter a query with no matches **when** search is applied **then** I see an empty state message and can clear search to restore the full list
+- **Given** the catalog contains at least 18 seeded SKUs with lighting attributes **when** I enter a search term matching a product name or SKU **then** matching products appear in the search results list with thumbnail, title, and unit price displayed in major units derived from integer pence
+- **Given** I am viewing a product list **when** I apply filters for price range, brand, category, wattage, color/finish, and availability where the seed supports them **then** only products matching all selected filters are shown
+- **Given** I am viewing a product list **when** I sort by price, newest, or popularity **then** the list order updates according to the selected sort (popularity per seeded merchandising weight or sales proxy defined in seed)
 
-### US-003 Filter and sort product listing (must)
-As a guest shopper, I want to filter and sort products by price, brand, category, wattage, color/finish, and availability, so that I can narrow results to fixtures that meet my budget and technical needs.
+### US-003 View product detail, variants, and lighting specifications (must)
+As a shopper, I want to see images, description, price, stock, variants, and relevant lighting specs on the product detail screen, so that I can buy the correct variant with confidence.
 
-- **Given** the listing shows multiple products with varied brands, categories, wattages, and stock states **when** I apply a price range filter in GBP **then** only products whose current variant or base price falls within the range remain visible
-- **Given** filters for brand, category, wattage, color/finish, and availability are available on the listing screen **when** I select one or more filters **then** results update to match all active filters and I can reset filters to defaults
-- **Given** sort options include price (low/high), newest, and popularity **when** I choose popularity sort **then** products order by manual merchandising popularity rank (lower number first), tie-breaking by units sold in the last 90 days where rank is equal or unset
+- **Given** a product has multiple variants (e.g. finish, wattage, color temperature) **when** I open product detail and select a variant **then** price, SKU, stock availability, and variant-specific attributes update for the selected variant
+- **Given** a product is seeded with lighting attributes **when** I scroll the specifications section **then** I see only attributes relevant to that product type (e.g. wattage, lumens, color temperature, IP rating, dimmable, finish, dimensions, installation type) with values matching API/seed data
+- **Given** Release 2 imagery is bundled under app/assets and/or API static paths **when** I view the product in list, detail, home carousel, or cart line item **then** at least one real product photo loads from bundled assets without relying on hotlinking alone (offline emulator demo works)
 
-### US-004 View product detail with lighting specs, variants, ratings, and reviews (must)
-As a guest shopper, I want to open a product detail page with images, description, pricing, variants, lighting specifications, star ratings, and reviews, so that I can decide whether the product fits my room and installation requirements.
+### US-004 Register, log in, log out, and merge guest cart (must)
+As a shopper, I want to create an account, authenticate with JWT, and merge my guest cart on login, so that I do not lose items when I sign in before checkout.
 
-- **Given** I select a product from the listing **when** the product detail screen loads **then** I see product name, SKU, price in GBP, stock state, image gallery, and description appropriate to the product type
-- **Given** the product is a lighting SKU with domain attributes **when** I view the specifications section **then** only relevant fields are shown among Product Name, SKU, Wattage, Lumens, Color Temperature, Light Type, Voltage, Dimmable, Material, Finish, Dimensions, IP Rating, Bulb Included, Installation Type (example: 24W, 2400 lm, 3000K, IP44, Dimmable Yes)
-- **Given** the product has variants (e.g. finish, wattage, color temperature) and seeded star ratings and reviews **when** I change variant selection **then** price, SKU, availability, and add-to-cart enabled state update for the selected variant; out-of-stock variants disable add-to-cart; ratings summary and review list are visible on the detail page
+- **Given** I am a guest with items in my session cart **when** I register a new account or log in with valid credentials **then** guest cart lines merge into my user cart (matching variant SKUs combine quantities per business rules) and persist for future sessions
+- **Given** I am logged in **when** I log out **then** my session token is cleared on the client and subsequent cart operations require login for persistence or continue as guest per app policy without exposing another user's cart
+- **Given** I submit registration with a weak or invalid password **when** the server validates input **then** I see a clear validation error and no account is created; passwords are stored hashed (bcrypt or argon2) on the server
 
-### US-005 Manage an in-memory shopping cart (must)
-As a guest shopper, I want to add products to a cart, change quantities, remove items, and see totals, so that I can review my selection before checkout in a later milestone.
+### US-005 Manage shopping cart (must)
+As a shopper (guest or signed-in), I want to add, update quantity, and remove line items and see accurate totals, so that I can review my order before checkout.
 
-- **Given** I am on product detail with an in-stock variant selected **when** I tap add to cart **then** the item appears in the cart with correct name, unit price snapshot for the session, variant label, and quantity one
-- **Given** I have items in the in-memory cart **when** I increase or decrease quantity or remove a line **then** line totals and cart subtotal update immediately without requiring sign-in
-- **Given** a variant is out of stock **when** I attempt to add it to cart from detail **then** add-to-cart is disabled or blocked with a clear message and the cart is unchanged
+- **Given** a variant has sufficient stock **when** I add it to the cart from product detail or listing **then** the cart shows line item with product name, variant label, unit price in pence, quantity, line subtotal, and bundled product image thumbnail
+- **Given** I change quantity on a cart line **when** the requested quantity exceeds available stock for that variant **then** the app prevents the update and shows an out-of-stock or max-quantity message without overselling
+- **Given** my cart has items **when** I view cart totals **then** subtotal sums line prices using integer minor units; shipping and discount lines appear when applicable at checkout preview
 
-### US-006 Consume catalog from NestJS API (M2) (must)
-As a guest shopper using the app configured for API mode, I want the app to load the same product catalog from the backend when available, so that the demo proves API contract alignment beyond local mocks.
+### US-006 Save and manage wishlist (registered users only) (should)
+As a signed-in customer, I want to add and remove products or variants from my wishlist synced via API, so that I can save favorites for later purchase.
 
-- **Given** NestJS serves GET /api/v1/health returning healthy status and GET /api/v1/catalog (or equivalent catalog list/detail operations within the 12-operation budget) with seed data matching M1 products **when** the Flutter app is pointed at the running API and OpenAPI-generated client integration is enabled after analyze/tests pass **then** product listing and detail display the same SKU set and core fields (name, price minor units, currency GBP, availability, specs) as local mock data
-- **Given** the API is unreachable or client generation/integration fails **when** I launch the app for the stakeholder demo **then** the M1 local mock data path still works and documentation notes API readiness for follow-up integration
-- **Given** OpenAPI is published at /api/docs-json (infrastructure, not counted toward the 12 API operations limit) **when** a developer generates the Dart dio client **then** the catalog operations used by the app are described with request/response schemas including integer price minor units and ISO 4217 currency code GBP
+- **Given** I am logged in **when** I tap save to wishlist on a product **then** the item is persisted via API and appears on my wishlist screen after refresh or navigation
+- **Given** I am a guest **when** I attempt to use wishlist **then** I am prompted to register or log in; no local-only guest wishlist is offered in Release 2
+- **Given** I have wishlist items **when** I remove an item **then** it is deleted via API and no longer appears in the list
 
-### US-007 Registered account access and order history (full MVP) (should)
-As a registered customer, I want to register, log in, log out, reset my password, and view past orders, so that I can manage my profile and track purchases over time.
+### US-007 Complete UK checkout with contact and shipping (must)
+As a shopper (guest or signed-in), I want to enter contact details and a UK shipping address and review my order before payment, so that I can receive delivery under simplified domestic rules.
 
-- **Given** I am a new user on the full MVP build (post demo run) **when** I register with email and password and verify required fields **then** my password is stored hashed (bcrypt or argon2), I can log in and log out, and my cart belongs to my signed-in user session per domain rules
-- **Given** I forgot my password **when** I complete the password reset flow **then** I can set a new password and sign in without support intervention under normal conditions
-- **Given** I have placed paid orders on my account **when** I open order history **then** I see orders with lines copying product name and unit price at purchase time, statuses aligned to pending_payment → paid → fulfilled → delivered (plus cancelled/refunded when supported), and guest lookup remains order number plus email for non-account orders
+- **Given** my cart subtotal is below the free-delivery threshold defined in seed/config **when** I proceed to checkout with a valid mainland UK address **then** standard flat-rate UK domestic shipping is applied and displayed in pence with copy stating standard domestic delivery only
+- **Given** my cart subtotal meets or exceeds the free-delivery threshold (e.g. £75) **when** I review checkout **then** shipping cost is zero and the UI states free delivery applies
+- **Given** I am on order review **when** I confirm line items, subtotal, shipping, optional coupon discount, and total **then** all amounts match server-calculated totals in GBP pence and VAT-inclusive B2C prices
 
-### US-008 Checkout, UK shipping, VAT, Stripe payment, and order confirmation (full MVP) (should)
-As a guest or registered customer on the full MVP, I want to complete checkout with contact details, UK shipping address, delivery option, coupon, tax review, and secure card payment, so that I receive an order number and email confirmation and the store fulfils without overselling.
+### US-008 Pay with mock secure payment and place order (must)
+As a shopper, I want to complete a clear payment step without entering raw card data on our servers, so that my order is placed and marked paid after successful mock confirmation.
 
-- **Given** my cart has in-stock lines and I am at checkout review **when** I enter a valid UK domestic shipping address, choose Standard (3–5 business days, £4.99 flat or free over £75) or Express (1–2 business days, £9.99), and view totals **then** subtotal, single 20% VAT line on eligible goods, shipping, optional one coupon (pre-coupon subtotal of non-sale items only), and grand total in GBP minor units are shown before payment
-- **Given** the server creates a Stripe PaymentIntent in test mode **when** I confirm payment with the Stripe SDK without card data touching our server **then** duplicate submission controls prevent double placement; on success I see order confirmation with order number; webhook marks order paid; stock was reserved at checkout and released on failed or expired payment
-- **Given** payment fails or network drops mid-checkout **when** I retry or cancel **then** I see a clear error state, no duplicate paid orders occur, and reserved stock is released according to the single implemented inventory rule
+- **Given** I have a valid checkout and stock is reserved for my cart variants **when** I submit mock payment successfully **then** the order is created in pending_payment, transitions to paid upon mock confirmation, stock reservation is consumed, and I see confirmation with a unique order number
+- **Given** mock payment fails or is cancelled **when** the payment step completes unsuccessfully **then** the order is not marked paid, reserved stock is released, and I see a recoverable error with option to retry without creating duplicate paid orders for the same idempotent checkout attempt
+- **Given** I am on the payment step **when** I interact with the UI **then** no full card PAN or CVV is transmitted to or stored on the application backend; demo copy explains secure payment pattern for future gateway swap
+
+### US-009 Apply coupon code at checkout (must)
+As a shopper (guest or signed-in), I want to enter a valid coupon code during checkout, so that I receive the seeded promotion discount on my order.
+
+- **Given** a seeded coupon is active with no minimum or my subtotal meets the minimum order value **when** I enter the coupon code at checkout **then** exactly one coupon is applied to the order subtotal after line-item sale or variant prices are reflected, and discount and revised total display in pence
+- **Given** I have already applied one coupon **when** I attempt to apply a second coupon **then** the app rejects stacking and shows that only one code per order is allowed
+- **Given** a coupon is restricted to a category or SKU in seed data **when** my cart does not qualify **then** the server rejects the coupon with a clear message and totals remain unchanged
+
+### US-010 Receive order confirmation (must)
+As a shopper, I want to see an order confirmation screen after successful placement, so that I trust the purchase completed.
+
+- **Given** mock payment succeeded **when** I land on confirmation **then** I see order number, summary of lines with snapshotted product names and unit prices, shipping address, totals, and estimated delivery copy for UK standard shipping
+- **Given** order lines were persisted **when** catalog prices or product names change later **then** historical order detail still shows the name and unit price captured at purchase time
+
+### US-011 View order history and tracking (must)
+As a signed-in customer, I want to view my past orders and see status progression and shipment info, so that I know when my lighting order is processing, shipped, or delivered.
+
+- **Given** I am logged in and have at least one order **when** I open order history **then** I see a list of orders with order number, date, total in GBP, and high-level status mapped from pending_payment, paid, fulfilled, delivered (and cancelled/refunded only if present in seed for demo)
+- **Given** I open an order detail **when** the order has seeded shipment info **then** I see customer-facing statuses aligned to processing → shipped → delivered and any carrier or tracking reference provided by seed/API
+- **Given** I am a guest who completed checkout **when** I attempt to view order history without an account **then** I am directed to register or log in; guest order lookup by email is out of scope unless explicitly seeded as demo-only copy pointing to support
+
+### US-012 Reset password (Release 2 demo flow) (should)
+As a registered customer, I want to request a password reset, so that I can recover access to my account.
+
+- **Given** I enter a registered email on forgot password **when** I submit the request **then** I see a generic success message (e.g. check your email) without revealing whether the email exists
+- **Given** Release 2 uses a stub provider **when** password reset is triggered **then** reset token or deep link behavior is logged or demo-documented; production email delivery is not required for Release 2 done
+
+### US-013 Access customer support and FAQ (should)
+As a shopper, I want an in-app support screen with UK contact details and FAQ link, so that I know how to get help with orders, delivery, and returns policy.
+
+- **Given** I open customer support **when** the screen loads **then** I see business hours, phone, email, and a link or WebView to FAQ covering shipping, mock payment demo, and that returns/refunds are handled via support until a later release
+- **Given** emergency or compliance-oriented products appear in catalog copy **when** I read product or FAQ text where seeded **then** disclaimers clarify demo catalog and direct buyers to specialist advice where appropriate
+
+### US-014 Ship production-style catalog with documented imagery (must)
+As a product owner / QA, I want 18–30 real lighting SKUs with bundled photos and documented sources aligned across Flutter, Prisma seed, and OpenAPI, so that the Release 2 demo credibly represents a UK lighting retailer offline and online.
+
+- **Given** imagery is sourced primarily from https://stanpro2.folio3.site/search and linked product pages **when** assets are downloaded into app/assets/catalog/images/ and/or API static seed paths **then** docs/IMAGE_SOURCES.md records URL, SKU mapping, and demo/staging use provenance
+- **Given** catalog.json, Prisma seed, and API mappers are updated **when** I browse the app against API and offline fallback **then** the same 18–30 SKUs appear with consistent names, pence prices, variants, stock per variant, and lighting attributes
+- **Given** M3 delivery completes **when** CI runs flutter analyze, flutter test, and server unit/e2e tests for new endpoints **then** all are green and OpenAPI documents new operations (health and infrastructure docs excluded from operation count caps per program rules)
 
 ## Non-functional requirements
-- NFR-01 Performance: Product listing and detail screens load efficiently on Android emulator; catalog API list/detail responses suitable for demo without perceptible stall on seed catalog size (12–30 SKUs for demo; scalable to growth post-MVP).
-- NFR-02 Compatibility: Minimum Android 8.0 (API 26) and iOS 15.0 for acceptance testing; MVP stakeholder sign-off requires runnable end-to-end guest shopper path on Android emulator at or above API 26; iOS build is phase 2 after Android sign-off.
-- NFR-03 Security: HTTPS for all API traffic; JWT auth for registered users and admin on full MVP; bcrypt or argon2 password hashing; role-based access with single admin role for MVP; account deletion support on full MVP; no raw card data on our systems.
-- NFR-04 Payments: Stripe PaymentIntents in test mode on full MVP; server creates intent, mobile confirms via Stripe SDK, webhook marks order paid; Apple Pay, Google Pay, wallets, and BNPL out of scope for MVP sign-off.
-- NFR-05 Usability: Mobile-first layouts within at most six app screens for this demo run; intuitive navigation (home/listing, search/filter, detail, cart, and supporting flows consolidated as needed); single-brand retailer experience with multi-manufacturer brands as filters.
-- NFR-06 Reliability: Graceful handling of network failures on catalog fetch with fallback to M1 mocks; checkout payment and duplicate-submission handling on full MVP; consistent stock reservation rule to prevent overselling.
-- NFR-07 Scalability: NestJS + PostgreSQL 16 + Prisma architecture supports growth in products, customers, and orders beyond demo seed size.
-- NFR-08 Accessibility: Readable text, sufficient contrast, and accessible controls (best-effort for demo; target WCAG 2.1 AA as goal for launch hardening).
-- NFR-09 Data Integrity: Prices stored as integer minor units (pence) with currency GBP; order lines snapshot name and unit price at purchase; coupons respect one per order, expiration, optional minimum order value, single-use per email when configured, no stacking on sale lines; no overselling at order placement.
-- NFR-10 Analytics: Track product views, cart adds, and purchases for MVP; product views do not drive popularity sort (manual rank primary, 90-day units sold tie-break).
-- NFR-11 Privacy: Store minimum personal data; support account deletion on full MVP; email required for guest checkout and transactional email notifications on full MVP.
-- NFR-12 Localization: United Kingdom only for MVP — en-GB language, GBP currency, domestic UK addresses validated; no cross-border shipping or multi-locale.
-- NFR-13 Notifications: Email required for order confirmation and shipping/status updates on full MVP; push notifications not required for MVP sign-off.
-- NFR-14 Tax and shipping: Single fixed 20% VAT on eligible goods at checkout review; Standard £4.99 (free over £75) and Express £9.99; no weight-based or carrier-calculated rates in MVP.
-- NFR-15 Delivery engineering: Flutter 3.x with cohesive design system chosen without external style-approval gates; NestJS /api/v1 with OpenAPI; Docker/docker-compose for staging; health check endpoint included and excluded from API operation count cap.
+- NFR-01 Performance: Primary catalog and product detail screens render within 2 seconds on a mid-range Android emulator on Wi‑Fi against staging API; search and filter requests show loading states within 500 ms.
+- NFR-02 Supported platforms: Android first for demo (Flutter 3.x); define minimum Android API level in project README for stakeholder sign-off; iOS compatibility maintained at code level but App Store submission out of scope.
+- NFR-03 Security: HTTPS for all API calls in staging; JWT for authenticated endpoints; passwords hashed with bcrypt or argon2; no storage of raw card data; mock payment only in Release 2; rate-limit auth endpoints where feasible.
+- NFR-04 Privacy and GDPR: Collect minimum personal data (account, shipping, order history); support account deletion API/app flow; privacy copy on registration; no production marketing push in this pass.
+- NFR-05 Data integrity: All monetary values stored and transmitted as integer minor units (pence) with currency code GBP; prevent overselling via per-variant stock checks and reservation on checkout; idempotent order placement to avoid duplicate paid orders on double-submit.
+- NFR-06 Availability and failure handling: Graceful degradation when API unavailable (Pass 1 local catalog fallback); clear errors for network, checkout, payment, and coupon validation failures; retry without data loss where safe.
+- NFR-07 API contract: NestJS OpenAPI (/api/docs-json) stays in parity with implemented M3 endpoints; health check exposed; infrastructure routes excluded from M3 operation budget per program rules; maximum 28 API operations for Release 2 scope.
+- NFR-08 Testing: flutter analyze and flutter test green; Jest unit and Supertest e2e coverage for new auth, cart, checkout, orders, coupons, wishlist, and home merchandising endpoints; one structured M3 QA round before Release 2 sign-off.
+- NFR-09 Accessibility: Touch targets and semantic labels on primary flows (browse, cart, checkout); support system font scaling; target WCAG 2.1 AA as backlog unless audit scheduled in M3.
+- NFR-10 Analytics: Instrument hooks for product view, add-to-cart, and purchase completion events (log or stub provider) for future optimization without blocking demo.
+- NFR-11 Scalability: Stateless API suitable for horizontal scaling in staging; PostgreSQL 16 via Prisma; no single-server demo assumptions that block later production hardening.
+- NFR-12 Release scope caps: At most 14 user stories, 14 work items (WI-013–WI-026), 1 milestone (M3), 14 app screens, and 28 API operations—trim features before exceeding caps.
 
 ## Out of scope
-- This demo run: production payments, live Stripe checkout in the meeting build, Apple Pay, Google Pay, wallets, and buy-now-pay-later.
-- This demo run: admin panel UI, marketing website, production email delivery (mock or log narrative acceptable for demo).
-- This demo run: sign-in required for demo meeting — guest shopping only on M1; account flows documented in US-007/US-008 for full MVP.
-- This demo run: more than eight user stories, twelve work items, two milestones, twelve API operations, or six app screens; infrastructure /health and /api/docs-json excluded from API operation cap.
-- Full MVP deferred from demo run: in-app return requests and admin refund workflow updating order status to refunded (display-only returns policy text instead).
-- Live carrier API tracking integration (manual admin status plus optional carrier name and tracking number only).
-- Push notifications for order and shipping updates.
-- Cross-border shipping, multiple locales, jurisdiction-based tax (fixed 20% VAT only).
-- Guest persisted cart on server without account (cart belongs to signed-in user on full MVP; demo uses in-memory cart).
-- Separate admin roles (catalog vs orders vs super-admin).
-- International markets beyond UK domestic.
-- iOS build and simulator testing as gate for MVP demo sign-off (phase 2 after Android).
-- Work items requiring human approval, stakeholder sign-off, or style-approval gates.
+- Pass 1 replan or rework of WI-001 through WI-012 except small deltas required for Release 2 integration
+- Full admin panel UI for AR-01–AR-09 (API-first admin and optional minimal UI or documented API only)
+- Stripe PaymentIntents, webhooks, and production payment keys in Release 2 (follow-on for production readiness)
+- Guest wishlist or local-only favorites
+- Trade account types, ex-VAT display, trade pricing, and volume discount tiers
+- Multiple UK shipping zones, carrier selection, weight-based shipping, surcharges for oversized/fragile SKUs, click-and-collect
+- In-app customer cancel, return, refund, or warranty claim workflows (statuses may exist API-only for staff demo)
+- Production push notifications and transactional email/SMS (FR-18 mock/log only)
+- iOS App Store submission and production image licensing for public redistribution
+- Multi-currency and Ireland/EU expansion
+- Live ERP/WMS inventory sync beyond seeded quantities
+- Production analytics platform and KPI dashboards beyond event hooks
+- Apple Pay, Google Pay, trade credit, and non-mock payment methods
 
 ## Assumptions
-- Default category taxonomy is fixed for build: Ceiling Lights (flush & semi-flush, pendant, chandelier, track & spot); Wall Lights (sconces, picture lights, bathroom vanity); Outdoor & Security (wall lanterns, flood & security, garden & path, porch); Bulbs & Tubes (LED bulbs, smart bulbs, tubes & capsules); LED Strips & Profiles (strips, drivers, profiles & accessories); Lamps & Portable (desk, floor, table); Commercial & Trade (panel, high-bay, emergency); merchandising may refine labels before launch without structural change.
-- Seed catalog contains 12–20 products for demo mock assets and matching backend seed (15–30 SKUs acceptable for full MVP seed); stock placeholders and representative images acceptable for MVP photography.
-- Popularity sort uses admin-set merchandising rank first, then 90-day units sold; view counts tracked but not used for sort in MVP.
-- Guest wishlist may exist device-local for demo; persisted cross-device wishlist requires registered account on full MVP.
-- Customer support for MVP is in-app business hours, phone, email, and FAQ link; no live chat bot.
-- Returns and refunds policy is linked from checkout, confirmation, and support; customers contact phone or email for returns.
-- Legal copy for terms of service, privacy policy, and consent to be provided by business stakeholders before public launch; demo may use placeholder legal links.
-- Stripe test mode is the payment gateway for full MVP card payments only.
-- Order tracking on full MVP maps customer-visible statuses to processing, shipped, and delivered with manual admin updates.
-- Single admin role has full AR-01–AR-09 capabilities via API or minimal admin UI after demo run.
-- M2 integration: Dart OpenAPI client generated only when analyze/tests pass; otherwise M1 mock path is the demo fallback with documented API readiness.
+- Working customer-facing name is Lumen until retail brand is finalized.
+- All catalog, cart, and checkout prices are VAT-inclusive B2C GBP shown to all personas including trade buyers.
+- Shipping uses one standard flat rate for mainland UK plus free delivery over a stated threshold (e.g. £75) documented in seed and checkout copy.
+- Popularity sort uses a seed-defined merchandising weight or sales proxy documented in backend seed.
+- Order lifecycle for shoppers displays processing → shipped → delivered mapped from paid → fulfilled → delivered backend states where applicable.
+- Cancelled and refunded orders may appear in API/seed for staff but have no shopper-initiated actions in Release 2.
+- Milestone M3 delivers new work items WI-013 upward only; example mapping includes auth (WI-013), cart merge (WI-014), checkout/shipping (WI-015), mock payment/orders (WI-016), coupons (WI-017), wishlist (WI-018), home merchandising (WI-019), order history/tracking (WI-020), catalog imagery/seed expansion (WI-021), OpenAPI/client sync (WI-022), support screen (WI-023), password reset stub (WI-024), analytics hooks (WI-025), M3 QA fixes (WI-026)—exact titles owned by engineering backlog.
+- Demo imagery from stanpro2.folio3.site is for demo/staging until license review.
+- Maximum 14 app screens cover: Home, Categories, Product List, Search Results, Product Detail, Cart, Checkout (address/review), Mock Payment, Order Confirmation, Login/Register, Account/Profile, Order History, Order Detail, Wishlist, Support (some screens may combine tabs to stay within cap).
+- Account deletion is supported to meet UK GDPR expectations; retention policy details deferred to legal sign-off.
+- Notifications for order confirmation and shipping are logged or mocked, not delivered via FCM/APNs in Release 2.

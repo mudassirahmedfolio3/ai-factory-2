@@ -128,6 +128,46 @@ def list_runs() -> list[dict[str, Any]]:
     return unique
 
 
+def _enrich_from_fz_workspace_state(payload: dict[str, Any], run_id: str) -> dict[str, Any]:
+    """Merge live fz state.json fields (work items, pipeline steps) into API payloads."""
+    state_path = FZ_RUNS_DIR / run_id / "state.json"
+    if not state_path.is_file():
+        archived = RUNS_DIR / run_id / "fz_workspace" / "state.json"
+        state_path = archived if archived.is_file() else state_path
+    if not state_path.is_file():
+        return payload
+    import json
+
+    try:
+        raw = state_path.read_text(encoding="utf-8")
+        data = json.loads(raw)
+    except (OSError, json.JSONDecodeError):
+        return payload
+
+    from fz_bridge import build_progress_summary_from_dict
+
+    merged = {**payload, "build_progress": build_progress_summary_from_dict(data)}
+
+    try:
+        _ensure_fz_pythonpath()
+        from agentic_sdlc.state import ProjectState
+        from fz_bridge import infer_ui_phase, infer_ui_stage_index, pipeline_steps_for_state
+
+        state = ProjectState.model_validate(data)
+        ui_status = str(payload.get("status") or state.status or "running")
+        if ui_status == "stale":
+            ui_status = "running"
+        merged["phase"] = infer_ui_phase(state)
+        merged["ui_active_stage"] = infer_ui_stage_index(state)
+        steps = pipeline_steps_for_state(state, ui_status if ui_status != "stale" else "running")
+        if steps:
+            merged["pipeline_steps"] = steps
+    except Exception:
+        pass
+
+    return merged
+
+
 def _enrich_product_display_name(payload: dict[str, Any], run_id: str) -> dict[str, Any]:
     if payload.get("product_name"):
         return payload
@@ -156,7 +196,10 @@ def get_run(run_id: str) -> dict[str, Any] | None:
         if live and payload.get("status") in ("stale", "failed"):
             payload["status"] = "running"
             payload["error"] = None
-        return _enrich_product_display_name(payload, run_id)
+        return _enrich_from_fz_workspace_state(
+            _enrich_product_display_name(payload, run_id),
+            run_id,
+        )
 
     archived = read_json(RUNS_DIR / run_id / "snapshot.json")
     if archived:
@@ -186,13 +229,19 @@ def get_run(run_id: str) -> dict[str, Any] | None:
         if not payload.get("artifacts_index"):
             payload["artifacts_index"] = state.get("artifacts_index") or _list_archived_artifacts(run_id)
         payload["flutter_ready"] = flutter_project_ready(run_id, payload)
-        return _enrich_product_display_name(payload, run_id)
+        return _enrich_from_fz_workspace_state(
+            _enrich_product_display_name(payload, run_id),
+            run_id,
+        )
 
     # Live fz workspace still on disk (e.g. failed before archive).
     live_fz = _run_state_from_fz_workspace(run_id)
     if live_fz:
         live_fz["flutter_ready"] = flutter_project_ready(run_id, live_fz)
-        return _enrich_product_display_name(live_fz, run_id)
+        return _enrich_from_fz_workspace_state(
+            _enrich_product_display_name(live_fz, run_id),
+            run_id,
+        )
 
     if flutter_project_ready(run_id):
         return {
@@ -248,7 +297,15 @@ def _run_state_from_fz_workspace(
     try:
         _ensure_fz_pythonpath()
         from agentic_sdlc.state import ProjectState
-        from fz_bridge import _usage_payload, infer_product_display_name, infer_ui_phase, list_fz_artifacts
+        from fz_bridge import (
+            _usage_payload,
+            build_progress_summary,
+            infer_product_display_name,
+            infer_ui_phase,
+            infer_ui_stage_index,
+            list_fz_artifacts,
+            pipeline_steps_for_state,
+        )
 
         state = ProjectState.model_validate_json(state_path.read_text(encoding="utf-8"))
         if live_run_ids is None:
@@ -265,18 +322,23 @@ def _run_state_from_fz_workspace(
         if state.status == "running" and not live_workers:
             ui_status = "stale"
         slug = state.brief.split("\n")[0].strip("# ").strip() if state.brief else run_id
+        pipe_status = "completed" if state.status == "completed" else ui_status
+        if pipe_status == "stale":
+            pipe_status = "running"
         return {
             "run_id": run_id,
             "project_name": slug or run_id,
             "product_name": infer_product_display_name(state, slug or run_id),
             "phase": infer_ui_phase(state),
+            "ui_active_stage": infer_ui_stage_index(state),
             "status": ui_status,
             "is_live": state.status == "running" and live_workers,
             "factory_engine": "fz",
             "artifacts_index": list_fz_artifacts(run_id) if include_artifacts else [],
             "usage": _usage_payload(state) if include_usage else {},
             "error": state.stop_reason or None,
-            "pipeline_steps": [],
+            "pipeline_steps": pipeline_steps_for_state(state, pipe_status),
+            "build_progress": build_progress_summary(state),
         }
     except Exception:
         return None

@@ -9,21 +9,19 @@ All URIs are relative to *http://10.0.2.2:3000/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**getCatalogFacets**](CatalogApi.md#getcatalogfacets) | **GET** /catalog/facets | Filter facet metadata
-[**getCategoryBySlug**](CatalogApi.md#getcategorybyslug) | **GET** /categories/{slug} | Get category by slug
-[**getHome**](CatalogApi.md#gethome) | **GET** /home | Home merchandising payload
+[**getCatalogFacets**](CatalogApi.md#getcatalogfacets) | **GET** /catalog/facets | Catalog filter facets
+[**getCategoryBySlug**](CatalogApi.md#getcategorybyslug) | **GET** /categories/{slug} | Category by slug
+[**getHome**](CatalogApi.md#gethome) | **GET** /home | Home merchandising
 [**getProductById**](CatalogApi.md#getproductbyid) | **GET** /products/{productId} | Product detail
-[**listCategories**](CatalogApi.md#listcategories) | **GET** /categories | List category tree
-[**listProductReviews**](CatalogApi.md#listproductreviews) | **GET** /products/{productId}/reviews | List product reviews
-[**listProducts**](CatalogApi.md#listproducts) | **GET** /products | List and search products
+[**listCategories**](CatalogApi.md#listcategories) | **GET** /categories | List categories
+[**listProductReviews**](CatalogApi.md#listproductreviews) | **GET** /products/{productId}/reviews | Product reviews
+[**listProducts**](CatalogApi.md#listproducts) | **GET** /products | Search and list products
 
 
 # **getCatalogFacets**
 > CatalogFacetsResponse getCatalogFacets(categorySlug)
 
-Filter facet metadata
-
-Brands, finishes, wattage bounds, and category options for the listing filter UI (US-003).
+Catalog filter facets
 
 ### Example
 ```dart
@@ -64,9 +62,7 @@ No authorization required
 # **getCategoryBySlug**
 > CategoryDetail getCategoryBySlug(slug)
 
-Get category by slug
-
-Resolve a category or subcategory for listing context (US-001).
+Category by slug
 
 ### Example
 ```dart
@@ -107,9 +103,7 @@ No authorization required
 # **getHome**
 > HomeResponse getHome()
 
-Home merchandising payload
-
-Top-level categories and featured products for the home screen (US-001).
+Home merchandising
 
 ### Example
 ```dart
@@ -147,8 +141,6 @@ No authorization required
 > ProductDetail getProductById(productId)
 
 Product detail
-
-Detail with variants, lighting specifications, images, and ratings summary (US-004).
 
 ### Example
 ```dart
@@ -189,16 +181,14 @@ No authorization required
 # **listCategories**
 > CategoryListResponse listCategories(depth)
 
-List category tree
-
-Returns active categories with optional parent relationships for browse paths (US-001).
+List categories
 
 ### Example
 ```dart
 import 'package:api_client/api.dart';
 
 final api = ApiClient().getCatalogApi();
-final int depth = 56; // int | 1 for top-level only, 2 includes children
+final int depth = 56; // int | 
 
 try {
     final response = api.listCategories(depth);
@@ -212,7 +202,7 @@ try {
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **depth** | **int**| 1 for top-level only, 2 includes children | [optional] [default to 2]
+ **depth** | **int**|  | [optional] [default to 2]
 
 ### Return type
 
@@ -232,9 +222,7 @@ No authorization required
 # **listProductReviews**
 > ReviewListResponse listProductReviews(productId, page, pageSize)
 
-List product reviews
-
-Paginated reviews for product detail (US-004).
+Product reviews
 
 ### Example
 ```dart
@@ -279,9 +267,7 @@ No authorization required
 # **listProducts**
 > ProductListResponse listProducts(page, pageSize, q, categorySlug, brand, minPriceCents, maxPriceCents, minWattage, maxWattage, finish, inStockOnly, sort)
 
-List and search products
-
-Paginated product listing with text search (name, SKU, brand, keywords), filters, and sort (US-001, US-002, US-003). Prices in pence GBP. 
+Search and list products
 
 ### Example
 ```dart
@@ -290,9 +276,9 @@ import 'package:api_client/api.dart';
 final api = ApiClient().getCatalogApi();
 final int page = 56; // int | 
 final int pageSize = 56; // int | 
-final String q = q_example; // String | Search query (name, SKU, brand, description)
+final String q = q_example; // String | 
 final String categorySlug = categorySlug_example; // String | 
-final BuiltList<String> brand = ; // BuiltList<String> | Repeat for multiple brands
+final BuiltList<String> brand = ; // BuiltList<String> | 
 final int minPriceCents = 56; // int | 
 final int maxPriceCents = 56; // int | 
 final int minWattage = 56; // int | 
@@ -315,15 +301,15 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **page** | **int**|  | [optional] [default to 1]
  **pageSize** | **int**|  | [optional] [default to 20]
- **q** | **String**| Search query (name, SKU, brand, description) | [optional] 
+ **q** | **String**|  | [optional] 
  **categorySlug** | **String**|  | [optional] 
- **brand** | [**BuiltList&lt;String&gt;**](String.md)| Repeat for multiple brands | [optional] 
+ **brand** | [**BuiltList&lt;String&gt;**](String.md)|  | [optional] 
  **minPriceCents** | **int**|  | [optional] 
  **maxPriceCents** | **int**|  | [optional] 
  **minWattage** | **int**|  | [optional] 
  **maxWattage** | **int**|  | [optional] 
  **finish** | **String**|  | [optional] 
- **inStockOnly** | **bool**|  | [optional] [default to false]
+ **inStockOnly** | **bool**|  | [optional] 
  **sort** | [**ProductSort**](.md)|  | [optional] 
 
 ### Return type

@@ -11,7 +11,7 @@ void main() {
 
   setUp(() {
     repository = CatalogRepositoryImpl(
-      LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
+      local: LocalCatalogDataSource(seedOverride: buildDefaultCatalogSeed()),
     );
   });
 
@@ -160,7 +160,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     final fromAsset = LocalCatalogDataSource();
     final doc = await fromAsset.loadDocument();
-    expect(doc.products.length, 16);
+    expect(doc.products.length, 24);
   });
 
   test('getCategoryBySlug throws when missing', () async {

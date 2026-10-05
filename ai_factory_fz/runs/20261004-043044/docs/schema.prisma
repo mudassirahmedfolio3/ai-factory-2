@@ -1,5 +1,4 @@
-// Lighting Retail UK — PostgreSQL 16 (Prisma)
-// M2+ backend; M1 mobile uses embedded mock JSON with identical field shapes.
+// Lumen Lighting Retail UK — PostgreSQL 16 (Prisma) — Release 2 / M3
 
 generator client {
   provider = "prisma-client-js"
@@ -141,12 +140,28 @@ model Category {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryTree")
-  products Product[]
+  parent           Category?        @relation("CategoryTree", fields: [parentId], references: [id])
+  children         Category[]       @relation("CategoryTree")
+  products         Product[]
+  couponCategories CouponCategory[]
 
   @@index([parentId])
   @@map("categories")
+}
+
+model HomeBanner {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String   @db.VarChar(120)
+  subtitle     String?  @db.VarChar(200)
+  imageUrl     String   @map("image_url") @db.VarChar(500)
+  ctaLabel     String   @map("cta_label") @db.VarChar(60)
+  categorySlug String?  @map("category_slug") @db.VarChar(100)
+  sortOrder    Int      @default(0) @map("sort_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("home_banners")
 }
 
 model Product {
@@ -166,14 +181,15 @@ model Product {
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  category      Category @relation(fields: [categoryId], references: [id])
-  brand         Brand    @relation(fields: [brandId], references: [id])
-  variants      ProductVariant[]
-  images        ProductImage[]
-  specs         LightingSpecification?
-  reviews       Review[]
-  views         ProductViewEvent[]
-  wishlistItems WishlistItem[]
+  category       Category         @relation(fields: [categoryId], references: [id])
+  brand          Brand            @relation(fields: [brandId], references: [id])
+  variants       ProductVariant[]
+  images         ProductImage[]
+  specs          LightingSpecification?
+  reviews        Review[]
+  views          ProductViewEvent[]
+  wishlistItems  WishlistItem[]
+  couponProducts CouponProduct[]
 
   @@index([categoryId])
   @@index([brandId])
@@ -238,10 +254,11 @@ model ProductVariant {
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  product      Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
-  cartItems    CartItem[]
-  orderItems   OrderItem[]
-  reservations StockReservation[]
+  product        Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems      CartItem[]
+  guestCartItems GuestCartItem[]
+  orderItems     OrderItem[]
+  reservations   StockReservation[]
 
   @@index([productId])
   @@map("product_variants")
@@ -275,6 +292,39 @@ model ProductViewEvent {
 
   @@index([productId, createdAt])
   @@map("product_view_events")
+}
+
+model GuestCart {
+  id        String   @id @default(uuid()) @db.Uuid
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  items GuestCartItem[]
+
+  @@index([expiresAt])
+  @@map("guest_carts")
+}
+
+model GuestCartItem {
+  id             String   @id @default(uuid()) @db.Uuid
+  guestCartId    String   @map("guest_cart_id") @db.Uuid
+  variantId      String   @map("variant_id") @db.Uuid
+  quantity       Int      @default(1)
+  unitPriceCents Int      @map("unit_price_cents")
+  currency       String   @default("GBP") @db.VarChar(3)
+  productName    String   @map("product_name") @db.VarChar(200)
+  variantLabel   String   @map("variant_label") @db.VarChar(120)
+  sku            String   @db.VarChar(64)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  guestCart GuestCart      @relation(fields: [guestCartId], references: [id], onDelete: Cascade)
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@unique([guestCartId, variantId])
+  @@index([guestCartId])
+  @@map("guest_cart_items")
 }
 
 model Cart {
@@ -327,8 +377,36 @@ model Coupon {
 
   redemptions CouponRedemption[]
   orders      Order[]
+  categories  CouponCategory[]
+  products    CouponProduct[]
 
   @@map("coupons")
+}
+
+model CouponCategory {
+  couponId   String   @map("coupon_id") @db.Uuid
+  categoryId String   @map("category_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  coupon   Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([couponId, categoryId])
+  @@map("coupon_categories")
+}
+
+model CouponProduct {
+  couponId  String   @map("coupon_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  coupon  Coupon  @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([couponId, productId])
+  @@map("coupon_products")
 }
 
 model CouponRedemption {
@@ -344,6 +422,30 @@ model CouponRedemption {
 
   @@index([couponId, email])
   @@map("coupon_redemptions")
+}
+
+model CheckoutIdempotency {
+  idempotencyKey String   @id @map("idempotency_key") @db.VarChar(64)
+  orderId        String   @unique @map("order_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("checkout_idempotency")
+}
+
+model MockPaymentSession {
+  id         String    @id @default(uuid()) @db.Uuid
+  orderId    String    @unique @map("order_id") @db.Uuid
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("mock_payment_sessions")
 }
 
 model Order {
@@ -362,6 +464,7 @@ model Order {
   couponId                String?        @map("coupon_id") @db.Uuid
   shippingAddressId       String?        @map("shipping_address_id") @db.Uuid
   shippingAddressSnapshot Json           @map("shipping_address_snapshot")
+  idempotencyKey          String?        @unique @map("idempotency_key") @db.VarChar(64)
   stripePaymentIntentId   String?        @unique @map("stripe_payment_intent_id") @db.VarChar(255)
   carrierName             String?        @map("carrier_name") @db.VarChar(80)
   trackingNumber          String?        @map("tracking_number") @db.VarChar(80)
@@ -372,13 +475,15 @@ model Order {
   createdAt               DateTime       @default(now()) @map("created_at") @db.Timestamptz
   updatedAt               DateTime       @updatedAt @map("updated_at") @db.Timestamptz
 
-  user             User?              @relation(fields: [userId], references: [id])
-  shippingAddress  Address?           @relation(fields: [shippingAddressId], references: [id])
-  coupon           Coupon?            @relation(fields: [couponId], references: [id])
-  items            OrderItem[]
-  payment          Payment?
-  reservations     StockReservation[]
-  couponRedemption CouponRedemption?
+  user               User?               @relation(fields: [userId], references: [id])
+  shippingAddress    Address?            @relation(fields: [shippingAddressId], references: [id])
+  coupon             Coupon?             @relation(fields: [couponId], references: [id])
+  items              OrderItem[]
+  payment            Payment?
+  reservations       StockReservation[]
+  couponRedemption   CouponRedemption?
+  mockPaymentSession MockPaymentSession?
+  checkoutIdempotency CheckoutIdempotency?
 
   @@index([userId])
   @@index([guestEmail])
@@ -428,7 +533,9 @@ model StockReservation {
 model Payment {
   id                    String        @id @default(uuid()) @db.Uuid
   orderId               String        @unique @map("order_id") @db.Uuid
-  stripePaymentIntentId String        @unique @map("stripe_payment_intent_id") @db.VarChar(255)
+  provider              String        @default("mock") @db.VarChar(20)
+  mockSessionId         String?       @unique @map("mock_session_id") @db.Uuid
+  stripePaymentIntentId String?       @unique @map("stripe_payment_intent_id") @db.VarChar(255)
   status                PaymentStatus
   amountCents           Int           @map("amount_cents")
   currency              String        @default("GBP") @db.VarChar(3)
