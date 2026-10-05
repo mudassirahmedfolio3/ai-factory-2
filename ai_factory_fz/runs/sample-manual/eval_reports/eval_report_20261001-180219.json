@@ -1,0 +1,705 @@
+{
+  "run": "sample-manual",
+  "generated": "2026-10-01T18:02:19",
+  "pass_threshold": 0.6,
+  "level_meaning": {
+    "HIGH": "0.80 to 1.00. The output meets the criteria with little or no gap.",
+    "MEDIUM": "0.60 to 0.79. The output passes, but the judge found real gaps that should be fixed.",
+    "LOW": "0.00 to 0.59. The output does not meet the criteria; the test fails."
+  },
+  "overall": {
+    "verdict": "PASS",
+    "confidence": 0.809,
+    "confidence_level": "HIGH",
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0
+  },
+  "agents": [
+    {
+      "agent": "customer",
+      "verdict": "PASS",
+      "confidence": 0.7,
+      "confidence_level": "MEDIUM",
+      "lowest_score": 0.7,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "customer",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_02_customer_brief_and_answers_match_prd",
+          "outcome": "passed",
+          "score": 0.7,
+          "level": "MEDIUM",
+          "criteria": "The PRD (output) reflects the product brief and the customer's clarification answers (input): decisions on scope, business rules, payments, delivery and returns appear as requirements or out-of-scope items, and nothing contradicts them.",
+          "reason": "The PRD matches most of the input decisions. Browse, detail and cart with quantities and total are in scope. USD pricing, the anonymous on-device cart id, the 2-second list load and Android/iOS support all match. The out-of-scope list (accounts, payments and checkout, admin tools, emails, order history, delivery, returns) reproduces the brief exactly. It has no contradictions and invents no decisions that override the brief or clarifications. It omits several clarification answers: the US-only sales market (Q4), the fixed catalogue of about twenty products entered by the owner with no customer-added products (Q1), no stock tracking, and the cart persisting on the same phone on return (Q2). Payments are excluded but not described as a later release. It also adds unrequested NFRs (HTTPS, accessibility thresholds, no personal data), though these do not conflict with the input. The missing US-only and catalogue-scope decisions are the main shortcomings."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.70, which is MEDIUM (0.60 to 0.79. The output passes, but the judge found real gaps that should be fixed.) The weakest test scored 0.70; every test passes but none of the gaps below were serious enough to fail.",
+      "analysis": {
+        "why_score": "The PRD scored 0.7, above the 0.6 pass mark, because it matches most of the brief and clarification decisions with no contradictions and no invented decisions that override the input. It lost points because several clarification answers are missing, mainly the US-only market and the fixed catalogue scope. It also adds NFRs nobody asked for.",
+        "level_justification": "MEDIUM fits because the PRD is faithful and consistent with the input but incomplete: several clarification answers (Q1, Q2, Q4) were not carried over. It is not HIGH because the missing US-only and catalogue-scope decisions are real shortcomings, and the score of 0.7 is below what a fully complete PRD would earn.",
+        "strengths": [
+          "In-scope items (browse, detail, cart with quantities and total) match the brief.",
+          "USD pricing, anonymous on-device cart id, 2-second list load and Android/iOS support all match the input.",
+          "The out-of-scope list (accounts, payments and checkout, admin tools, emails, order history, delivery, returns) reproduces the brief exactly.",
+          "No contradictions with the input and no invented decisions that override the brief or clarifications."
+        ],
+        "gaps": [
+          "US-only sales market (Q4) is missing from the PRD.",
+          "Fixed catalogue of about twenty owner-entered products with no customer-added products (Q1) is missing.",
+          "No-stock-tracking decision is not recorded.",
+          "Cart persisting on the same phone on return (Q2) is not captured.",
+          "Payments are excluded but not described as a later release.",
+          "Unrequested NFRs were added (HTTPS, accessibility thresholds, no personal data)."
+        ],
+        "improvements": [
+          "Add an explicit requirement or constraint stating sales are US-only, per Q4.",
+          "Add a catalogue-scope requirement: about twenty products entered by the owner, no customer-added products, and no stock tracking.",
+          "Add a cart persistence requirement: the cart is kept on the same phone when the customer returns, per Q2.",
+          "State that payments and checkout are deferred to a later release, not only excluded.",
+          "Remove the unrequested NFRs or label them as assumptions so they don't read as customer decisions."
+        ]
+      }
+    },
+    {
+      "agent": "spec_writer",
+      "verdict": "PASS",
+      "confidence": 0.8,
+      "confidence_level": "HIGH",
+      "lowest_score": 0.8,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "spec_writer",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_01_spec_writer_prd_satisfies_client_brief",
+          "outcome": "passed",
+          "score": 0.8,
+          "level": "HIGH",
+          "criteria": "The PRD must cover every capability the original client brief asks for, add no major scope the brief does not imply, have Given/When/Then acceptance criteria on every story, and include non-functional requirements and an out-of-scope list.",
+          "reason": "The PRD covers every capability in the brief: browsing (US-001), product description (US-002), add to cart (US-003), and cart with quantities and USD total (US-004). It also respects the no sign-in and no payments constraints. All four stories use Given/When/Then criteria that map to the behavior described. The non-functional section (performance, security, privacy, accessibility, platforms) and the out-of-scope list are present and consistent with the brief; the out-of-scope list excludes nothing requested. Weaknesses: US-004 adds quantity changes in the cart, and US-001 adds loading and empty states, which the brief does not state, but these are minor and reasonably implied. Other small additions are the API reference, the anonymous device-kept cart id, and the Android and iOS platform choice. Also, the 'Given I change a quantity' criterion has no matching story action and sits slightly outside the brief. The out-of-scope list adds items such as admin tools, emails, and returns, which is harmless. Overall the PRD is strong, with only slight scope creep."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.80, which is HIGH (0.80 to 1.00. The output meets the criteria with little or no gap.)",
+      "analysis": {
+        "why_score": "The agent scored 0.8 because the PRD covers every capability in the brief (browsing, product description, add to cart, cart with quantities and USD total) and respects the no sign-in and no payments constraints. All four stories have Given/When/Then criteria, and the non-functional requirements and out-of-scope list are present and consistent. Points were lost for slight scope creep: unstated additions such as quantity changes, loading and empty states, an API reference, an anonymous cart id, and the platform choice. One criterion also has no matching story action.",
+        "level_justification": "The level is HIGH because the score of 0.8 passes the 0.6 mark and the agent's confidence of 0.80 meets the HIGH threshold of 0.8. It is not a higher level because HIGH is the top tier, and the judge still noted minor scope creep and one orphaned criterion.",
+        "strengths": [
+          "Covers every capability the client brief asks for, in US-001 to US-004.",
+          "Respects the brief's constraints of no sign-in and no payments.",
+          "All four stories use Given/When/Then criteria that map to the described behavior.",
+          "Includes non-functional requirements (performance, security, privacy, accessibility, platforms) and an out-of-scope list consistent with the brief.",
+          "The out-of-scope list excludes nothing the client requested."
+        ],
+        "gaps": [
+          "US-004 adds quantity changes in the cart, which the brief does not state.",
+          "US-001 adds loading and empty states that the brief does not mention.",
+          "The 'Given I change a quantity' criterion has no matching story action.",
+          "Unrequested additions: an API reference, an anonymous device-kept cart id, and the Android and iOS platform choice.",
+          "The out-of-scope list adds items such as admin tools, emails, and returns beyond the brief."
+        ],
+        "improvements": [
+          "Mark quantity changes, loading states and empty states as implied or assumed additions, or remove them, so the PRD stays within the brief.",
+          "Add a story action for changing quantity, or remove the orphaned 'Given I change a quantity' criterion, so criteria and stories match.",
+          "Label the API reference, anonymous cart id, and platform choice as assumptions or open questions for the client to confirm.",
+          "Trim the out-of-scope list to items the brief actually implies, or note that the extra entries are illustrative."
+        ]
+      }
+    },
+    {
+      "agent": "project_manager",
+      "verdict": "PASS",
+      "confidence": 1.0,
+      "confidence_level": "HIGH",
+      "lowest_score": 1.0,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "project_manager",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_03_project_manager_backlog_traces_to_prd",
+          "outcome": "passed",
+          "score": 1.0,
+          "level": "HIGH",
+          "criteria": "The backlog covers every must-have PRD story with at least one work item, each work item names the stories it serves, and no work item serves a story missing from the PRD.",
+          "reason": "The PRD has four stories (US-001 to US-004), all marked must. All six work items (WI-001 to WI-006) name at least one story in the Stories column, so none lack a reference. Every must-have story is covered: US-001 by WI-001 and WI-003, US-002 by WI-001 and WI-004, US-003 by WI-002 and WI-005, US-004 by WI-002 and WI-006. Every referenced ID exists in the PRD, with no invented or misnamed stories. The Story coverage section matches the work item table. No gaps were found in coverage, references, or validity."
+        }
+      ],
+      "level_reasoning": "The average judge score is 1.00, which is HIGH (0.80 to 1.00. The output meets the criteria with little or no gap.)",
+      "analysis": {
+        "why_score": "The agent scored 1.0 because its backlog traced cleanly to the PRD. All four must-have stories (US-001 to US-004) are covered by at least one of the six work items. Every work item names at least one story in the Stories column, and every referenced ID exists in the PRD. The Story coverage section also matches the work item table.",
+        "level_justification": "HIGH is justified because the confidence of 1.00 is well above the 0.8 threshold and the judge found no gaps in coverage, references or validity. There is no higher level than HIGH, and the score matches the confidence.",
+        "strengths": [
+          "Every must-have story, US-001 to US-004, is covered by at least two work items.",
+          "All six work items (WI-001 to WI-006) name at least one story, so none are unreferenced.",
+          "No invented or misnamed story IDs; every reference exists in the PRD.",
+          "The Story coverage section is consistent with the work item table."
+        ],
+        "gaps": [],
+        "improvements": []
+      }
+    },
+    {
+      "agent": "architect",
+      "verdict": "PASS",
+      "confidence": 0.9,
+      "confidence_level": "HIGH",
+      "lowest_score": 0.9,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "architect",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_04_architect_design_supports_prd",
+          "outcome": "passed",
+          "score": 0.9,
+          "level": "HIGH",
+          "criteria": "The architecture, OpenAPI contract and Prisma schema support every must-have PRD story: each story's data and actions have an endpoint and stored entity, and nothing important in the PRD is left without a design.",
+          "reason": "All four must-have stories (US-001 to US-004) have matching endpoints, schemas and stored entities. US-001 maps to GET /products, whose ProductPage returns name, priceCents and imageUrl, with Product in Prisma. US-002 maps to GET /products/{id}, which returns description and a 404 for a missing product. US-003 maps to POST /cart/items, backed by Cart and CartItem with a default quantity of 1 and a unique (cartId, productId) constraint for the increment. US-004 maps to GET /cart and PATCH /cart/items/{productId}, returning unitPriceCents, quantity, lineTotalCents and totalCents. The architecture covers the cross-cutting needs: anonymous device ID to JWT auth, HTTPS, no PII, and screens with loading, empty and error states. Cart is tied to deviceId, matching the privacy requirement. Gaps are minor. The PATCH endpoint allows quantity 0 but doesn't say it removes the line, which the PRD never asks for. The anonymous-session endpoint, rate limiting and /health are not in the PRD, though they trace to the non-functional requirements and the anonymous-ID privacy note. Empty and loading states are UI-only, and the architecture doesn't say how the cart is created on first access. Overall the design is consistent with the PRD and has no important gaps."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.90, which is HIGH (0.80 to 1.00. The output meets the criteria with little or no gap.)",
+      "analysis": {
+        "why_score": "The agent scored 0.9 because the architecture, OpenAPI contract and Prisma schema cover all four must-have stories (US-001 to US-004), each with a matching endpoint and stored entity. It also handled cross-cutting needs such as anonymous device ID to JWT auth, HTTPS, no PII and UI states. The score is not higher because of a few minor gaps, such as unspecified PATCH quantity 0 behavior and unexplained cart creation on first access.",
+        "level_justification": "HIGH fits because the score of 0.9 is well above the 0.8 threshold and the judge found no important gaps. It is a HIGH level rather than anything higher because the minor unspecified details keep the design from being fully complete.",
+        "strengths": [
+          "All four must-have stories (US-001 to US-004) map to endpoints, schemas and stored entities",
+          "GET /products returns name, priceCents and imageUrl, backed by the Product model in Prisma",
+          "GET /products/{id} returns description and a 404 for a missing product",
+          "Cart and CartItem models with default quantity 1 and a unique (cartId, productId) constraint support the add-to-cart increment",
+          "GET /cart and PATCH /cart/items/{productId} return unitPriceCents, quantity, lineTotalCents and totalCents",
+          "Cross-cutting needs covered: anonymous device ID to JWT auth, HTTPS, no PII, and loading, empty and error states",
+          "Cart tied to deviceId matches the privacy requirement",
+          "Extra items like the session endpoint, rate limiting and /health trace to non-functional requirements"
+        ],
+        "gaps": [
+          "PATCH /cart/items/{productId} allows quantity 0 but doesn't say whether it removes the line",
+          "Architecture doesn't describe how the cart is created on first access",
+          "Empty and loading states are UI-only and not reflected in the API design"
+        ],
+        "improvements": [
+          "Document the PATCH quantity 0 behavior (remove the line, or restrict the minimum to 1) in the OpenAPI contract",
+          "Specify cart creation on first access, for example lazily creating the cart by deviceId in GET /cart or POST /cart/items",
+          "Note how the API signals an empty cart so the UI empty state is explicitly supported"
+        ]
+      }
+    },
+    {
+      "agent": "ui_ux_designer",
+      "verdict": "PASS",
+      "confidence": 0.9,
+      "confidence_level": "HIGH",
+      "lowest_score": 0.9,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "ui_ux_designer",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_05_ui_ux_designer_screens_serve_prd_stories",
+          "outcome": "passed",
+          "score": 0.9,
+          "level": "HIGH",
+          "criteria": "Every must-have PRD story is served by at least one screen in the design system, and the screens specify their loading, empty and error states.",
+          "reason": "All four must-have stories (US-001 to US-004) map to screens: SCR-01 serves US-001, SCR-02 serves US-002 and US-003 (Add to cart button), and SCR-03 serves US-003 and US-004 (cart with QuantityStepper and total row in USD). No coverage gaps. All three screens specify loading, empty and error states. The only weakness is that SCR-02's empty state is written as 'not applicable; a missing product shows the error state'. It is explicitly addressed and justified by the PRD, but it is not a concrete empty state, so a strict reading counts it as a minor gap. Smaller details are also thin: SCR-03 does not explicitly show line total or unit price per line, though the total row and stepper imply it."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.90, which is HIGH (0.80 to 1.00. The output meets the criteria with little or no gap.)",
+      "analysis": {
+        "why_score": "The agent scored 0.9 because all four must-have PRD stories (US-001 to US-004) map to at least one screen, with no coverage gaps, and all three screens specify loading, empty and error states. Points were lost because SCR-02's empty state is written as 'not applicable; a missing product shows the error state', which a strict reading counts as a minor gap. SCR-03 also lacks explicit line total and unit price per line.",
+        "level_justification": "HIGH fits because the test passed at 0.9 with full story coverage and only minor, justified weaknesses. It does not reach a higher level because the empty state on SCR-02 is not concrete and SCR-03 detail is thin.",
+        "strengths": [
+          "All four must-have stories (US-001 to US-004) are served by screens, with no coverage gaps.",
+          "SCR-01 serves US-001; SCR-02 serves US-002 and US-003 via the Add to cart button; SCR-03 serves US-003 and US-004.",
+          "SCR-03 includes a QuantityStepper and a total row in USD.",
+          "All three screens specify loading, empty and error states.",
+          "The SCR-02 empty-state exception is explicitly stated and justified by the PRD."
+        ],
+        "gaps": [
+          "SCR-02's empty state is 'not applicable' rather than a concrete empty state design.",
+          "SCR-03 does not explicitly show line total or unit price per cart line; they are only implied by the stepper and total row."
+        ],
+        "improvements": [
+          "Give SCR-02 a concrete empty or no-content state, or a clearly defined fallback screen, instead of 'not applicable'.",
+          "Add explicit unit price and line total elements to each cart line on SCR-03 so the layout does not rely on implication."
+        ]
+      }
+    },
+    {
+      "agent": "backend_developer",
+      "verdict": "PASS",
+      "confidence": 0.8,
+      "confidence_level": "HIGH",
+      "lowest_score": 0.8,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "backend_developer",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_06_backend_developer_code_matches_contract_from_prd",
+          "outcome": "passed",
+          "score": 0.8,
+          "level": "HIGH",
+          "criteria": "The backend code implements the API contract derived from the PRD: matching paths, methods, status codes and shapes, with no secrets in code.",
+          "reason": "All 7 endpoints (GET /health, POST /auth/anonymous, GET /products, GET /products/{id}, GET /cart, POST /cart/items, PATCH /cart/items/{productId}) are implemented with matching paths and methods, and none are extra. Public routes (health, anonymous) are correctly exempt from the JWT guard. Success payloads match the schemas: Session {token}, ProductPage {items,page,pageSize,total}, Cart with CartItem fields, and totalCents in integer cents. Error responses use the {code,message} shape via ErrorFilter, with 401 from the guard, 404 for unknown products and cart items, and 400 for bad input. No secrets are hardcoded: JWT_SECRET, CORS_ORIGINS and PORT come from environment variables. Deviations: (1) ErrorFilter is registered only in main.ts, so it is not in the module. (2) The deviceId has @MinLength(8), which the spec does not require, so short IDs get a 400 the contract doesn't define. (3) forbidNonWhitelisted rejects extra fields, which the spec doesn't say. (4) GET /products/{id}, /cart/items and /cart/items/{productId} return 401 from the global guard, but the spec doesn't list a 401 for them. (5) /products lacks a documented 400, and its page/pageSize validation is manual and returns 400. (6) The anonymous endpoint's spec doesn't say what happens when the JWT secret is undefined. These are minor, so the contract is largely met."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.80, which is HIGH (0.80 to 1.00. The output meets the criteria with little or no gap.)",
+      "analysis": {
+        "why_score": "The agent scored 0.8 and passed because all 7 contract endpoints are implemented with matching paths, methods, success payload shapes and the {code,message} error format. Public routes are correctly exempt from the JWT guard, and no secrets are hardcoded. Points were lost for six minor deviations from the spec, including extra validation rules, undocumented 401/400 responses and ErrorFilter registration only in main.ts.",
+        "level_justification": "HIGH is justified because the score of 0.8 is above the pass mark and the contract is largely met, with only minor deviations. It is not a higher level because HIGH is the top tier, and the remaining deviations show the contract is not matched exactly.",
+        "strengths": [
+          "All 7 endpoints are implemented with correct paths and methods, and none are extra",
+          "Public routes (health, anonymous) are correctly exempt from the JWT guard",
+          "Success payloads match the schemas: Session, ProductPage, Cart/CartItem, and totalCents in integer cents",
+          "Errors use the {code,message} shape via ErrorFilter, with 401, 404 and 400 used appropriately",
+          "No hardcoded secrets: JWT_SECRET, CORS_ORIGINS and PORT come from environment variables"
+        ],
+        "gaps": [
+          "ErrorFilter is registered only in main.ts, not in the module",
+          "deviceId has @MinLength(8), which the spec does not require, so short IDs get an undefined 400",
+          "forbidNonWhitelisted rejects extra fields, which the spec does not state",
+          "GET /products/{id}, /cart/items and /cart/items/{productId} return 401 from the global guard, but the spec does not list it",
+          "/products lacks a documented 400, and its page/pageSize validation is manual",
+          "The anonymous endpoint's behavior when the JWT secret is undefined is not specified"
+        ],
+        "improvements": [
+          "Register ErrorFilter in the module (e.g. as APP_FILTER) so it applies regardless of main.ts bootstrap",
+          "Remove @MinLength(8) from deviceId or add it to the contract so validation matches the spec",
+          "Drop forbidNonWhitelisted or document the extra-field rejection in the contract",
+          "Add 401 responses to the contract for the guarded endpoints, or align the implementation with the spec",
+          "Document the 400 response for /products and move page/pageSize validation into a DTO",
+          "Fail fast at startup if JWT_SECRET is undefined and document this behavior"
+        ]
+      }
+    },
+    {
+      "agent": "frontend_developer",
+      "verdict": "PASS",
+      "confidence": 0.8,
+      "confidence_level": "HIGH",
+      "lowest_score": 0.8,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "frontend_developer",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_07_frontend_developer_app_matches_design_from_prd",
+          "outcome": "passed",
+          "score": 0.8,
+          "level": "HIGH",
+          "criteria": "The Flutter app implements the screens and design tokens from the design system and calls the API through the generated client, matching the contract.",
+          "reason": "All three screens (SCR-01 list, SCR-02 detail, SCR-03 cart) exist with the correct routes. The go_router setup has a bottom bar for Shop and Cart, and detail is pushed at /products/:id. The components ProductCard, QuantityStepper, StateView and PrimaryButton are present, and loading, empty and error messages match the spec text. Theme colors for light and dark match the token hex values and are applied through ThemeData and a Tokens class. Spacing, the 48dp touch target and the typography sizes (22/28 w600, 18/24 w500, 16/24, 12/16) also match. API calls all go through ApiClient with correct endpoints, methods, query parameters and bodies for listProducts, getProduct, getCart, addCartItem and updateCartItemQuantity. Models match the schemas. Shortcomings: the ApiClient is hand-written Dio code returning raw maps rather than a truly generated, typed client. createAnonymousSession and getHealth are never used, so no bearer token is attached and the authenticated calls would likely return 401. Product detail's error button is built with onRetry but labeled 'Try again' instead of the specified 'Back to shop'. The loading spinner on the detail and cart screens shows the default 'Loading' text. Body text styles such as the price and description are not explicitly mapped to the body token. The ProductCard uses hardcoded 56 image dimensions. Product list ignores pagination beyond page 1."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.80, which is HIGH (0.80 to 1.00. The output meets the criteria with little or no gap.)",
+      "analysis": {
+        "why_score": "The agent scored 0.8, passing the 0.6 mark. All three screens, routes, components, theme tokens, spacing, typography and API endpoints/bodies match the spec, and models match the schemas. Points were lost because the ApiClient is hand-written and returns raw maps rather than a generated typed client, and because no session or bearer token is ever set up, so authenticated calls would likely fail with 401. Several smaller deviations from the spec also cost points.",
+        "level_justification": "The confidence of 0.80 sits exactly at the HIGH threshold (>= 0.8), matching a passing score with strong spec conformance. It is not higher because HIGH is the top level, and the auth gap and non-generated client suggest the app might not work against the real API.",
+        "strengths": [
+          "All three screens (SCR-01, SCR-02, SCR-03) exist with correct routes, including bottom bar navigation and /products/:id detail push",
+          "Components ProductCard, QuantityStepper, StateView and PrimaryButton are present",
+          "Loading, empty and error messages match the spec text",
+          "Light and dark theme colors match token hex values and are applied via ThemeData and a Tokens class",
+          "Spacing, 48dp touch target and typography sizes match the design tokens",
+          "All API calls go through ApiClient with correct endpoints, methods, query parameters and bodies",
+          "Models match the contract schemas"
+        ],
+        "gaps": [
+          "ApiClient is hand-written Dio code returning raw maps, not a truly generated typed client",
+          "createAnonymousSession and getHealth are never used, so no bearer token is attached and authenticated calls would likely return 401",
+          "Product detail error button is labeled 'Try again' instead of the specified 'Back to shop'",
+          "Loading spinners on detail and cart screens show the default 'Loading' text",
+          "Body text styles such as price and description are not explicitly mapped to the body token",
+          "ProductCard uses hardcoded 56 image dimensions",
+          "Product list ignores pagination beyond page 1"
+        ],
+        "improvements": [
+          "Generate the API client from the OpenAPI contract and return typed models instead of raw maps",
+          "Call createAnonymousSession at startup and attach the bearer token to requests so cart calls succeed",
+          "Change the product detail error button label to 'Back to shop' and have it navigate back to the shop",
+          "Use the spec's loading text on the detail and cart spinners instead of the default 'Loading'",
+          "Map price and description text explicitly to the body typography token",
+          "Replace the hardcoded 56 image size in ProductCard with a spacing or size token",
+          "Implement pagination or infinite scroll in the product list beyond page 1"
+        ]
+      }
+    },
+    {
+      "agent": "qa_engineer",
+      "verdict": "PASS",
+      "confidence": 0.7,
+      "confidence_level": "MEDIUM",
+      "lowest_score": 0.7,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "qa_engineer",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_08_qa_engineer_verifies_prd_acceptance_criteria",
+          "outcome": "passed",
+          "score": 0.7,
+          "level": "MEDIUM",
+          "criteria": "The QA reports check the PRD's acceptance criteria for the built items, report reproducible bugs with correct severity, and set passed only when no blocker or major bug remains.",
+          "reason": "The report maps every acceptance criterion of US-001 to US-004 to code, a test and an explicit result, and invents none. It also covers the non-functional requirements and the OpenAPI check. Gaps: the report lists WI-001 to WI-005, but the PRD input contains no build scope, so this can't be verified. The 'not covered by a test' result for the missing-product criterion is neither pass nor fail. BUG-2 is tied only to a work item, not to a criterion, and it contradicts that row. BUG-2 describes the UI as correct while saying the label is wrong. Its 'Back to shop' expectation comes from a design system outside the PRD, though the minor severity is reasonable. BUG-1 has clear steps, expected vs. actual behavior and a criterion link. A one-second blank screen is arguably minor rather than major, since the empty-state message does appear, so it may be over-rated. The final passed: false is consistent with the stated major bug and the report's own logic, with no contradiction. Performance, iOS and screen-reader checks were unverified, and these are noted as gaps."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.70, which is MEDIUM (0.60 to 0.79. The output passes, but the judge found real gaps that should be fixed.) The weakest test scored 0.70; every test passes but none of the gaps below were serious enough to fail.",
+      "analysis": {
+        "why_score": "The report maps every acceptance criterion of US-001 to US-004 to code, a test and an explicit result, invents none, and also covers the non-functional requirements and the OpenAPI check. BUG-1 is well written, and the final passed: false follows from the report's own logic. The score is held at 0.7 by unverifiable work item scope, a criterion left as neither pass nor fail, internal inconsistencies in BUG-2, and a possibly over-rated BUG-1 severity.",
+        "level_justification": "MEDIUM fits because the core criteria mapping and the pass/fail verdict are sound, but several traceability and severity problems remain. It is not HIGH because the work item scope can't be verified, BUG-2 contradicts itself, and some checks were left unverified.",
+        "strengths": [
+          "Every acceptance criterion of US-001 to US-004 is mapped to code, a test and an explicit result, with nothing invented",
+          "Non-functional requirements and the OpenAPI check are covered",
+          "BUG-1 has clear reproduction steps, expected vs. actual behavior and a criterion link",
+          "Final passed: false is consistent with the stated major bug and the report's logic",
+          "Unverified areas (performance, iOS, screen-reader) are noted as gaps"
+        ],
+        "gaps": [
+          "Report lists WI-001 to WI-005 but the PRD input contains no build scope, so this can't be verified",
+          "The missing-product criterion is marked 'not covered by a test', which is neither pass nor fail",
+          "BUG-2 is tied only to a work item, not to a criterion, and contradicts that row",
+          "BUG-2 describes the UI as correct while saying the label is wrong",
+          "BUG-2's 'Back to shop' expectation comes from a design system outside the PRD",
+          "BUG-1 (one-second blank screen) is arguably minor rather than major since the empty-state message does appear",
+          "Performance, iOS and screen-reader checks remain unverified"
+        ],
+        "improvements": [
+          "Only cite work items that appear in the input, or state that the build scope was not provided",
+          "Give every criterion an explicit pass or fail result, and mark uncovered criteria as a failed or blocked verification",
+          "Link each bug to a PRD acceptance criterion and make the bug description consistent with the matching table row",
+          "Base expected behavior on the PRD, or flag explicitly when it comes from an external design source",
+          "Justify severity against the PRD's impact, and consider downgrading BUG-1 to minor since the empty-state message appears",
+          "Run or clearly mark the performance, iOS and screen-reader checks as not run, with the reason"
+        ]
+      }
+    },
+    {
+      "agent": "deployment_engineer",
+      "verdict": "PASS",
+      "confidence": 0.8,
+      "confidence_level": "HIGH",
+      "lowest_score": 0.8,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "deployment_engineer",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_09_deployment_engineer_ships_what_architecture_describes",
+          "outcome": "passed",
+          "score": 0.8,
+          "level": "HIGH",
+          "criteria": "The Dockerfile and compose file run the system the architecture describes (API plus PostgreSQL, migrations on start, PORT), and contain no real secrets.",
+          "reason": "The output covers the required components: the Dockerfile builds the NestJS API with a multi-stage build and runs `prisma migrate deploy` before starting, and the compose file defines both `db` (postgres:16) and `api`. Wiring is correct: DATABASE_URL points to host `db`, `depends_on` uses `service_healthy` with a pg_isready healthcheck, and port 3000 is mapped. Secrets are clearly placeholders (`staging_password_placeholder`, `sk_test_placeholder`), and server secrets come from an env file, matching the architecture's 'secrets from environment variables' requirement. Shortcomings: PORT handling is inconsistent. `staging.env` sets PORT=3000, but the Dockerfile hardcodes `EXPOSE 3000` and compose hardcodes `3000:3000` instead of using `${PORT}`, so changing PORT would break the mapping. The Dockerfile comment says it starts 'on $PORT' but nothing enforces this. The Postgres password is also duplicated in compose and the env file rather than shared by substitution. Prisma CLI in the final image depends on `npm ci --omit=dev`, which would fail if prisma is a devDependency. Other pieces, such as rate limiting config and the HTTPS/HSTS settings, are not addressed, but they are not infra-critical."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.80, which is HIGH (0.80 to 1.00. The output meets the criteria with little or no gap.)",
+      "analysis": {
+        "why_score": "The agent scored 0.8 because its Dockerfile and compose file cover what the architecture describes: a multi-stage NestJS build, `prisma migrate deploy` on start, a `db` service (postgres:16) and an `api` service, correct DATABASE_URL wiring, a healthcheck-gated `depends_on`, and placeholder-only secrets. It lost points for inconsistent PORT handling, duplicated Postgres credentials, and a Prisma CLI that may be missing from the final image. Rate limiting and HTTPS/HSTS were not addressed, though the judge called them not infra-critical.",
+        "level_justification": "HIGH fits because the score of 0.8 is well above the 0.6 pass mark and the confidence of 0.80 meets the HIGH threshold of 0.8, with all required components present and correctly wired. It is not a higher level because HIGH is the top tier, and the remaining PORT, credential-duplication and Prisma-dependency flaws show the deployment is not fully robust.",
+        "strengths": [
+          "Multi-stage Dockerfile builds the NestJS API and runs `prisma migrate deploy` before starting",
+          "Compose defines both `db` (postgres:16) and `api` services as the architecture describes",
+          "DATABASE_URL correctly points to host `db`",
+          "`depends_on` with `service_healthy` and a pg_isready healthcheck orders startup correctly",
+          "Port 3000 is mapped",
+          "Secrets are clearly placeholders (`staging_password_placeholder`, `sk_test_placeholder`) and server secrets come from an env file, matching the 'secrets from environment variables' requirement"
+        ],
+        "gaps": [
+          "PORT handling is inconsistent: `staging.env` sets PORT=3000, but the Dockerfile hardcodes `EXPOSE 3000` and compose hardcodes `3000:3000` instead of using `${PORT}`",
+          "The Dockerfile comment says it starts 'on $PORT' but nothing enforces this",
+          "The Postgres password is duplicated in compose and the env file instead of being shared by substitution",
+          "Prisma CLI in the final image relies on `npm ci --omit=dev`, which fails if prisma is a devDependency",
+          "Rate limiting config and HTTPS/HSTS settings are not addressed"
+        ],
+        "improvements": [
+          "Use `${PORT}` in the compose port mapping and make the Dockerfile EXPOSE and start command honor PORT, so changing it does not break the mapping",
+          "Define the Postgres password once in the env file and reference it by substitution in compose and DATABASE_URL",
+          "Make sure the Prisma CLI is available in the final image, for example by installing it as a production dependency or copying it from the build stage",
+          "Add notes or config for rate limiting and HTTPS/HSTS, such as a reverse-proxy or TLS setup, to cover the remaining architecture items"
+        ]
+      }
+    },
+    {
+      "agent": "integration_pass",
+      "verdict": "PASS",
+      "confidence": 0.8,
+      "confidence_level": "HIGH",
+      "lowest_score": 0.8,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "integration_pass",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_10_integration_pass_confirms_contract_on_staging",
+          "outcome": "passed",
+          "score": 0.8,
+          "level": "HIGH",
+          "criteria": "The release verification report states whether the served API matches the contract and what integration problems were found, with correct severity.",
+          "reason": "The report gives an explicit overall verdict (`passed: false`) and ties it to the contract. Its endpoint-by-endpoint table covers all seven operations. The one reported discrepancy, `price` (decimal) instead of `priceCents` (integer) on `/products` and `/products/{id}`, is traceable to the `Product` schema's required `priceCents` and is described accurately with steps, expected and actual values. It fabricates no issues. Severity is given as major with a rationale, and the failing verdict follows from that major bug. The report is clear and actionable. Weaknesses: the 'major' rating is arguable, since a missing required field in a core schema could be called critical or breaking for clients. The report also never addresses `imageUrl` and `description`, which the Product schema requires, so full schema conformance is not shown. The 400 validation message says deviceId must be at least 8 characters, which the contract does not state, and the report does not flag it as a minor undocumented constraint. The 401 and 404 cases on cart endpoints, and `/products/{id}` without a token, are not exercised. The reasoning that the cart works despite the bug is plausible but not fully supported by the input. Some non-contract sections (CORS, migrations) are extra but harmless."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.80, which is HIGH (0.80 to 1.00. The output meets the criteria with little or no gap.)",
+      "analysis": {
+        "why_score": "The agent scored 0.8 because its release verification report gave an explicit failing verdict (`passed: false`) tied to the contract. It covered all seven operations in an endpoint table, and it accurately described the one real discrepancy (`price` decimal instead of `priceCents` integer) with steps, expected and actual values. It fabricated no issues. Points were lost because the severity rating is arguable, schema conformance was not fully checked, and some cases were not exercised.",
+        "level_justification": "The confidence of 0.80 sits exactly at the HIGH threshold, which is consistent with a passing, accurate and actionable report. It is not higher because the report has real gaps in schema coverage, edge-case testing and severity calibration, so it is not fully conclusive.",
+        "strengths": [
+          "Gives an explicit overall verdict (`passed: false`) clearly tied to the contract",
+          "Endpoint-by-endpoint table covers all seven operations",
+          "Correctly identifies the `price` vs `priceCents` mismatch on `/products` and `/products/{id}`, traceable to the Product schema's required field",
+          "Discrepancy is described with steps, expected and actual values, making it actionable",
+          "Fabricates no issues",
+          "Severity is stated (major) with a rationale, and the failing verdict follows from it",
+          "Extra sections (CORS, migrations) are harmless"
+        ],
+        "gaps": [
+          "The 'major' severity is arguable, since a missing required field in a core schema could be critical or breaking for clients",
+          "The report never addresses the required `imageUrl` and `description` fields, so full Product schema conformance is not shown",
+          "The 400 message requires deviceId of at least 8 characters, which the contract does not state, and the report does not flag it as a minor undocumented constraint",
+          "The 401 and 404 cases on cart endpoints, and `/products/{id}` without a token, are not exercised",
+          "The claim that the cart works despite the bug is plausible but not fully supported by the input"
+        ],
+        "improvements": [
+          "Justify severity against client impact, or raise a missing or renamed required field to critical/breaking",
+          "Check every required Product field (including `imageUrl` and `description`) against the served response and report each result",
+          "Flag undocumented constraints such as the deviceId minimum length as minor contract deviations",
+          "Exercise the 401 and 404 cases on cart endpoints and `/products/{id}` without a token, and record the outcomes",
+          "Support the claim that the cart works by showing evidence, or drop it"
+        ]
+      }
+    },
+    {
+      "agent": "smoke_tester",
+      "verdict": "PASS",
+      "confidence": 0.7,
+      "confidence_level": "MEDIUM",
+      "lowest_score": 0.7,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        {
+          "agent": "smoke_tester",
+          "scope": "flow",
+          "file": "test_end_to_end_flow.py",
+          "test": "test_11_smoke_tester_covers_prd_journeys",
+          "outcome": "passed",
+          "score": 0.7,
+          "level": "MEDIUM",
+          "criteria": "The smoke and on-device tests exercise the key PRD user journeys that were built end to end, assert real outcomes, and are independent of each other.",
+          "reason": "The PRD has four journeys: browse (US-001), details (US-002), add to cart (US-003) and view cart/total (US-004). The on-device tests cover browse, open, add, and cart view end to end in test 1. Test 2 covers add-twice and quantity change with line and cart totals, and test 3 covers the empty cart. The smoke test covers health, anonymous session, list, detail, and add-twice with a total check. Assertions check real observable results such as cart text, quantity, price and total, and the smoke test checks API response values. Gaps: the loading state and the empty product list (US-001) are not tested. The error state for a missing product (US-002) is not tested. The browse test never checks that each product shows a picture, and it does not check the description on the detail screen. Smoke coverage never reads the cart back or tests the quantity change, and it checks only the first product. The smoke test also has no cleanup, though its unique deviceId keeps runs isolated. The on-device tests are independent because each one launches fresh and empties the cart first. However, that depends on a shared staging backend and on a cleanup helper that itself relies on UI state. The 'Add to cart' flow on the detail screen is also never checked for a distinct line item name. Overall coverage of the main happy path is good, independence is good, and the error and edge states are missing."
+        }
+      ],
+      "level_reasoning": "The average judge score is 0.70, which is MEDIUM (0.60 to 0.79. The output passes, but the judge found real gaps that should be fixed.) The weakest test scored 0.70; every test passes but none of the gaps below were serious enough to fail.",
+      "analysis": {
+        "why_score": "The agent scored 0.7, which passes the 0.6 mark. The on-device and smoke tests cover all four PRD journeys (browse, details, add to cart, view cart/total) on the main happy path. They assert real outcomes such as cart text, quantity, price, total and API response values, and the on-device tests are independent because each launches fresh and empties the cart first. The score is held back because error and edge states are missing, smoke coverage is thin, and test isolation depends on a shared staging backend and a UI-based cleanup helper.",
+        "level_justification": "The confidence is MEDIUM (0.70) because the happy-path coverage and independence are good but the judge found several gaps, including untested loading, empty and error states and thin smoke coverage. It is not HIGH (0.8 or above) because those gaps and the shared-backend dependency leave the coverage incomplete.",
+        "strengths": [
+          "All four PRD journeys (US-001 to US-004) are covered end to end on the main happy path",
+          "On-device test 1 covers browse, open, add and cart view in a single flow",
+          "On-device test 2 covers add-twice and quantity change with line and cart totals; test 3 covers the empty cart",
+          "Assertions check real observable results (cart text, quantity, price, total, API response values)",
+          "Smoke test covers health, anonymous session, list, detail and add-twice with a total check",
+          "On-device tests are independent because each launches fresh and empties the cart first",
+          "Smoke test uses a unique deviceId, which keeps runs isolated"
+        ],
+        "gaps": [
+          "Loading state and empty product list (US-001) are not tested",
+          "Error state for a missing product (US-002) is not tested",
+          "Browse test never checks that each product shows a picture",
+          "Detail screen description is not checked",
+          "Smoke test never reads the cart back or tests the quantity change",
+          "Smoke test checks only the first product",
+          "Smoke test has no cleanup",
+          "On-device independence relies on a shared staging backend and a cleanup helper that depends on UI state",
+          "The detail-screen 'Add to cart' flow is never checked for a distinct line item name"
+        ],
+        "improvements": [
+          "Add tests for the loading state and the empty product list to cover US-001 edge states",
+          "Add a test that opens a missing product and asserts the error state (US-002)",
+          "Extend the browse test to assert each product shows a picture, and the detail test to assert the description",
+          "Extend the smoke test to read the cart back, change quantity, and check more than the first product",
+          "Add cleanup to the smoke test, and make the on-device cleanup independent of UI state (e.g. via API) to reduce reliance on shared staging",
+          "Assert a distinct line item name after adding from the detail screen"
+        ]
+      }
+    }
+  ],
+  "structure_checks": [
+    {
+      "agent": null,
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_every_agent_left_output",
+      "outcome": "passed",
+      "score": null,
+      "level": "-",
+      "criteria": "",
+      "reason": ""
+    }
+  ],
+  "tests": [
+    {
+      "agent": "spec_writer",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_01_spec_writer_prd_satisfies_client_brief",
+      "outcome": "passed",
+      "score": 0.8,
+      "level": "HIGH",
+      "criteria": "The PRD must cover every capability the original client brief asks for, add no major scope the brief does not imply, have Given/When/Then acceptance criteria on every story, and include non-functional requirements and an out-of-scope list.",
+      "reason": "The PRD covers every capability in the brief: browsing (US-001), product description (US-002), add to cart (US-003), and cart with quantities and USD total (US-004). It also respects the no sign-in and no payments constraints. All four stories use Given/When/Then criteria that map to the behavior described. The non-functional section (performance, security, privacy, accessibility, platforms) and the out-of-scope list are present and consistent with the brief; the out-of-scope list excludes nothing requested. Weaknesses: US-004 adds quantity changes in the cart, and US-001 adds loading and empty states, which the brief does not state, but these are minor and reasonably implied. Other small additions are the API reference, the anonymous device-kept cart id, and the Android and iOS platform choice. Also, the 'Given I change a quantity' criterion has no matching story action and sits slightly outside the brief. The out-of-scope list adds items such as admin tools, emails, and returns, which is harmless. Overall the PRD is strong, with only slight scope creep."
+    },
+    {
+      "agent": "customer",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_02_customer_brief_and_answers_match_prd",
+      "outcome": "passed",
+      "score": 0.7,
+      "level": "MEDIUM",
+      "criteria": "The PRD (output) reflects the product brief and the customer's clarification answers (input): decisions on scope, business rules, payments, delivery and returns appear as requirements or out-of-scope items, and nothing contradicts them.",
+      "reason": "The PRD matches most of the input decisions. Browse, detail and cart with quantities and total are in scope. USD pricing, the anonymous on-device cart id, the 2-second list load and Android/iOS support all match. The out-of-scope list (accounts, payments and checkout, admin tools, emails, order history, delivery, returns) reproduces the brief exactly. It has no contradictions and invents no decisions that override the brief or clarifications. It omits several clarification answers: the US-only sales market (Q4), the fixed catalogue of about twenty products entered by the owner with no customer-added products (Q1), no stock tracking, and the cart persisting on the same phone on return (Q2). Payments are excluded but not described as a later release. It also adds unrequested NFRs (HTTPS, accessibility thresholds, no personal data), though these do not conflict with the input. The missing US-only and catalogue-scope decisions are the main shortcomings."
+    },
+    {
+      "agent": "project_manager",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_03_project_manager_backlog_traces_to_prd",
+      "outcome": "passed",
+      "score": 1.0,
+      "level": "HIGH",
+      "criteria": "The backlog covers every must-have PRD story with at least one work item, each work item names the stories it serves, and no work item serves a story missing from the PRD.",
+      "reason": "The PRD has four stories (US-001 to US-004), all marked must. All six work items (WI-001 to WI-006) name at least one story in the Stories column, so none lack a reference. Every must-have story is covered: US-001 by WI-001 and WI-003, US-002 by WI-001 and WI-004, US-003 by WI-002 and WI-005, US-004 by WI-002 and WI-006. Every referenced ID exists in the PRD, with no invented or misnamed stories. The Story coverage section matches the work item table. No gaps were found in coverage, references, or validity."
+    },
+    {
+      "agent": "architect",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_04_architect_design_supports_prd",
+      "outcome": "passed",
+      "score": 0.9,
+      "level": "HIGH",
+      "criteria": "The architecture, OpenAPI contract and Prisma schema support every must-have PRD story: each story's data and actions have an endpoint and stored entity, and nothing important in the PRD is left without a design.",
+      "reason": "All four must-have stories (US-001 to US-004) have matching endpoints, schemas and stored entities. US-001 maps to GET /products, whose ProductPage returns name, priceCents and imageUrl, with Product in Prisma. US-002 maps to GET /products/{id}, which returns description and a 404 for a missing product. US-003 maps to POST /cart/items, backed by Cart and CartItem with a default quantity of 1 and a unique (cartId, productId) constraint for the increment. US-004 maps to GET /cart and PATCH /cart/items/{productId}, returning unitPriceCents, quantity, lineTotalCents and totalCents. The architecture covers the cross-cutting needs: anonymous device ID to JWT auth, HTTPS, no PII, and screens with loading, empty and error states. Cart is tied to deviceId, matching the privacy requirement. Gaps are minor. The PATCH endpoint allows quantity 0 but doesn't say it removes the line, which the PRD never asks for. The anonymous-session endpoint, rate limiting and /health are not in the PRD, though they trace to the non-functional requirements and the anonymous-ID privacy note. Empty and loading states are UI-only, and the architecture doesn't say how the cart is created on first access. Overall the design is consistent with the PRD and has no important gaps."
+    },
+    {
+      "agent": "ui_ux_designer",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_05_ui_ux_designer_screens_serve_prd_stories",
+      "outcome": "passed",
+      "score": 0.9,
+      "level": "HIGH",
+      "criteria": "Every must-have PRD story is served by at least one screen in the design system, and the screens specify their loading, empty and error states.",
+      "reason": "All four must-have stories (US-001 to US-004) map to screens: SCR-01 serves US-001, SCR-02 serves US-002 and US-003 (Add to cart button), and SCR-03 serves US-003 and US-004 (cart with QuantityStepper and total row in USD). No coverage gaps. All three screens specify loading, empty and error states. The only weakness is that SCR-02's empty state is written as 'not applicable; a missing product shows the error state'. It is explicitly addressed and justified by the PRD, but it is not a concrete empty state, so a strict reading counts it as a minor gap. Smaller details are also thin: SCR-03 does not explicitly show line total or unit price per line, though the total row and stepper imply it."
+    },
+    {
+      "agent": "backend_developer",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_06_backend_developer_code_matches_contract_from_prd",
+      "outcome": "passed",
+      "score": 0.8,
+      "level": "HIGH",
+      "criteria": "The backend code implements the API contract derived from the PRD: matching paths, methods, status codes and shapes, with no secrets in code.",
+      "reason": "All 7 endpoints (GET /health, POST /auth/anonymous, GET /products, GET /products/{id}, GET /cart, POST /cart/items, PATCH /cart/items/{productId}) are implemented with matching paths and methods, and none are extra. Public routes (health, anonymous) are correctly exempt from the JWT guard. Success payloads match the schemas: Session {token}, ProductPage {items,page,pageSize,total}, Cart with CartItem fields, and totalCents in integer cents. Error responses use the {code,message} shape via ErrorFilter, with 401 from the guard, 404 for unknown products and cart items, and 400 for bad input. No secrets are hardcoded: JWT_SECRET, CORS_ORIGINS and PORT come from environment variables. Deviations: (1) ErrorFilter is registered only in main.ts, so it is not in the module. (2) The deviceId has @MinLength(8), which the spec does not require, so short IDs get a 400 the contract doesn't define. (3) forbidNonWhitelisted rejects extra fields, which the spec doesn't say. (4) GET /products/{id}, /cart/items and /cart/items/{productId} return 401 from the global guard, but the spec doesn't list a 401 for them. (5) /products lacks a documented 400, and its page/pageSize validation is manual and returns 400. (6) The anonymous endpoint's spec doesn't say what happens when the JWT secret is undefined. These are minor, so the contract is largely met."
+    },
+    {
+      "agent": "frontend_developer",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_07_frontend_developer_app_matches_design_from_prd",
+      "outcome": "passed",
+      "score": 0.8,
+      "level": "HIGH",
+      "criteria": "The Flutter app implements the screens and design tokens from the design system and calls the API through the generated client, matching the contract.",
+      "reason": "All three screens (SCR-01 list, SCR-02 detail, SCR-03 cart) exist with the correct routes. The go_router setup has a bottom bar for Shop and Cart, and detail is pushed at /products/:id. The components ProductCard, QuantityStepper, StateView and PrimaryButton are present, and loading, empty and error messages match the spec text. Theme colors for light and dark match the token hex values and are applied through ThemeData and a Tokens class. Spacing, the 48dp touch target and the typography sizes (22/28 w600, 18/24 w500, 16/24, 12/16) also match. API calls all go through ApiClient with correct endpoints, methods, query parameters and bodies for listProducts, getProduct, getCart, addCartItem and updateCartItemQuantity. Models match the schemas. Shortcomings: the ApiClient is hand-written Dio code returning raw maps rather than a truly generated, typed client. createAnonymousSession and getHealth are never used, so no bearer token is attached and the authenticated calls would likely return 401. Product detail's error button is built with onRetry but labeled 'Try again' instead of the specified 'Back to shop'. The loading spinner on the detail and cart screens shows the default 'Loading' text. Body text styles such as the price and description are not explicitly mapped to the body token. The ProductCard uses hardcoded 56 image dimensions. Product list ignores pagination beyond page 1."
+    },
+    {
+      "agent": "qa_engineer",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_08_qa_engineer_verifies_prd_acceptance_criteria",
+      "outcome": "passed",
+      "score": 0.7,
+      "level": "MEDIUM",
+      "criteria": "The QA reports check the PRD's acceptance criteria for the built items, report reproducible bugs with correct severity, and set passed only when no blocker or major bug remains.",
+      "reason": "The report maps every acceptance criterion of US-001 to US-004 to code, a test and an explicit result, and invents none. It also covers the non-functional requirements and the OpenAPI check. Gaps: the report lists WI-001 to WI-005, but the PRD input contains no build scope, so this can't be verified. The 'not covered by a test' result for the missing-product criterion is neither pass nor fail. BUG-2 is tied only to a work item, not to a criterion, and it contradicts that row. BUG-2 describes the UI as correct while saying the label is wrong. Its 'Back to shop' expectation comes from a design system outside the PRD, though the minor severity is reasonable. BUG-1 has clear steps, expected vs. actual behavior and a criterion link. A one-second blank screen is arguably minor rather than major, since the empty-state message does appear, so it may be over-rated. The final passed: false is consistent with the stated major bug and the report's own logic, with no contradiction. Performance, iOS and screen-reader checks were unverified, and these are noted as gaps."
+    },
+    {
+      "agent": "deployment_engineer",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_09_deployment_engineer_ships_what_architecture_describes",
+      "outcome": "passed",
+      "score": 0.8,
+      "level": "HIGH",
+      "criteria": "The Dockerfile and compose file run the system the architecture describes (API plus PostgreSQL, migrations on start, PORT), and contain no real secrets.",
+      "reason": "The output covers the required components: the Dockerfile builds the NestJS API with a multi-stage build and runs `prisma migrate deploy` before starting, and the compose file defines both `db` (postgres:16) and `api`. Wiring is correct: DATABASE_URL points to host `db`, `depends_on` uses `service_healthy` with a pg_isready healthcheck, and port 3000 is mapped. Secrets are clearly placeholders (`staging_password_placeholder`, `sk_test_placeholder`), and server secrets come from an env file, matching the architecture's 'secrets from environment variables' requirement. Shortcomings: PORT handling is inconsistent. `staging.env` sets PORT=3000, but the Dockerfile hardcodes `EXPOSE 3000` and compose hardcodes `3000:3000` instead of using `${PORT}`, so changing PORT would break the mapping. The Dockerfile comment says it starts 'on $PORT' but nothing enforces this. The Postgres password is also duplicated in compose and the env file rather than shared by substitution. Prisma CLI in the final image depends on `npm ci --omit=dev`, which would fail if prisma is a devDependency. Other pieces, such as rate limiting config and the HTTPS/HSTS settings, are not addressed, but they are not infra-critical."
+    },
+    {
+      "agent": "integration_pass",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_10_integration_pass_confirms_contract_on_staging",
+      "outcome": "passed",
+      "score": 0.8,
+      "level": "HIGH",
+      "criteria": "The release verification report states whether the served API matches the contract and what integration problems were found, with correct severity.",
+      "reason": "The report gives an explicit overall verdict (`passed: false`) and ties it to the contract. Its endpoint-by-endpoint table covers all seven operations. The one reported discrepancy, `price` (decimal) instead of `priceCents` (integer) on `/products` and `/products/{id}`, is traceable to the `Product` schema's required `priceCents` and is described accurately with steps, expected and actual values. It fabricates no issues. Severity is given as major with a rationale, and the failing verdict follows from that major bug. The report is clear and actionable. Weaknesses: the 'major' rating is arguable, since a missing required field in a core schema could be called critical or breaking for clients. The report also never addresses `imageUrl` and `description`, which the Product schema requires, so full schema conformance is not shown. The 400 validation message says deviceId must be at least 8 characters, which the contract does not state, and the report does not flag it as a minor undocumented constraint. The 401 and 404 cases on cart endpoints, and `/products/{id}` without a token, are not exercised. The reasoning that the cart works despite the bug is plausible but not fully supported by the input. Some non-contract sections (CORS, migrations) are extra but harmless."
+    },
+    {
+      "agent": "smoke_tester",
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_11_smoke_tester_covers_prd_journeys",
+      "outcome": "passed",
+      "score": 0.7,
+      "level": "MEDIUM",
+      "criteria": "The smoke and on-device tests exercise the key PRD user journeys that were built end to end, assert real outcomes, and are independent of each other.",
+      "reason": "The PRD has four journeys: browse (US-001), details (US-002), add to cart (US-003) and view cart/total (US-004). The on-device tests cover browse, open, add, and cart view end to end in test 1. Test 2 covers add-twice and quantity change with line and cart totals, and test 3 covers the empty cart. The smoke test covers health, anonymous session, list, detail, and add-twice with a total check. Assertions check real observable results such as cart text, quantity, price and total, and the smoke test checks API response values. Gaps: the loading state and the empty product list (US-001) are not tested. The error state for a missing product (US-002) is not tested. The browse test never checks that each product shows a picture, and it does not check the description on the detail screen. Smoke coverage never reads the cart back or tests the quantity change, and it checks only the first product. The smoke test also has no cleanup, though its unique deviceId keeps runs isolated. The on-device tests are independent because each one launches fresh and empties the cart first. However, that depends on a shared staging backend and on a cleanup helper that itself relies on UI state. The 'Add to cart' flow on the detail screen is also never checked for a distinct line item name. Overall coverage of the main happy path is good, independence is good, and the error and edge states are missing."
+    },
+    {
+      "agent": null,
+      "scope": "flow",
+      "file": "test_end_to_end_flow.py",
+      "test": "test_every_agent_left_output",
+      "outcome": "passed",
+      "score": null,
+      "level": "-",
+      "criteria": "",
+      "reason": ""
+    }
+  ]
+}

@@ -20,14 +20,25 @@ PASS_THRESHOLD = float(os.environ.get("DEEPEVAL_THRESHOLD", "0.6"))  # a score f
 RESULTS: dict[tuple[str, str], list[dict]] = {}  # (test file, test name) -> judge scores, filled by judge()
 
 
+RUN_ID = re.compile(r"\d{8}-\d{6}")   # pipeline run ids start with a timestamp: 20261004-043044[-slug]
+
+
+def latest_run_dir(runs_dir: Path) -> Path | None:
+    """The latest pipeline build in `runs_dir`: the newest run id (they sort by time), ignoring scratch folders such
+    as sample-manual or thread-test. If no folder has a run id, the most recently modified folder is used."""
+    if not runs_dir.is_dir():
+        return None
+    folders = [p for p in runs_dir.iterdir() if p.is_dir()]
+    builds = [p for p in folders if RUN_ID.match(p.name)]
+    if builds:
+        return max(builds, key=lambda p: p.name)
+    return max(folders, key=lambda p: p.stat().st_mtime, default=None)
+
+
 def find_run_dir() -> Path | None:
-    """The run being evaluated (DEEPEVAL_RUN_DIR, else the newest folder in the runs dir), or None."""
+    """The run being evaluated: DEEPEVAL_RUN_DIR if set, else the latest build in the runs dir, or None."""
     env = os.environ.get("DEEPEVAL_RUN_DIR")
-    if env:
-        path = Path(env)
-    else:
-        runs = sorted((p for p in RUNS_DIR.glob("*") if p.is_dir()), key=lambda p: p.stat().st_mtime)
-        path = runs[-1] if runs else None
+    path = Path(env) if env else latest_run_dir(RUNS_DIR)
     return path if path and path.is_dir() else None
 
 

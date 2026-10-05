@@ -1,0 +1,5 @@
+{
+  "run_id": "sample-manual",
+  "note": "SAMPLE FILE: written by hand to try the DeepEval tests. NOT output of the pipeline.",
+  "brief": "A tiny mobile shop. Shoppers browse products, open one to read its description, add it to a cart and see the cart with quantities and the total price in USD. No sign-in or payments."
+}

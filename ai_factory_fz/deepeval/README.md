@@ -12,8 +12,9 @@ cd ai_factory_fz\deepeval
 uv sync                                   # once
 $env:PYTHONUTF8=1                         # stops the Windows console crashing on emoji
 
-# Which run to score. Without it, the newest folder in ..\runs is used.
-$env:DEEPEVAL_RUN_DIR="..\samples\20261002-120919"
+# Nothing else to set: the LATEST BUILD in ..\runs is scored (newest run id, e.g. 20261004-043044).
+# The first line of the output shows which one. To score another run:
+#   $env:DEEPEVAL_RUN_DIR="..\runs\20261003-044724"
 
 uv run pytest flow_test_writeup/test_end_to_end_flow.py -v    # the whole flow: 12 tests, about 2 minutes
 uv run pytest agent_test_writeup -v                           # every agent: 33 tests, about 5 minutes
@@ -21,7 +22,7 @@ uv run pytest agent_test_writeup/test_architect.py -v         # one agent
 ```
 
 - Every test is one judge call (Claude if `ANTHROPIC_API_KEY` is in `.env`), so a run costs tokens. A test passes at a score of 0.6 or above.
-- The run folder needs the files the tests read (see [Input: a pipeline run](#input-a-pipeline-run)). A test whose files are missing is **skipped**, not failed. The sample folder above has only `docs/`, so about 20 of the 45 tests run.
+- The run folder needs the files the tests read (see [Input: a pipeline run](#input-a-pipeline-run)). A test whose files are missing is **skipped**, not failed. A run with only `docs/` and QA reports runs about 20 of the 45 tests.
 - Each run prints a pass/fail table with a confidence per agent and writes `eval_report_flow.*`, `eval_report_agents.*` or `eval_report.*` (`.md`, `.json`, `.html`) into the run folder.
 - To start the Project Manager process after the report, set `$env:DEEPEVAL_REMEDIATE=1` first (see [Remediation](#remediation-project-manager)).
 - `uv run deepeval test run <path>` works too, but on Windows it can crash on emoji output; plain `pytest` is the verified way.
@@ -72,8 +73,10 @@ The tests read one run folder, `../runs/<run_id>/`. Besides `docs/`, they use th
 | `infra/docker-compose.staging.yml`, `infra/staging.env`, `infra/README.md`, `.github/workflows/ci.yml` | deployment |
 | `server/smoke/**`, `server/test-smoke/**`, `server/test/**/*smoke*`, `app/integration_test/**/*.dart` | smoke tester |
 
-Choose the run with `DEEPEVAL_RUN_DIR` (a path, for example `../runs/<run_id>` when you run from this folder).
-Without it, the newest folder in `../runs` is used. `SDLC_RUNS_DIR` moves the whole runs folder.
+Which run is scored: `DEEPEVAL_RUN_DIR` if set (a path, for example `../runs/<run_id>` when you run from this folder);
+otherwise **the latest build in `../runs`**, meaning the newest run id (ids start with a timestamp, so they sort by
+time). Scratch folders such as `sample-manual` or `thread-test` are ignored, and the choice does not depend on which
+folder was edited last. `SDLC_RUNS_DIR` moves the whole runs folder. The chosen folder is printed at the top of the output.
 
 To create a run, `ai_factory_fz/.env` needs a Claude credential (`ANTHROPIC_API_KEY`, or
 `CLAUDE_CODE_ENABLE=true` + `CLAUDE_CODE_OAUTH_TOKEN`). Then:
@@ -91,6 +94,38 @@ uv run python run/run_from_briefs.py --brief demo_mini
 
 **Cost:** a full `pipeline.demo` run is capped at 1.5M uncached tokens, and scoring adds about 45 judge calls.
 Add `--dry-run` to the `run/` scripts to see the commands without spending anything.
+
+## Two ways to run: agent by agent, or the complete flow
+
+| | Agent by agent (`agent_test_writeup/`) | Complete flow (`flow_test_writeup/`) |
+|---|---|---|
+| Question it answers | Did this agent do its own job well? | Do all the agents' outputs fit together? |
+| What it judges | One agent's output against that agent's own task criteria and its inputs | Every agent's output against the spec writer's PRD, in pipeline order (PRD vs original brief first) |
+| Size | 11 files, 33 tests | 1 file, 12 tests (11 agents plus a no-LLM check that every agent left output) |
+| Use it to | Find which agent is weak and why | Find where the chain drifts from the PRD |
+
+```powershell
+# One agent (customer, spec_writer, project_manager, architect, ui_ux_designer, backend_developer,
+# frontend_developer, qa_engineer, deployment_engineer, integration_pass, smoke_tester)
+uv run pytest agent_test_writeup/test_spec_writer.py -v
+
+# Every agent, one at a time (11 separate runs; each overwrites eval_report_agents.* with that agent only)
+foreach ($a in "customer","spec_writer","project_manager","architect","ui_ux_designer","backend_developer","frontend_developer","qa_engineer","deployment_engineer","integration_pass","smoke_tester") {
+    uv run pytest "agent_test_writeup/test_$a.py" -q
+}
+
+# Every agent in one session (one combined agents report)
+uv run pytest agent_test_writeup -v
+
+# The complete flow
+uv run pytest flow_test_writeup -v
+
+# Both methods in one session (one combined report, eval_report.*, with each agent's confidence from both)
+uv run pytest agent_test_writeup flow_test_writeup -v
+```
+
+To run the pipeline and score it in one go, use the scripts in `run/` (see `run/README.md`): `--agent <name>` scores one
+agent, `--flow-only` scores only the flow, `--skip-run <run_id>` scores an existing run without building a new one.
 
 ## Running evaluations
 

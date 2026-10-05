@@ -16,6 +16,12 @@ OUTCOMES: dict[tuple[str, str], str] = {}
 EVALUATION_DIRS = ("agent_test_writeup/", "flow_test_writeup/")
 
 
+def pytest_report_header(config):
+    """Show which run is being scored, so a wrong default is obvious at the top of the output."""
+    run = find_run_dir()
+    return f"DeepEval run folder: {run}" if run else "DeepEval run folder: (none found; set DEEPEVAL_RUN_DIR)"
+
+
 def pytest_runtest_logreport(report):
     """Keep one outcome per evaluation test: the call result, or the setup result if setup did not pass."""
     nodeid = report.nodeid.replace("\\", "/")

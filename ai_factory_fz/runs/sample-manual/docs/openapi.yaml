@@ -1,0 +1,105 @@
+# SAMPLE FILE: written by hand to try the DeepEval tests. NOT output of the pipeline.
+openapi: 3.1.0
+info: {title: ShopEase Mini API, version: 1.0.0}
+servers: [{url: https://api.shopease.example}]
+security: [{bearerAuth: []}]
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      security: []
+      responses:
+        '200': {description: API is up, content: {application/json: {schema: {type: object, required: [status], properties: {status: {type: string}}}}}}
+  /auth/anonymous:
+    post:
+      operationId: createAnonymousSession
+      security: []
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/AnonymousSessionRequest'}}}
+      responses:
+        '200': {description: Session token, content: {application/json: {schema: {$ref: '#/components/schemas/Session'}}}}
+        '400': {$ref: '#/components/responses/Error'}
+  /products:
+    get:
+      operationId: listProducts
+      parameters:
+        - {name: page, in: query, schema: {type: integer, minimum: 1, default: 1}}
+        - {name: pageSize, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 20}}
+      responses:
+        '200': {description: A page of products, content: {application/json: {schema: {$ref: '#/components/schemas/ProductPage'}}}}
+        '401': {$ref: '#/components/responses/Error'}
+  /products/{id}:
+    get:
+      operationId: getProduct
+      parameters: [{name: id, in: path, required: true, schema: {type: string}}]
+      responses:
+        '200': {description: Product, content: {application/json: {schema: {$ref: '#/components/schemas/Product'}}}}
+        '404': {$ref: '#/components/responses/Error'}
+  /cart:
+    get:
+      operationId: getCart
+      responses:
+        '200': {description: Cart, content: {application/json: {schema: {$ref: '#/components/schemas/Cart'}}}}
+        '401': {$ref: '#/components/responses/Error'}
+  /cart/items:
+    post:
+      operationId: addCartItem
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/AddCartItem'}}}
+      responses:
+        '200': {description: Updated cart, content: {application/json: {schema: {$ref: '#/components/schemas/Cart'}}}}
+        '404': {$ref: '#/components/responses/Error'}
+  /cart/items/{productId}:
+    patch:
+      operationId: updateCartItemQuantity
+      parameters: [{name: productId, in: path, required: true, schema: {type: string}}]
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/UpdateQuantity'}}}
+      responses:
+        '200': {description: Updated cart, content: {application/json: {schema: {$ref: '#/components/schemas/Cart'}}}}
+        '404': {$ref: '#/components/responses/Error'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  responses:
+    Error: {description: Error, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties: {code: {type: string}, message: {type: string}}
+    AnonymousSessionRequest:
+      type: object
+      required: [deviceId]
+      properties: {deviceId: {type: string}}
+    Session:
+      type: object
+      required: [token]
+      properties: {token: {type: string}}
+    Product:
+      type: object
+      required: [id, name, priceCents, imageUrl, description]
+      properties: {id: {type: string}, name: {type: string}, priceCents: {type: integer}, imageUrl: {type: string}, description: {type: string}}
+    ProductPage:
+      type: object
+      required: [items, page, pageSize, total]
+      properties: {items: {type: array, items: {$ref: '#/components/schemas/Product'}}, page: {type: integer}, pageSize: {type: integer}, total: {type: integer}}
+    CartItem:
+      type: object
+      required: [productId, name, unitPriceCents, quantity, lineTotalCents]
+      properties: {productId: {type: string}, name: {type: string}, unitPriceCents: {type: integer}, quantity: {type: integer}, lineTotalCents: {type: integer}}
+    Cart:
+      type: object
+      required: [items, totalCents]
+      properties: {items: {type: array, items: {$ref: '#/components/schemas/CartItem'}}, totalCents: {type: integer}}
+    AddCartItem:
+      type: object
+      required: [productId]
+      properties: {productId: {type: string}}
+    UpdateQuantity:
+      type: object
+      required: [quantity]
+      properties: {quantity: {type: integer, minimum: 0}}
